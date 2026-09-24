@@ -185,6 +185,30 @@ npm run dev
 
 Buka peramban di `http://127.0.0.1:8000` atau `http://jadwalsekolah.test` jika menggunakan Lerd / Valet.
 
+### 4. Deploy ke Render + Supabase (Cloud Production)
+
+Platform ini sudah dilengkapi konfigurasi siap pakai untuk deploy ke **Render** dengan database PostgreSQL terkelola di **Supabase**:
+
+#### A. Persiapan Database Supabase
+1. Buat project baru di [Supabase Dashboard](https://supabase.com/dashboard).
+2. Masuk ke **Project Settings** $\to$ **Database** $\to$ Salin kredensial **Connection Parameters** (Host, Port `5432` / `6543`, Database `postgres`, User, Password).
+
+#### B. Deploy ke Render via Blueprint (1-Klik)
+1. Buka [Render Dashboard](https://dashboard.render.com/) $\to$ Klik **New** $\to$ **Blueprint**.
+2. Hubungkan repository GitHub: `https://github.com/itsvin-debug/EduSync`.
+3. Render akan mendeteksi file [`render.yaml`](file:///home/greatsundanese/jadwalsekolah/render.yaml) dan [`Dockerfile`](file:///home/greatsundanese/jadwalsekolah/Dockerfile).
+4. Masukkan Environment Variables sesuai kredensial Supabase Anda:
+   - `DB_HOST`: `aws-0-[region].pooler.supabase.com`
+   - `DB_PORT`: `5432`
+   - `DB_DATABASE`: `postgres`
+   - `DB_USERNAME`: `postgres.[project-ref]`
+   - `DB_PASSWORD`: `[password-supabase-anda]`
+   - `DB_SSLMODE`: `require`
+   - `APP_KEY`: *(Salin dari `APP_KEY` lokal Anda)*
+   - `RUN_MIGRATIONS`: `true`
+   - `RUN_SEEDER`: `true`
+5. Klik **Apply**. Render akan mengompilasi image Docker, menjalankan migrasi database Supabase, dan meluncurkan aplikasi dengan domain gratis `https://[nama-app].onrender.com`.
+
 ---
 
 ## 🧪 Rangkaian Pengujian Otomatis
