@@ -25,6 +25,7 @@ import {
     Activity,
 } from 'lucide-react';
 import Logo from '@/Components/Logo';
+import ClassMonitoringGrid from '@/Components/ClassMonitoringGrid';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import { useScheduleEngine } from '@/hooks/useScheduleEngine';
 
@@ -329,7 +330,14 @@ export default function Index({
 
                 {/* 4. CLASS SCHEDULE QUICK LOOKUP SECTION (Stitch Screen 4) */}
                 <section id="jadwal-instan" className="py-16 bg-white border-y border-slate-200 w-full">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+                        {/* Live Class Matrix Monitoring */}
+                        <ClassMonitoringGrid
+                            classrooms={classrooms}
+                            title="Matrix Monitoring Real-Time Seluruh Rombel"
+                        />
+
+                        <div>
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-100">
                             <div>
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 mb-2">
@@ -517,6 +525,7 @@ export default function Index({
                                     </div>
                                 </div>
                             ))}
+                        </div>
                         </div>
                     </div>
                 </section>

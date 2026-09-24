@@ -13,7 +13,13 @@ class LandingController extends Controller
     public function index()
     {
         $departments = Department::withCount('classrooms')->get();
-        $classrooms = Classroom::with('department')->orderBy('grade')->orderBy('name')->get();
+        $classrooms = Classroom::with([
+            'department',
+            'homeroomTeacher',
+            'schedules' => function ($q) {
+                $q->with(['subject', 'teacher', 'room'])->orderBy('day')->orderBy('period_start');
+            }
+        ])->orderBy('grade')->orderBy('name')->get();
         $teachers = Teacher::whereNotNull('name')->take(8)->get();
         $totalSchedules = Schedule::count();
         $totalTeachers = Teacher::distinct('name')->count();

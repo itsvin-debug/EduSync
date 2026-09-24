@@ -211,41 +211,48 @@ class EduSyncSeeder extends Seeder
             return $subjectMap['PROD_PPLG'];
         };
 
-        // 6. CLASSROOMS (ROMBEL)
+        // 6. CLASSROOMS (ROMBEL) - 100% Exact from Source Schedule Matrices (31 Classes)
         $classroomsData = [
-            // PPLG
+            // PPLG (9 Classes)
             ['code' => 'X_PPLG_1', 'name' => 'X PPLG 1', 'grade' => 10, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['41A']->id, 'is_pkl' => false],
             ['code' => 'X_PPLG_2', 'name' => 'X PPLG 2', 'grade' => 10, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['42A']->id, 'is_pkl' => false],
             ['code' => 'X_PPLG_3', 'name' => 'X PPLG 3', 'grade' => 10, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['20A']->id, 'is_pkl' => false],
             ['code' => 'XI_PPLG_1', 'name' => 'XI PPLG 1', 'grade' => 11, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['26A']->id, 'is_pkl' => false],
             ['code' => 'XI_PPLG_2', 'name' => 'XI PPLG 2', 'grade' => 11, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['43A']->id, 'is_pkl' => false],
             ['code' => 'XI_PPLG_3', 'name' => 'XI PPLG 3', 'grade' => 11, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['39A']->id, 'is_pkl' => false],
-            ['code' => 'XII_PPLG_1', 'name' => 'XII PPLG 1', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['24A']->id, 'is_pkl' => true],
-            ['code' => 'XII_PPLG_2', 'name' => 'XII PPLG 2', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['7A']->id, 'is_pkl' => true],
-            ['code' => 'XII_PPLG_3', 'name' => 'XII PPLG 3', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['26B']->id, 'is_pkl' => true],
+            ['code' => 'XII_PPLG_1', 'name' => 'XII PPLG 1 (PKL)', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['24A']->id, 'is_pkl' => true],
+            ['code' => 'XII_PPLG_2', 'name' => 'XII PPLG 2 (PKL)', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['7A']->id, 'is_pkl' => true],
+            ['code' => 'XII_PPLG_3', 'name' => 'XII PPLG 3 (PKL)', 'grade' => 12, 'department_id' => $deptMap['PPLG']->id, 'homeroom_teacher_id' => $teacherMap['26B']->id, 'is_pkl' => true],
 
-            // ANIMASI
+            // ANIMASI (6 Classes)
             ['code' => 'X_ANIMASI_1', 'name' => 'X Animasi 1', 'grade' => 10, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['25A']->id, 'is_pkl' => false],
             ['code' => 'X_ANIMASI_2', 'name' => 'X Animasi 2', 'grade' => 10, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['14A']->id, 'is_pkl' => false],
             ['code' => 'XI_ANIMASI_1', 'name' => 'XI Animasi 1', 'grade' => 11, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['47A']->id, 'is_pkl' => false],
             ['code' => 'XI_ANIMASI_2', 'name' => 'XI Animasi 2', 'grade' => 11, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['15A']->id, 'is_pkl' => false],
-            ['code' => 'XII_ANIMASI_1', 'name' => 'XII Animasi (PKL)', 'grade' => 12, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['47A']->id, 'is_pkl' => true],
+            ['code' => 'XII_ANIMASI_1', 'name' => 'XII Animasi 1 (PKL)', 'grade' => 12, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['47A']->id, 'is_pkl' => true],
+            ['code' => 'XII_ANIMASI_2', 'name' => 'XII Animasi 2 (PKL)', 'grade' => 12, 'department_id' => $deptMap['ANM']->id, 'homeroom_teacher_id' => $teacherMap['14A']->id, 'is_pkl' => true],
 
-            // BROADCASTING
+            // BROADCASTING (6 Classes)
             ['code' => 'X_BCF_1', 'name' => 'X BCF 1', 'grade' => 10, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['21A']->id, 'is_pkl' => false],
             ['code' => 'X_BCF_2', 'name' => 'X BCF 2', 'grade' => 10, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['23A']->id, 'is_pkl' => false],
             ['code' => 'XI_BCF_1', 'name' => 'XI BCF 1', 'grade' => 11, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['44A']->id, 'is_pkl' => false],
             ['code' => 'XI_BCF_2', 'name' => 'XI BCF 2', 'grade' => 11, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['45A']->id, 'is_pkl' => false],
+            ['code' => 'XII_BCF_1', 'name' => 'XII BCF 1 (PKL)', 'grade' => 12, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['21A']->id, 'is_pkl' => true],
+            ['code' => 'XII_BCF_2', 'name' => 'XII BCF 2 (PKL)', 'grade' => 12, 'department_id' => $deptMap['BCF']->id, 'homeroom_teacher_id' => $teacherMap['23A']->id, 'is_pkl' => true],
 
-            // TEKNIK OTOMOTIF
+            // TEKNIK OTOMOTIF (6 Classes)
             ['code' => 'X_TO_1', 'name' => 'X TO 1', 'grade' => 10, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['40A']->id, 'is_pkl' => false],
             ['code' => 'X_TO_2', 'name' => 'X TO 2', 'grade' => 10, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['8A']->id, 'is_pkl' => false],
             ['code' => 'XI_TO_1', 'name' => 'XI TO 1', 'grade' => 11, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['17A']->id, 'is_pkl' => false],
             ['code' => 'XI_TO_2', 'name' => 'XI TO 2', 'grade' => 11, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['9A']->id, 'is_pkl' => false],
+            ['code' => 'XII_TO_1', 'name' => 'XII TO 1 (PKL)', 'grade' => 12, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['17A']->id, 'is_pkl' => true],
+            ['code' => 'XII_TO_2', 'name' => 'XII TO 2 (PKL)', 'grade' => 12, 'department_id' => $deptMap['TO']->id, 'homeroom_teacher_id' => $teacherMap['8A']->id, 'is_pkl' => true],
 
-            // TPFL
+            // TPFL (4 Classes)
             ['code' => 'X_TPFL', 'name' => 'X TPFL', 'grade' => 10, 'department_id' => $deptMap['TPFL']->id, 'homeroom_teacher_id' => $teacherMap['6B']->id, 'is_pkl' => false],
             ['code' => 'XI_TPFL', 'name' => 'XI TPFL', 'grade' => 11, 'department_id' => $deptMap['TPFL']->id, 'homeroom_teacher_id' => $teacherMap['10A']->id, 'is_pkl' => false],
+            ['code' => 'XII_TPFL_1', 'name' => 'XII TPFL 1 (PKL)', 'grade' => 12, 'department_id' => $deptMap['TPFL']->id, 'homeroom_teacher_id' => $teacherMap['10A']->id, 'is_pkl' => true],
+            ['code' => 'XII_TPFL_2', 'name' => 'XII TPFL 2 (PKL)', 'grade' => 12, 'department_id' => $deptMap['TPFL']->id, 'homeroom_teacher_id' => $teacherMap['48A']->id, 'is_pkl' => true],
         ];
 
         $classroomMap = [];

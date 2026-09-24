@@ -2,6 +2,7 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import ConflictBanner from '@/Components/ConflictBanner';
+import ClassMonitoringGrid from '@/Components/ClassMonitoringGrid';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import { useScheduleEngine } from '@/hooks/useScheduleEngine';
 import {
@@ -17,7 +18,7 @@ import {
     Sparkles,
 } from 'lucide-react';
 
-export default function Dashboard({ metrics, conflicts = [], auditLogs = [], departments = [] }) {
+export default function Dashboard({ metrics, conflicts = [], auditLogs = [], departments = [], classrooms = [] }) {
     const { clock, engineState } = useScheduleEngine([]);
 
     const statCards = [
@@ -132,7 +133,12 @@ export default function Dashboard({ metrics, conflicts = [], auditLogs = [], dep
                 })}
             </div>
 
-            {/* 4. Quick Overview & Audit Log Feed */}
+            {/* 4. Real-Time Class Monitoring Matrix for ALL Classes (Grade 10, 11, 12) */}
+            <div className="mb-8">
+                <ClassMonitoringGrid classrooms={classrooms} title="Matrix Monitoring Seluruh Rombel (Real-Time)" />
+            </div>
+
+            {/* 5. Quick Overview & Audit Log Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Department Distribution */}
                 <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">

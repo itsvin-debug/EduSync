@@ -74,6 +74,17 @@ class AdminController extends Controller
         $recentAuditLogs = AuditLog::with('user')->latest()->take(8)->get();
         $activeClasses = Classroom::where('is_pkl', false)->count();
 
+        $classrooms = Classroom::with([
+            'department',
+            'homeroomTeacher',
+            'schedules' => function ($q) {
+                $q->with(['subject', 'teacher', 'room'])->orderBy('day')->orderBy('period_start');
+            }
+        ])
+        ->orderBy('grade')
+        ->orderBy('name')
+        ->get();
+
         return Inertia::render('Admin/Dashboard', [
             'metrics' => [
                 'total_teachers' => $totalTeachers,
@@ -85,6 +96,7 @@ class AdminController extends Controller
             'conflicts' => $conflicts,
             'auditLogs' => $recentAuditLogs,
             'departments' => Department::withCount('classrooms')->get(),
+            'classrooms' => $classrooms,
         ]);
     }
 
