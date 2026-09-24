@@ -64,7 +64,7 @@ export function useScheduleEngine(schedules = [], options = {}) {
             return {
                 state: 'WEEKEND_HOLIDAY',
                 label: 'Libur Akhir Pekan',
-                sublabel: 'Kegiatan Pembelajaran Dimulai Kembali Senin Pagi Pukul 06:30 WIB',
+                sublabel: 'Kegiatan Pembelajaran Dimulai Kembali Senin Pagi Pukul 06:30',
                 activeSlot: null,
                 activePeriod: null,
                 isBreak: false,
@@ -88,7 +88,7 @@ export function useScheduleEngine(schedules = [], options = {}) {
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
                 label: 'Pending — Menunggu Waktu Sekolah',
-                sublabel: 'Menunggu Sesi Pembelajaran Dimulai Pukul 06:30 WIB',
+                sublabel: 'Menunggu Sesi Pembelajaran Dimulai Pukul 06:30',
                 activeSlot: null,
                 activePeriod: null,
                 isBreak: false,

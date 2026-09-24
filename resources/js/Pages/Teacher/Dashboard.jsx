@@ -139,7 +139,7 @@ export default function Dashboard({
                                     Libur Akhir Pekan
                                 </h1>
                                 <p className="text-xs text-slate-400 mt-1">
-                                    Kegiatan belajar mengajar dimulai kembali hari Senin pukul 06:30 WIB.
+                                    Kegiatan belajar mengajar dimulai kembali hari Senin pukul 06:30.
                                 </p>
                             </div>
                         ) : (

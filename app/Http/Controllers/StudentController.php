@@ -48,7 +48,7 @@ class StudentController extends Controller
 
         return Inertia::render('Student/Dashboard', [
             'student' => $user,
-            'classroom' => $classroom->load(['department', 'homeroomTeacher']),
+            'classroom' => $classroom->load(['department', 'homeroomTeacher', 'room']),
             'classSchedules' => $classSchedules,
             'todayTimeline' => $todayTimeline,
             'activeLesson' => $activeLesson,

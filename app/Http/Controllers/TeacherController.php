@@ -20,7 +20,7 @@ class TeacherController extends Controller
 
         // Get personal weekly schedule for this teacher
         $personalSchedules = Schedule::where('teacher_id', $teacher->id)
-            ->with(['classroom.department', 'subject', 'room'])
+            ->with(['classroom.department', 'classroom.room', 'subject', 'room'])
             ->orderBy('period_start')
             ->get();
 
@@ -38,7 +38,7 @@ class TeacherController extends Controller
         $activeSchedule = $todaySchedules->first();
 
         // Master class schedule lookup
-        $classrooms = Classroom::with('department')->orderBy('grade')->orderBy('name')->get();
+        $classrooms = Classroom::with(['department', 'room'])->orderBy('grade')->orderBy('name')->get();
         $selectedClassroomId = $request->query('lookup_class_id', $classrooms->first()?->id);
         $masterClassSchedule = Schedule::where('classroom_id', $selectedClassroomId)
             ->with(['subject', 'teacher', 'room'])

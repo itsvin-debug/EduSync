@@ -17,6 +17,7 @@ class Classroom extends Model
         'name',
         'grade',
         'homeroom_teacher_id',
+        'room_id',
         'academic_year',
         'semester',
         'is_pkl',
@@ -30,6 +31,11 @@ class Classroom extends Model
     public function homeroomTeacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
     public function students(): HasMany

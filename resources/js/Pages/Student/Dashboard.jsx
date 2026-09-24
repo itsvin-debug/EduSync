@@ -434,7 +434,7 @@ export default function Dashboard({
                         <div>
                             <h3 className="font-bold text-slate-900 text-base">Alur Pembelajaran Hari Ini</h3>
                             <p className="text-xs text-slate-500 mt-0.5">
-                                Senin s/d Jumat • Jam Pelajaran ke-1 sampai ke-10 (06.30 - 15.00 WIB)
+                                Senin s/d Jumat • Jam Pelajaran ke-1 sampai ke-10 (06.30 - 15.00)
                             </p>
                         </div>
                         <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">

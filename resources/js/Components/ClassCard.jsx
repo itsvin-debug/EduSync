@@ -123,7 +123,7 @@ export default function ClassCard({ classroom, onOpenDetail }) {
                                             ? `Sisa waktu: ${evaluation.countdownFormatted}`
                                             : evaluation.state === 'BREAK_TIME'
                                                 ? `Selesai dlm: ${evaluation.countdownFormatted}`
-                                                : clock.timeShort + ' WIB'}
+                                                : clock.timeShort}
                                     </span>
                                 </span>
                                 {evaluation.state === 'CLASS_ACTIVE' && (

@@ -26,11 +26,14 @@ class User extends Authenticatable
         'classroom_id',
         'department_id',
         'status',
+        'two_factor_enabled',
+        'two_factor_code',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_code',
     ];
 
     protected function casts(): array
@@ -38,6 +41,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_enabled' => 'boolean',
         ];
     }
 
@@ -59,20 +63,5 @@ class User extends Authenticatable
     public function picketReports(): HasMany
     {
         return $this->hasMany(PicketReport::class, 'student_id');
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isGuru(): bool
-    {
-        return $this->role === 'guru';
-    }
-
-    public function isSiswa(): bool
-    {
-        return $this->role === 'siswa';
     }
 }

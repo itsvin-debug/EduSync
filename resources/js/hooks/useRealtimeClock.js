@@ -20,7 +20,7 @@ export function useRealtimeClock() {
     const seconds = now.getSeconds();
 
     const pad = (n) => String(n).padStart(2, '0');
-    const timeString = `${pad(hours)}:${pad(minutes)}:${pad(seconds)} WIB`;
+    const timeString = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     const timeShort = `${pad(hours)}:${pad(minutes)}`;
 
     // Indonesian Day Names (0 = Minggu, 1 = Senin, ..., 6 = Sabtu)

@@ -237,7 +237,7 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
                                                     </span>
 
                                                     <span className="font-mono text-xs text-slate-500 font-medium">
-                                                        {periodDef.start} - {periodDef.end} WIB
+                                                        {periodDef.start} - {periodDef.end}
                                                     </span>
 
                                                     {matchedSchedule?.subject?.category === 'kejuruan' && (

@@ -16,6 +16,7 @@ class LandingController extends Controller
         $classrooms = Classroom::with([
             'department',
             'homeroomTeacher',
+            'room',
             'schedules' => function ($q) {
                 $q->with(['subject', 'teacher', 'room'])->orderBy('day')->orderBy('period_start');
             }

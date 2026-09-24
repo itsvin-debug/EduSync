@@ -334,7 +334,7 @@ export default function Index({
                         {/* Live Class Matrix Monitoring */}
                         <ClassMonitoringGrid
                             classrooms={classrooms}
-                            title="Matrix Monitoring Real-Time Seluruh Rombel"
+                            title="Monitoring Sesi KBM Seluruh Rombel"
                         />
 
                         <div>
@@ -553,8 +553,12 @@ export default function Index({
                                     className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between"
                                 >
                                     <div>
-                                        <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold mb-3">
-                                            <Icon className="w-5 h-5 text-indigo-400" />
+                                        <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold mb-3 overflow-hidden p-2">
+                                            {dept.icon_image ? (
+                                                <img src={dept.icon_image} alt={dept.code} className="w-full h-full object-contain" />
+                                            ) : (
+                                                <Icon className="w-5 h-5 text-indigo-400" />
+                                            )}
                                         </div>
                                         <h3 className="font-bold text-slate-900 text-sm leading-tight">
                                             {dept.name}
@@ -562,6 +566,11 @@ export default function Index({
                                         <span className="font-mono text-xs font-semibold text-indigo-600 mt-1 block">
                                             [{dept.code}]
                                         </span>
+                                        {dept.head_teacher_name && (
+                                            <div className="text-[11px] text-slate-500 mt-1">
+                                                Kaprog: {dept.head_teacher_name}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                                         <span>{dept.classrooms_count || 4} Rombel</span>
@@ -608,7 +617,7 @@ export default function Index({
                                     </div>
                                     <h3 className="font-bold text-slate-900 text-base">Portal Guru Pengampu</h3>
                                     <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                                        Jadwal mengajar mingguan pribadi, kartu aktif mengajar real-time, verifikasi piket siswa, dan tukar jam.
+                                        Jadwal mengajar mingguan pribadi, kartu aktif mengajar harian, verifikasi piket siswa, dan tukar jam.
                                     </p>
                                 </div>
                                 <div className="mt-5 flex items-center gap-1 text-xs font-semibold text-indigo-600 group-hover:gap-2 transition-all">

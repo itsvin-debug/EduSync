@@ -13,7 +13,7 @@ import ClassCard from './ClassCard';
 import ClassDetailModal from './ClassDetailModal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 
-export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix Monitoring Kelas Real-Time" }) {
+export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix Monitoring Kelas" }) {
     const clock = useRealtimeClock();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGrade, setSelectedGrade] = useState('all');
