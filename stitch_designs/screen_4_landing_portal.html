@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "surface-container-highest": "#d3e4fe",
+        "surface-bright": "#f8f9ff",
+        "tertiary-container": "#006e4c",
+        "error": "#ba1a1a",
+        "tertiary-fixed": "#85f8c4",
+        "primary-fixed-dim": "#c3c0ff",
+        "surface-variant": "#d3e4fe",
+        "inverse-primary": "#c3c0ff",
+        "surface": "#f8f9ff",
+        "on-primary-fixed-variant": "#3323cc",
+        "outline-variant": "#c7c4d8",
+        "on-tertiary-fixed-variant": "#005137",
+        "on-primary": "#ffffff",
+        "primary": "#3525cd",
+        "on-surface-variant": "#464555",
+        "on-tertiary-container": "#7df1bd",
+        "primary-fixed": "#e2dfff",
+        "error-container": "#ffdad6",
+        "secondary-container": "#dae2fd",
+        "on-primary-fixed": "#0f0069",
+        "on-surface": "#0b1c30",
+        "on-error-container": "#93000a",
+        "on-background": "#0b1c30",
+        "surface-container-high": "#dce9ff",
+        "outline": "#777587",
+        "on-secondary-fixed-variant": "#3f465c",
+        "on-primary-container": "#dad7ff",
+        "inverse-on-surface": "#eaf1ff",
+        "on-secondary-container": "#5c647a",
+        "surface-tint": "#4d44e3",
+        "tertiary": "#005338",
+        "on-tertiary": "#ffffff",
+        "surface-container-low": "#eff4ff",
+        "primary-container": "#4f46e5",
+        "on-secondary": "#ffffff",
+        "surface-container-lowest": "#ffffff",
+        "on-secondary-fixed": "#131b2e",
+        "surface-dim": "#cbdbf5",
+        "tertiary-fixed-dim": "#68dba9",
+        "secondary": "#565e74",
+        "secondary-fixed-dim": "#bec6e0",
+        "on-tertiary-fixed": "#002114",
+        "inverse-surface": "#213145",
+        "background": "#f8f9ff",
+        "surface-container": "#e5eeff",
+        "on-error": "#ffffff",
+        "secondary-fixed": "#dae2fd"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "margin-desktop": "2rem",
+        "space-lg": "1.25rem",
+        "space-sm": "0.5rem",
+        "space-xs": "0.25rem",
+        "margin": "1rem",
+        "gutter": "1rem",
+        "space-xl": "2rem",
+        "space-md": "0.75rem",
+        "gutter-desktop": "1.5rem"
+      },
+      "fontFamily": {
+        "label-sm": ["Inter"],
+        "tabular-data": ["Inter"],
+        "label-md": ["Inter"],
+        "headline-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "body-lg": ["Inter"],
+        "headline-lg-mobile": ["Inter"],
+        "headline-xl-mobile": ["Inter"],
+        "body-md": ["Inter"],
+        "body-sm": ["Inter"],
+        "headline-sm": ["Inter"],
+        "headline-xl": ["Inter"]
+      },
+      "fontSize": {
+        "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+        "tabular-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.005em", "fontWeight": "500"}],
+        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+        "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+        "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.011em", "fontWeight": "400"}],
+        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "headline-xl-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.006em", "fontWeight": "400"}],
+        "body-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-sm": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+        "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "700"}]
+      }
+    }
+  }
+}</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant"><div class="h-16 w-full px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">E</div><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">EDUSYNC</span><span class="text-outline font-body-sm text-body-sm">—</span><span class="font-body-sm text-body-sm text-on-surface-variant">SMK Negeri Portal</span></div><div class="hidden sm:inline-flex items-center px-space-xs py-0.5 rounded-DEFAULT bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase tracking-wider">SMK PK TERAKREDITASI A</div></div><div class="flex items-center gap-space-lg"><nav class="hidden md:flex items-center gap-space-lg" data-active-classes="text-primary font-headline-sm"><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="beranda" href="#">Beranda</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="panduan" href="#">Panduan</a><a class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="jadwal-umum" href="#">Jadwal Umum</a></nav><div class="flex items-center gap-space-sm"><a class="h-9 px-space-md inline-flex items-center justify-center rounded-lg bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary transition-colors" data-path="masuk-portal" href="#">Masuk ke Portal</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Sub-Header Status Strip -->
+<div class="w-full bg-surface-container-lowest border-b border-outline-variant/30">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3 text-body-sm font-body-sm text-secondary">
+<div class="flex items-center gap-4 flex-wrap">
+<div class="inline-flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface uppercase tracking-wide">Server Node SMKN-01: Stabil</span>
+</div>
+<span class="text-outline-variant/50 hidden sm:inline">|</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">sync</span>
+<span>Sistem Dapodik &amp; Presensi Sinkron: <strong class="text-on-surface font-tabular-data">Hari Ini, 07:15 WIB</strong></span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-2.5 py-0.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm">TA 2024/2025 • Semester Genap</span>
+<span class="text-outline-variant/50 hidden md:inline">|</span>
+<span class="text-secondary font-tabular-data hidden md:inline">Minggu Efektif Ke-14</span>
+</div>
+</div>
+</div>
+<!-- Hero Section -->
+<section class="py-20 lg:py-24 max-w-7xl mx-auto px-6 lg:px-8 w-full">
+<div class="grid lg:grid-cols-12 gap-12 items-center">
+<!-- Left Column -->
+<div class="lg:col-span-7 flex flex-col items-start">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container text-secondary text-label-sm font-label-sm border border-outline-variant/40">
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+<span>Portal Resmi Vokasi • Standar Industri DUDI</span>
+</div>
+<h1 class="text-4xl sm:text-5xl lg:text-[46px] font-headline-xl text-on-surface tracking-tight leading-[1.15] mt-6">
+          Sistem Informasi &amp; Penjadwalan Terpadu
+        </h1>
+<p class="text-body-lg text-secondary leading-relaxed mt-6 max-w-xl">
+          Platform tata kelola jadwal akademik, rotasi bengkel praktik kejuruan, dan sinkronisasi presensi harian guru serta peserta didik SMK Negeri dalam satu portal terpusat berstandar industri.
+        </p>
+<div class="flex flex-wrap items-center gap-4 mt-8 w-full sm:w-auto">
+<a class="w-full sm:w-auto px-6 py-3.5 rounded-lg bg-inverse-surface hover:bg-on-surface text-inverse-on-surface font-label-md text-label-md transition-colors flex items-center justify-center gap-2" href="#jadwal-instan">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+<span>Lihat Jadwal Hari Ini</span>
+</a>
+<a class="w-full sm:w-auto px-6 py-3.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md border border-outline-variant transition-colors flex items-center justify-center gap-2" href="#">
+<span class="material-symbols-outlined text-[18px]">vpn_key</span>
+<span>Akses Akun Guru / Siswa</span>
+</a>
+</div>
+<!-- Key Metrics Bar -->
+<div class="mt-12 pt-8 border-t border-outline-variant/40 grid grid-cols-3 gap-6 w-full">
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">36</div>
+<div class="font-label-md text-label-md text-secondary mt-1">Rombel Aktif</div>
+<div class="font-body-sm text-body-sm text-outline mt-0.5">Tingkat X, XI, XII</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">12</div>
+<div class="font-label-md text-label-md text-secondary mt-1">Lab &amp; Bengkel</div>
+<div class="font-body-sm text-body-sm text-outline mt-0.5">Standar Mitra DUDI</div>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">99.2%</div>
+<div class="font-label-md text-label-md text-secondary mt-1">Presensi Tepat Waktu</div>
+<div class="font-body-sm text-body-sm text-outline mt-0.5">Audit Dapodik April</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Live Schedule Preview Card -->
+<div class="lg:col-span-5 w-full">
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-none">
+<div class="flex items-center justify-between pb-6 border-b border-outline-variant/30">
+<div>
+<div class="font-label-sm text-label-sm uppercase text-outline tracking-wider">Live Monitor</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-0.5">Jadwal Aktif Sesi Ini</h2>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span>Jam Ke-4 (09.45 – 10.30 WIB)</span>
+</div>
+</div>
+<!-- Schedule list items -->
+<div class="mt-6 flex flex-col gap-4">
+<!-- Item 1 -->
+<div class="p-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors">
+<div class="flex items-start justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded">XII PPLG 1</span>
+<span class="font-label-sm text-label-sm text-outline">Lab Software 2</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1.5">Rekayasa Perangkat Lunak</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Hendra Gunawan, S.Kom</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-label-sm font-label-sm bg-tertiary-fixed/60 text-tertiary">Berlangsung</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors">
+<div class="flex items-start justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded">XI TKT 2</span>
+<span class="font-label-sm text-label-sm text-outline">Lab CISCO &amp; Fiber</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1.5">Administrasi Infrastruktur Jaringan</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Ibu Ratna Sari, M.Pd</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-label-sm font-label-sm bg-tertiary-fixed/60 text-tertiary">Berlangsung</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors">
+<div class="flex items-start justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-surface-container-high text-on-surface-variant rounded">X DKV 1</span>
+<span class="font-label-sm text-label-sm text-outline">Studio Grafis A</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1.5">Tipografi &amp; Nirmana Ruang</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Aris Wibowo, S.Sn</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-label-sm font-label-sm bg-surface-container text-secondary">Sesi Istirahat</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="p-3.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 hover:border-outline transition-colors">
+<div class="flex items-start justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md px-2 py-0.5 bg-primary-fixed-dim text-on-primary-fixed-variant rounded">XII TKR 3</span>
+<span class="font-label-sm text-label-sm text-outline">Bengkel Otomotif 1</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1.5">Tune Up &amp; Kelistrikan Otomotif</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+<span>Bambang Sutrisno, S.T</span>
+</div>
+</div>
+<span class="px-2 py-1 rounded text-label-sm font-label-sm bg-secondary-container text-on-secondary-container">Jam Ke-5 (10.45)</span>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-6 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-secondary">Sistem sinkron otomatis tiap 60 dtk</span>
+<a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant flex items-center gap-1" href="#jadwal-instan">
+<span>Buka Jadwal Lengkap Seluruh Kelas</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Class Schedule Quick Lookup -->
+<section class="py-20 bg-surface-container-low border-y border-outline-variant/40 w-full" id="jadwal-instan">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-outline-variant/30">
+<div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest text-secondary text-label-sm font-label-sm border border-outline-variant/40 mb-3">
+<span class="material-symbols-outlined text-[15px] text-primary">search</span>
+<span>Pencarian Instan</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Penelusuran Jadwal Kelas &amp; Laboratorium</h2>
+<p class="font-body-md text-body-md text-secondary mt-2 max-w-2xl leading-relaxed">
+            Lihat susunan jadwal mata pelajaran dan ruang bengkel tanpa perlu login akun. Diperbarui langsung oleh staf kurikulum.
+          </p>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<div class="font-label-sm text-label-sm text-outline">Kalender Pendidikan</div>
+<div class="font-label-md text-label-md text-on-surface">Selasa, 22 April 2025</div>
+</div>
+<button class="px-4 py-2 bg-surface-container-lowest border border-outline-variant hover:border-outline text-on-surface rounded-lg text-label-md font-label-md flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Unduh PDF</span>
+</button>
+</div>
+</div>
+<!-- Filter Controls -->
+<div class="mt-8 flex flex-col gap-5">
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+<!-- Search input -->
+<div class="relative flex-1 max-w-lg">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input class="w-full h-11 pl-10 pr-4 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary placeholder:text-outline/70 transition-colors" id="schedule-search" placeholder="Cari nama guru, kelas, atau ruang lab..." type="text"/>
+</div>
+<!-- Tingkat Filter Tabs -->
+<div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0" id="filter-tingkat">
+<button class="filter-tingkat-btn active px-3.5 py-2 rounded-lg bg-inverse-surface text-inverse-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-level="all">Semua Tingkat</button>
+<button class="filter-tingkat-btn px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-level="X">Kelas X</button>
+<button class="filter-tingkat-btn px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-level="XI">Kelas XI</button>
+<button class="filter-tingkat-btn px-3.5 py-2 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-level="XII">Kelas XII</button>
+</div>
+</div>
+<!-- Jurusan Tabs -->
+<div class="flex items-center gap-2 overflow-x-auto pb-2" id="filter-jurusan">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider mr-2 hidden sm:inline">Program:</span>
+<button class="filter-dept-btn active px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md whitespace-nowrap transition-colors" data-dept="all">Semua Kejuruan</button>
+<button class="filter-dept-btn px-3 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-dept="PPLG">PPLG (Software)</button>
+<button class="filter-dept-btn px-3 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-dept="TKT">TKT (Jaringan / FTTH)</button>
+<button class="filter-dept-btn px-3 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-dept="DKV">DKV (Desain Komunikasi)</button>
+<button class="filter-dept-btn px-3 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container border border-outline-variant text-on-surface font-label-md text-label-md whitespace-nowrap transition-colors" data-dept="TKR">TKR (Otomotif Industri)</button>
+</div>
+</div>
+<!-- Schedule Cards 3-Column Grid -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10" id="schedule-grid">
+<!-- Card 1 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="PPLG" data-level="XII">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-primary-fixed text-on-primary-fixed font-label-md text-label-md">XII PPLG 1</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed/60 text-tertiary border border-tertiary/20">Aktif</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Pemrograman Web &amp; RESTful API</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">07.00 - 10.30 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Hendra Gunawan, S.Kom</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Lab Software 2</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Blok Praktik 4 JP</span>
+<span class="text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Sinkron Mesin Presensi</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="TKT" data-level="XI">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md">XI TKT 1</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-secondary border border-outline-variant/50">Selesai</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Fiber Optik &amp; Splicing OTDR</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">07.00 - 09.30 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Ir. Supriyanto</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Lab Jaringan &amp; FTTH</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Blok Bengkel 3 JP</span>
+<span class="text-secondary">Nilai Praktik Tersimpan</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="DKV" data-level="X">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md">X DKV 2</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed/60 text-tertiary border border-tertiary/20">Aktif</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Komposisi Warna &amp; Nirmana</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">07.45 - 10.30 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Aris Wibowo, S.Sn</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Studio Grafis A</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Teori &amp; Sketsa Dasar</span>
+<span class="text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Presensi 34/34 Siswa</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="TKR" data-level="XII">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-primary-fixed-dim text-on-primary-fixed-variant font-label-md text-label-md">XII TKR 1</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-secondary-container text-on-secondary-container border border-outline-variant/50">Jam Berikutnya</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Overhaul Engine &amp; Diagnosis ECU</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">10.45 - 15.00 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Bambang Sutrisno / Guru Astra</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Bengkel Otomotif 1</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Praktik Teaching Factory</span>
+<span class="text-primary font-medium">Mitra Industri Siap</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="PPLG" data-level="XI">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-primary-fixed text-on-primary-fixed font-label-md text-label-md">XI PPLG 2</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-secondary-container text-on-secondary-container border border-outline-variant/50">Jam Berikutnya</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Cloud Computing &amp; DevOps Mikro</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">10.45 - 14.30 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Dyah Kusumaningrum, M.Cs</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Lab Cloud 1</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Kurikulum Merdeka Kejuruan</span>
+<span class="text-secondary">Koneksi Server Siap</span>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="schedule-card bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col justify-between" data-dept="TKT" data-level="X">
+<div>
+<div class="flex items-center justify-between gap-3">
+<span class="px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md">X TKT 2</span>
+<span class="px-2.5 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-fixed/60 text-tertiary border border-tertiary/20">Aktif</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Konfigurasi Jaringan Nirkabel</h3>
+<div class="mt-4 flex flex-col gap-2 font-body-sm text-body-sm text-secondary">
+<div class="flex items-center gap-2 text-on-surface font-medium">
+<span class="material-symbols-outlined text-[17px] text-primary">schedule</span>
+<span class="font-tabular-data">09.45 - 12.15 WIB</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">badge</span>
+<span>Ibu Ratna Sari, M.Pd</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-outline">room</span>
+<span>Ruang: Lab Komputer Jaringan</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Blok Praktik Topologi</span>
+<span class="text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Presensi 36/36 Siswa</span>
+</div>
+</div>
+</div>
+<!-- Zero-slop Data Visual: Workshop Occupancy Meter -->
+<div class="mt-12 p-8 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col lg:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">precision_manufacturing</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Kapasitas Bengkel &amp; Laboratorium Berjalan</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">10 dari 12 ruang praktik sedang terpakai untuk pembelajaran intensif sesi pagi</div>
+</div>
+</div>
+<div class="w-full lg:w-96 flex flex-col gap-2">
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-secondary">Okupansi Ruang Praktik</span>
+<span class="text-on-surface font-tabular-data font-semibold">83.3% Terpakai</span>
+</div>
+<div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 83.3%;"></div>
+</div>
+<div class="flex justify-between text-[11px] text-outline">
+<span>2 Ruang Kosong (Perawatan Alat)</span>
+<span>Kapasitas Total 12 Bengkel</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Features Grid -->
+<section class="py-24 max-w-7xl mx-auto px-6 lg:px-8 w-full">
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-secondary text-label-sm font-label-sm border border-outline-variant/40 mb-3">
+<span class="material-symbols-outlined text-[15px] text-primary">architecture</span>
+<span>Keunggulan Sistem</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Dirancang Khusus Tata Kelola Vokasi Modern</h2>
+<p class="font-body-md text-body-md text-secondary mt-3 leading-relaxed">
+        Menjawab kompleksitas sistem blok mingguan, rotasi bengkel, logbook PKL, dan sinkronisasi kehadiran guru tamu industri secara terintegrasi.
+      </p>
+</div>
+<div class="grid md:grid-cols-3 gap-8 mt-12">
+<!-- Feature 1 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-none flex flex-col">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[24px]">calendar_view_week</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Schedule Builder Presisi</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mt-4 flex-1">
+          Algoritma pemetaan anti-bentrok khusus menangani rotasi workshop 8 JP, modul blok kejuruan, dan pembagian ruang laboratorium komputer tanpa potensi tabrakan instruktur maupun fasilitas.
+        </p>
+<div class="mt-8 pt-6 border-t border-outline-variant/30 flex items-center gap-2 text-primary font-label-md text-label-md">
+<span>Algoritma Anti-Tabrakan</span>
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-none flex flex-col">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[24px]">fact_check</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Monitoring Piket Real-time</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mt-4 flex-1">
+          Pencatatan kehadiran kelas dan bengkel secara instan terhubung ke pos guru piket. Sistem otomatis mengirim notifikasi delegasi tugas guru pengganti bila terdapat instruktur bertugas di luar sekolah.
+        </p>
+<div class="mt-8 pt-6 border-t border-outline-variant/30 flex items-center gap-2 text-primary font-label-md text-label-md">
+<span>Notifikasi Pengganti Instan</span>
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-none flex flex-col">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[24px]">security</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Portal Multi-Peran Tersegregasi</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mt-4 flex-1">
+          Akses terlindungi terpisah berdasarkan otorisasi: Kepala Sekolah (analitik makro), Waka Kurikulum (manajemen jadwal), Kepala Bengkel/Kaprogli, Guru Pengampu, hingga akses pantau orang tua siswa.
+        </p>
+<div class="mt-8 pt-6 border-t border-outline-variant/30 flex items-center gap-2 text-primary font-label-md text-label-md">
+<span>Standar RBAC Kemendikbud</span>
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Practical Workshop Showcase Section -->
+<div class="mt-16 p-8 lg:p-10 bg-surface-container-lowest border border-outline-variant rounded-xl">
+<div class="grid lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-6 flex flex-col">
+<div class="inline-flex items-center gap-2 text-label-sm font-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[16px]">handshake</span>
+<span>Link and Match Industri (DUDI)</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mt-2 tracking-tight">Kemitraan Fasilitas &amp; Praktik Bengkel</h3>
+<p class="font-body-md text-body-md text-secondary leading-relaxed mt-4">
+            Setiap laboratorium dan bengkel diatur dengan standar operasional industri riil. Pelaksanaan praktikum tercatat dalam logbook digital siswa yang siap diverifikasi langsung oleh asesor Lembaga Sertifikasi Profesi (LSP-P1).
+          </p>
+<div class="mt-6 grid grid-cols-2 gap-4">
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40">
+<div class="font-headline-sm text-headline-sm text-on-surface">54 Mitra DUDI</div>
+<div class="font-body-sm text-body-sm text-secondary mt-1">Perusahaan rekanan PKL &amp; Teaching Factory</div>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant/40">
+<div class="font-headline-sm text-headline-sm text-on-surface">100% Terverifikasi</div>
+<div class="font-body-sm text-body-sm text-secondary mt-1">Skema sertifikasi okupasi BNSP</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-6">
+<div class="w-full h-72 rounded-lg bg-surface-container border border-outline-variant overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="Modern Indonesian vocational high school students in clean uniform operating high-tech CNC machines and automotive diagnostic computers inside a bright, organized workshop with safety lines, Swiss architectural precision, realistic natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBold85T7Ft_HBnt94rrgMlsR2Dr3lxaBftupQijt5k_3VwZ5Szqw5K_ahUuQQXG56YDl5qwo6yPCxKtEovNa_3Ym5M9VBVYs0bAPG-6oLkQvYWHtLDHyIl5zRb4G-FrpLxzxnvmEG2KW2zauR_pjgmJUofr2KFwwpmTuWFtfBTvJH4V7tp8RNT5mB3Vs4TOBWw4IPwt9IythnG_NxK_YOv7c5PFn_q38n86v8oCch-hO4zP1Dn46M"/>
+<div class="absolute bottom-3 left-3 bg-inverse-surface/85 backdrop-blur text-inverse-on-surface text-label-sm font-label-sm px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed">domain</span>
+<span>Bengkel Otomotif Terpadu — Standar Mitra Industri PT Astra</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Agenda & Informasi Akademik Terkini -->
+<section class="py-16 bg-surface-container-low border-t border-outline-variant/40 w-full">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-outline-variant/30">
+<div>
+<div class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Kalender Kerja</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mt-1">Agenda &amp; Informasi Akademik Terkini</h2>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant flex items-center gap-1 self-start sm:self-auto" href="#">
+<span>Lihat Seluruh Agenda Sekolah</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+<div class="grid md:grid-cols-3 gap-8 mt-8">
+<!-- Event 1 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface-variant font-medium">Uji Kompetensi</span>
+<span class="font-tabular-data text-body-sm text-secondary">05 Mei 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Uji Sertifikasi Keahlian (UKK) LSP-P1</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-2.5 leading-relaxed">
+              Pelaksanaan sertifikasi kompetensi nasional untuk siswa tingkat XII bersama penguji eksternal dari asosiasi profesi.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Tingkat: XII Seluruh Jurusan</span>
+<span class="text-primary font-medium">Jadwal Sesi Rilis</span>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface-variant font-medium">Administrasi</span>
+<span class="font-tabular-data text-body-sm text-secondary">28 April 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Sinkronisasi Dapodiknas Semester Genap</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-2.5 leading-relaxed">
+              Penarikan data kehadiran, kelengkapan jam mengajar linear guru, dan pelaporan pembelajaran vokasi ke server pusat Kemendikbud.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Operator Dapodik Pusat</span>
+<span class="text-tertiary font-medium">Tahap Validasi 98%</span>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm text-on-surface-variant font-medium">Guru Tamu</span>
+<span class="font-tabular-data text-body-sm text-secondary">02 Mei 2025</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-4 leading-snug">Workshop Industri &amp; Budaya Kerja Astra</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-2.5 leading-relaxed">
+              Penyelarasan kurikulum operasional sekolah dan transfer teknologi terkini oleh para praktisi teknik senior PT Astra International.
+            </p>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/30 flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-outline">Aula Kejuruan &amp; Bengkel 1</span>
+<span class="text-secondary font-medium">Pendaftaran Ditutup</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Clean Callout Strip for Technical Support -->
+<section class="py-12 max-w-7xl mx-auto px-6 lg:px-8 w-full">
+<div class="p-8 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[22px]">contact_support</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Mengalami Kendala Jadwal atau Perubahan Ruang?</div>
+<div class="font-body-sm text-body-sm text-secondary mt-0.5">Hubungi Tim Kurikulum &amp; Helpdesk TI SMK Negeri melalui saluran resmi operasional.</div>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<a class="w-full md:w-auto px-5 py-2.5 bg-inverse-surface hover:bg-on-surface text-inverse-on-surface rounded-lg font-label-md text-label-md text-center transition-colors" href="mailto:helpdesk@edusync.sch.id">
+          Hubungi Helpdesk
+        </a>
+<a class="w-full md:w-auto px-5 py-2.5 bg-surface-container-lowest hover:bg-surface-container text-on-surface border border-outline-variant rounded-lg font-label-md text-label-md text-center transition-colors" href="#">
+          Panduan Guru Piket
+        </a>
+</div>
+</div>
+</section>
+<!-- Interactive JavaScript for Live Filter & Instant Search -->
+<script>
+    (function() {
+      const searchInput = document.getElementById('schedule-search');
+      const tingkatBtns = document.querySelectorAll('.filter-tingkat-btn');
+      const deptBtns = document.querySelectorAll('.filter-dept-btn');
+      const cards = document.querySelectorAll('.schedule-card');
+
+      let currentLevel = 'all';
+      let currentDept = 'all';
+      let searchQuery = '';
+
+      function applyFilters() {
+        cards.forEach(card => {
+          const cardLevel = card.getAttribute('data-level');
+          const cardDept = card.getAttribute('data-dept');
+          const cardText = card.textContent.toLowerCase();
+
+          const matchesLevel = (currentLevel === 'all') || (cardLevel === currentLevel);
+          const matchesDept = (currentDept === 'all') || (cardDept === currentDept);
+          const matchesSearch = searchQuery === '' || cardText.includes(searchQuery);
+
+          if (matchesLevel && matchesDept && matchesSearch) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      // Tingkat Filter
+      tingkatBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          tingkatBtns.forEach(b => {
+            b.classList.remove('bg-inverse-surface', 'text-inverse-on-surface', 'active');
+            b.classList.add('bg-surface-container-lowest', 'text-on-surface', 'border', 'border-outline-variant');
+          });
+          this.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'border', 'border-outline-variant');
+          this.classList.add('bg-inverse-surface', 'text-inverse-on-surface', 'active');
+          currentLevel = this.getAttribute('data-level');
+          applyFilters();
+        });
+      });
+
+      // Dept Filter
+      deptBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          deptBtns.forEach(b => {
+            b.classList.remove('bg-primary', 'text-on-primary', 'active');
+            b.classList.add('bg-surface-container-lowest', 'text-on-surface', 'border', 'border-outline-variant');
+          });
+          this.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'border', 'border-outline-variant');
+          this.classList.add('bg-primary', 'text-on-primary', 'active');
+          currentDept = this.getAttribute('data-dept');
+          applyFilters();
+        });
+      });
+
+      // Search field
+      if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+          searchQuery = e.target.value.toLowerCase().trim();
+          applyFilters();
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-inverse-surface text-inverse-on-surface border-t border-outline-variant/20"><div class="w-full px-margin-desktop py-space-xl"><div class="grid grid-cols-1 md:grid-cols-12 gap-gutter-desktop pb-space-xl border-b border-outline-variant/15"><div class="md:col-span-5 flex flex-col gap-space-sm"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">E</div><span class="font-headline-sm text-headline-sm text-inverse-on-surface">EDUSYNC</span></div><p class="font-body-sm text-body-sm text-inverse-on-surface/70 max-w-sm">Sistem Informasi Manajemen Terpadu Pendidikan Kejuruan. Standar tata kelola kurikulum merdeka, presensi berbasis industri, serta logbook praktik kerja lapangan SMK Negeri.</p><div class="mt-space-sm flex items-center gap-space-xs font-label-sm text-label-sm text-tertiary-fixed-dim"><span class="material-symbols-outlined text-[16px]">verified</span><span>Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi RI</span></div></div><div class="md:col-span-3 flex flex-col gap-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-inverse-on-surface">Tautan Cepat</span><div class="flex flex-col gap-space-xs pt-space-xs"><a class="font-body-sm text-body-sm text-inverse-on-surface/70 hover:text-inverse-on-surface transition-colors" href="#">Direktorat SMK Kemendikbud</a><a class="font-body-sm text-body-sm text-inverse-on-surface/70 hover:text-inverse-on-surface transition-colors" href="#">Badan Akreditasi Nasional (BAN-SM)</a><a class="font-body-sm text-body-sm text-inverse-on-surface/70 hover:text-inverse-on-surface transition-colors" href="#">Sertifikasi Kompetensi LSP-P1</a><a class="font-body-sm text-body-sm text-inverse-on-surface/70 hover:text-inverse-on-surface transition-colors" href="#">Portal Magang &amp; Industri Mitra</a></div></div><div class="md:col-span-4 flex flex-col gap-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-inverse-on-surface">Kontak &amp; Layanan Bantuan</span><div class="flex flex-col gap-space-xs pt-space-xs font-body-sm text-body-sm text-inverse-on-surface/70"><span>Gedung Administrasi Pusat SMK Negeri</span><span>Jl. Teknologi Industri No. 04, Kompleks Pendidikan Kejuruan</span><span>Surel Teknis: helpdesk@edusync.sch.id</span><span>Layanan Helpdesk: 08:00 - 16:00 WIB (Hari Kerja)</span></div></div></div><div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-inverse-on-surface/60"><div>© 2025 EDUSYNC — SMK Negeri Portal. Hak Cipta Dilindungi Undang-Undang.</div><div class="flex items-center gap-space-md"><a class="hover:text-inverse-on-surface transition-colors" href="#">Kebijakan Privasi Data Siswa</a><span class="text-outline-variant/40">•</span><a class="hover:text-inverse-on-surface transition-colors" href="#">Protokol Keamanan Sistem</a></div></div></div></footer></body></html>
