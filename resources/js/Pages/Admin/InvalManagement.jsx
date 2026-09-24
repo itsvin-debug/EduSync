@@ -62,11 +62,11 @@ export default function InvalManagement({ invalRequests = [], teachers = [] }) {
                                     <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
                                         <td className="py-3 px-4">
                                             <div className="font-semibold text-slate-900">{req.requester?.name}</div>
-                                            <div className="text-[11px] text-slate-400 font-mono">Kode: {req.requester?.code}</div>
+                                            <div className="text-[11px] text-slate-500">{req.requester?.title || 'Guru Pengampu'}</div>
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="font-semibold text-indigo-700">{req.substitute?.name || 'Belum Ditentukan'}</div>
-                                            <div className="text-[11px] text-slate-400 font-mono">Kode: {req.substitute?.code || '-'}</div>
+                                            <div className="text-[11px] text-slate-500">{req.substitute?.title || (req.substitute ? 'Guru Pengganti' : '-')}</div>
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="font-medium text-slate-900">{req.schedule?.classroom?.name}</div>

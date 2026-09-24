@@ -2,6 +2,8 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import ConflictBanner from '@/Components/ConflictBanner';
+import { useRealtimeClock } from '@/hooks/useRealtimeClock';
+import { useScheduleEngine } from '@/hooks/useScheduleEngine';
 import {
     Users,
     GraduationCap,
@@ -16,6 +18,8 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard({ metrics, conflicts = [], auditLogs = [], departments = [] }) {
+    const { clock, engineState } = useScheduleEngine([]);
+
     const statCards = [
         {
             title: 'Total Guru Pengampu',
@@ -54,13 +58,37 @@ export default function Dashboard({ metrics, conflicts = [], auditLogs = [], dep
             {/* 1. Real-Time Schedule Conflict Detector Banner */}
             <ConflictBanner conflicts={conflicts} />
 
-            {/* 2. Top Header & Schedule Builder CTA */}
+            {/* 2. Top Header & Live Temporal Status Strip */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                        <span className="font-mono font-bold text-slate-800 text-xs px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>{clock.timeString}</span>
+                        </span>
+                        <span className="text-xs text-slate-500 font-medium">
+                            {clock.dateFormatted} • {clock.academicYear}
+                        </span>
+                        {engineState.state === 'CLASS_ACTIVE' ? (
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                <span>KBM Aktif ({engineState.label})</span>
+                            </span>
+                        ) : engineState.state === 'BREAK_TIME' ? (
+                            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                                <span>{engineState.label}</span>
+                            </span>
+                        ) : (
+                            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold">
+                                {engineState.label}
+                            </span>
+                        )}
+                    </div>
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                         Ringkasan Sistem & Kurikulum
                     </h1>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-0.5">
                         Monitoring alokasi jam pembelajaran sekolah vokasi Tahun Ajaran 2024/2025 Genap.
                     </p>
                 </div>

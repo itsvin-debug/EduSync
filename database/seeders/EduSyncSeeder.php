@@ -508,6 +508,74 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_ANIMASI_2', 'Senin', 5, 7, 'MATEMATIKA', '4A', 'R_TEORI_201');
         $addSchedule('XI_ANIMASI_2', 'Senin', 8, 10, 'KIK', '30A', 'R_TEORI_201');
 
+        // SELASA
+        $addSchedule('X_ANIMASI_1', 'Selasa', 2, 3, 'SEJARAH', '16B', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Selasa', 4, 5, 'SENBUD', '46A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Selasa', 6, 7, 'B.SUNDA', '31A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Selasa', 8, 10, 'PAI', '12A', 'R_TEORI_101');
+
+        $addSchedule('X_ANIMASI_2', 'Selasa', 2, 3, 'SENBUD', '46A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Selasa', 4, 7, 'INFORMATIKA', '11A', 'STUDIO_ANM_2');
+        $addSchedule('X_ANIMASI_2', 'Selasa', 8, 10, 'MATEMATIKA', '4A', 'R_TEORI_102');
+
+        $addSchedule('XI_ANIMASI_1', 'Selasa', 2, 2, 'PRODUKTIF ANM', '47A', 'STUDIO_ANM_1');
+        $addSchedule('XI_ANIMASI_1', 'Selasa', 3, 4, 'PRODUKTIF ANM', '25A', 'STUDIO_ANM_1');
+        $addSchedule('XI_ANIMASI_1', 'Selasa', 5, 10, 'PRODUKTIF ANM', '15A', 'STUDIO_ANM_1');
+
+        $addSchedule('XI_ANIMASI_2', 'Selasa', 2, 4, 'B.INDONESIA', '13A', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_2', 'Selasa', 5, 6, 'B.INGGRIS', '37A', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_2', 'Selasa', 7, 8, 'SEJARAH', '19B', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_2', 'Selasa', 9, 10, 'KIK', '46B', 'STUDIO_ANM_2');
+
+        // RABU
+        $addSchedule('X_ANIMASI_1', 'Rabu', 2, 4, 'B.INGGRIS', '32A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Rabu', 5, 7, 'MATEMATIKA', '4A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Rabu', 8, 10, 'IPAS', '22A', 'R_TEORI_101');
+
+        $addSchedule('X_ANIMASI_2', 'Rabu', 2, 4, 'IPAS', '22A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Rabu', 5, 7, 'B.INGGRIS', '32A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Rabu', 8, 10, 'B.INDONESIA', '34A', 'R_TEORI_102');
+
+        $addSchedule('XI_ANIMASI_1', 'Rabu', 2, 3, 'BISNIS DIGITAL', '20C', 'STUDIO_ANM_1');
+        $addSchedule('XI_ANIMASI_1', 'Rabu', 4, 5, 'PPKN', '16A', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_1', 'Rabu', 6, 7, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('XI_ANIMASI_1', 'Rabu', 8, 10, 'KIK', '30A', 'STUDIO_ANM_1');
+
+        $addSchedule('XI_ANIMASI_2', 'Rabu', 2, 9, 'PRODUKTIF ANM', '47A', 'STUDIO_ANM_2');
+        $addSchedule('XI_ANIMASI_2', 'Rabu', 10, 10, 'PRODUKTIF ANM', '25A', 'STUDIO_ANM_2');
+
+        // KAMIS
+        $addSchedule('X_ANIMASI_1', 'Kamis', 2, 4, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('X_ANIMASI_1', 'Kamis', 5, 6, 'PPKN', '19A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Kamis', 7, 10, 'INFORMATIKA', '11A', 'STUDIO_ANM_1');
+
+        $addSchedule('X_ANIMASI_2', 'Kamis', 2, 3, 'IPAS', '22A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Kamis', 4, 5, 'SEJARAH', '16B', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Kamis', 6, 7, 'B.SUNDA', '31A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Kamis', 8, 10, 'PJOK', '35A', 'LAPANGAN');
+
+        $addSchedule('XI_ANIMASI_1', 'Kamis', 2, 4, 'PAI', '31B', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_1', 'Kamis', 5, 7, 'MATEMATIKA', '4A', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_1', 'Kamis', 8, 10, 'B.INDONESIA', '13A', 'R_TEORI_201');
+
+        $addSchedule('XI_ANIMASI_2', 'Kamis', 2, 2, 'PRODUKTIF ANM', '25A', 'STUDIO_ANM_2');
+        $addSchedule('XI_ANIMASI_2', 'Kamis', 3, 8, 'PRODUKTIF ANM', '15A', 'STUDIO_ANM_2');
+        $addSchedule('XI_ANIMASI_2', 'Kamis', 9, 10, 'BISNIS DIGITAL', '20C', 'STUDIO_ANM_2');
+
+        // JUMAT
+        $addSchedule('X_ANIMASI_1', 'Jumat', 2, 4, 'B.INDONESIA', '34A', 'R_TEORI_101');
+        $addSchedule('X_ANIMASI_1', 'Jumat', 5, 7, 'PRODUKTIF ANM', '14A', 'STUDIO_ANM_1');
+
+        $addSchedule('X_ANIMASI_2', 'Jumat', 2, 4, 'PAI', '12A', 'R_TEORI_102');
+        $addSchedule('X_ANIMASI_2', 'Jumat', 5, 7, 'PRODUKTIF ANM', '25A', 'STUDIO_ANM_2');
+
+        $addSchedule('XI_ANIMASI_1', 'Jumat', 2, 3, 'SEJARAH', '19B', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_1', 'Jumat', 4, 7, 'B.INGGRIS', '37A', 'R_TEORI_201');
+
+        $addSchedule('XI_ANIMASI_2', 'Jumat', 2, 3, 'B.INGGRIS', '37A', 'R_TEORI_201');
+        $addSchedule('XI_ANIMASI_2', 'Jumat', 4, 5, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('XI_ANIMASI_2', 'Jumat', 6, 7, 'PPKN', '16A', 'R_TEORI_201');
+
         // --- BROADCASTING SCHEDULE DATA (PAGE 3) ---
         // SENIN
         $addSchedule('X_BCF_1', 'Senin', 2, 5, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
@@ -519,6 +587,85 @@ class EduSyncSeeder extends Seeder
         $addSchedule('X_BCF_2', 'Senin', 8, 9, 'PRODUKTIF BCF', '44A', 'STUDIO_BCF');
         $addSchedule('X_BCF_2', 'Senin', 10, 10, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
 
+        $addSchedule('XI_BCF_1', 'Senin', 2, 4, 'MATEMATIKA', '36A', 'R_TEORI_101');
+        $addSchedule('XI_BCF_1', 'Senin', 5, 7, 'B.INDONESIA', '13A', 'R_TEORI_101');
+        $addSchedule('XI_BCF_1', 'Senin', 8, 10, 'PAI', '33A', 'R_TEORI_101');
+
+        $addSchedule('XI_BCF_2', 'Senin', 2, 4, 'B.INDONESIA', '13A', 'R_TEORI_102');
+        $addSchedule('XI_BCF_2', 'Senin', 5, 6, 'SEJARAH', '19B', 'R_TEORI_102');
+        $addSchedule('XI_BCF_2', 'Senin', 7, 10, 'B.INGGRIS', '37A', 'R_TEORI_102');
+
+        // SELASA
+        $addSchedule('X_BCF_1', 'Selasa', 2, 2, 'PRODUKTIF BCF', '23A', 'STUDIO_BCF');
+        $addSchedule('X_BCF_1', 'Selasa', 3, 5, 'PAI', '12A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Selasa', 6, 7, 'SENBUD', '46A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Selasa', 8, 10, 'IPAS', '22A', 'R_TEORI_101');
+
+        $addSchedule('X_BCF_2', 'Selasa', 2, 2, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
+        $addSchedule('X_BCF_2', 'Selasa', 3, 4, 'SEJARAH', '27B', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Selasa', 5, 7, 'B.INGGRIS', '32A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Selasa', 8, 10, 'MATEMATIKA', '18A', 'R_TEORI_102');
+
+        $addSchedule('XI_BCF_1', 'Selasa', 2, 3, 'SEJARAH', '19B', 'R_TEORI_201');
+        $addSchedule('XI_BCF_1', 'Selasa', 4, 5, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('XI_BCF_1', 'Selasa', 6, 7, 'PPKN', '16A', 'R_TEORI_201');
+        $addSchedule('XI_BCF_1', 'Selasa', 8, 10, 'B.INGGRIS', '37A', 'R_TEORI_201');
+
+        $addSchedule('XI_BCF_2', 'Selasa', 2, 3, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('XI_BCF_2', 'Selasa', 4, 5, 'PPKN', '16A', 'R_TEORI_201');
+        $addSchedule('XI_BCF_2', 'Selasa', 6, 8, 'PAI', '33A', 'R_TEORI_201');
+        $addSchedule('XI_BCF_2', 'Selasa', 9, 10, 'MATEMATIKA', '36A', 'R_TEORI_201');
+
+        // RABU
+        $addSchedule('X_BCF_1', 'Rabu', 2, 4, 'B.INDONESIA', '27A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Rabu', 5, 7, 'PJOK', '5A', 'LAPANGAN');
+        $addSchedule('X_BCF_1', 'Rabu', 8, 10, 'MATEMATIKA', '18A', 'R_TEORI_101');
+
+        $addSchedule('X_BCF_2', 'Rabu', 2, 3, 'SENBUD', '46A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Rabu', 4, 7, 'INFORMATIKA', '11A', 'STUDIO_BCF');
+        $addSchedule('X_BCF_2', 'Rabu', 8, 10, 'PAI', '12A', 'R_TEORI_102');
+
+        $addSchedule('XI_BCF_1', 'Rabu', 2, 2, 'B.INGGRIS', '37A', 'R_TEORI_201');
+        $addSchedule('XI_BCF_1', 'Rabu', 3, 4, 'BISNIS DIGITAL', '45B', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_1', 'Rabu', 5, 6, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_1', 'Rabu', 7, 10, 'PRODUKTIF BCF', '44A', 'STUDIO_BCF');
+
+        $addSchedule('XI_BCF_2', 'Rabu', 2, 2, 'MATEMATIKA', '36A', 'R_TEORI_201');
+        $addSchedule('XI_BCF_2', 'Rabu', 3, 4, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_2', 'Rabu', 5, 9, 'KIK', '23B', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_2', 'Rabu', 10, 10, 'PRODUKTIF BCF', '23A', 'STUDIO_BCF');
+
+        // KAMIS
+        $addSchedule('X_BCF_1', 'Kamis', 2, 3, 'PPKN', '19A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Kamis', 4, 6, 'B.INGGRIS', '32A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Kamis', 7, 8, 'IPAS', '22A', 'R_TEORI_101');
+        $addSchedule('X_BCF_1', 'Kamis', 9, 10, 'SEJARAH', '27B', 'R_TEORI_101');
+
+        $addSchedule('X_BCF_2', 'Kamis', 2, 4, 'B.INDONESIA', '27A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Kamis', 5, 6, 'IPAS', '22A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Kamis', 7, 8, 'PPKN', '19A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Kamis', 9, 10, 'B.SUNDA', '31A', 'R_TEORI_102');
+
+        $addSchedule('XI_BCF_1', 'Kamis', 2, 7, 'PRODUKTIF BCF', '45A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_1', 'Kamis', 8, 10, 'PRODUKTIF BCF', '23A', 'STUDIO_BCF');
+
+        $addSchedule('XI_BCF_2', 'Kamis', 2, 4, 'PRODUKTIF BCF', '23A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_2', 'Kamis', 5, 8, 'PRODUKTIF BCF', '44A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_2', 'Kamis', 9, 10, 'PRODUKTIF BCF', '45A', 'STUDIO_BCF');
+
+        // JUMAT
+        $addSchedule('X_BCF_1', 'Jumat', 2, 5, 'INFORMATIKA', '11A', 'STUDIO_BCF');
+        $addSchedule('X_BCF_1', 'Jumat', 6, 7, 'B.SUNDA', '31A', 'R_TEORI_101');
+
+        $addSchedule('X_BCF_2', 'Jumat', 2, 4, 'IPAS', '22A', 'R_TEORI_102');
+        $addSchedule('X_BCF_2', 'Jumat', 5, 7, 'PJOK', '5A', 'LAPANGAN');
+
+        $addSchedule('XI_BCF_1', 'Jumat', 2, 2, 'PRODUKTIF BCF', '23A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_1', 'Jumat', 3, 7, 'KIK', '23B', 'STUDIO_BCF');
+
+        $addSchedule('XI_BCF_2', 'Jumat', 2, 5, 'PRODUKTIF BCF', '45A', 'STUDIO_BCF');
+        $addSchedule('XI_BCF_2', 'Jumat', 6, 7, 'BISNIS DIGITAL', '45B', 'STUDIO_BCF');
+
         // --- TEKNIK OTOMOTIF SCHEDULE DATA (PAGE 5) ---
         // SENIN
         $addSchedule('X_TO_1', 'Senin', 2, 6, 'IPAS', '40A', 'BENGKEL_TO_1');
@@ -528,6 +675,79 @@ class EduSyncSeeder extends Seeder
         $addSchedule('X_TO_2', 'Senin', 2, 6, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_2');
         $addSchedule('X_TO_2', 'Senin', 7, 8, 'PPKN', '19A', 'R_TEORI_102');
         $addSchedule('X_TO_2', 'Senin', 9, 10, 'SENBUD', '46A', 'R_TEORI_102');
+
+        $addSchedule('XI_TO_1', 'Senin', 2, 6, 'PRODUKTIF TO', '17A', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Senin', 7, 10, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_1');
+
+        $addSchedule('XI_TO_2', 'Senin', 2, 7, 'PRODUKTIF TO', '9A', 'BENGKEL_TO_2');
+        $addSchedule('XI_TO_2', 'Senin', 8, 10, 'PRODUKTIF TO', '17A', 'BENGKEL_TO_2');
+
+        // SELASA
+        $addSchedule('X_TO_1', 'Selasa', 2, 4, 'PJOK', '5A', 'LAPANGAN');
+        $addSchedule('X_TO_1', 'Selasa', 5, 7, 'B.INDONESIA', '27A', 'R_TEORI_101');
+        $addSchedule('X_TO_1', 'Selasa', 8, 10, 'INFORMATIKA', '11A', 'BENGKEL_TO_1');
+
+        $addSchedule('X_TO_2', 'Selasa', 2, 3, 'B.SUNDA', '31A', 'R_TEORI_102');
+        $addSchedule('X_TO_2', 'Selasa', 4, 8, 'IPAS', '30B', 'BENGKEL_TO_2');
+        $addSchedule('X_TO_2', 'Selasa', 9, 10, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_2');
+
+        $addSchedule('XI_TO_1', 'Selasa', 2, 2, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Selasa', 3, 8, 'PRODUKTIF TO', '9A', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Selasa', 9, 10, 'KIK', '6A', 'BENGKEL_TO_1');
+
+        $addSchedule('XI_TO_2', 'Selasa', 2, 3, 'PRODUKTIF TO', '17A', 'BENGKEL_TO_2');
+        $addSchedule('XI_TO_2', 'Selasa', 4, 8, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_2');
+        $addSchedule('XI_TO_2', 'Selasa', 9, 10, 'KIK', '30A', 'BENGKEL_TO_2');
+
+        // RABU
+        $addSchedule('X_TO_1', 'Rabu', 2, 2, 'INFORMATIKA', '11A', 'BENGKEL_TO_1');
+        $addSchedule('X_TO_1', 'Rabu', 3, 5, 'PAI', '12A', 'R_TEORI_101');
+        $addSchedule('X_TO_1', 'Rabu', 6, 7, 'SEJARAH', '27B', 'R_TEORI_101');
+        $addSchedule('X_TO_1', 'Rabu', 8, 10, 'PRODUKTIF TO', '9A', 'BENGKEL_TO_1');
+
+        $addSchedule('X_TO_2', 'Rabu', 2, 4, 'PRODUKTIF TO', '9A', 'BENGKEL_TO_2');
+        $addSchedule('X_TO_2', 'Rabu', 5, 7, 'B.INGGRIS', '2A', 'R_TEORI_102');
+        $addSchedule('X_TO_2', 'Rabu', 8, 10, 'B.INDONESIA', '27A', 'R_TEORI_102');
+
+        $addSchedule('XI_TO_1', 'Rabu', 2, 2, 'KIK', '6A', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Rabu', 3, 4, 'PJOK', '35A', 'LAPANGAN');
+        $addSchedule('XI_TO_1', 'Rabu', 5, 8, 'B.INGGRIS', '37A', 'R_TEORI_201');
+        $addSchedule('XI_TO_1', 'Rabu', 9, 10, 'SEJARAH', '2B', 'R_TEORI_201');
+
+        $addSchedule('XI_TO_2', 'Rabu', 2, 3, 'BISNIS DIGITAL', '18B', 'BENGKEL_TO_2');
+        $addSchedule('XI_TO_2', 'Rabu', 4, 6, 'KIK', '6A', 'BENGKEL_TO_2');
+        $addSchedule('XI_TO_2', 'Rabu', 7, 8, 'PPKN', '16A', 'R_TEORI_201');
+        $addSchedule('XI_TO_2', 'Rabu', 9, 10, 'PJOK', '35A', 'LAPANGAN');
+
+        // KAMIS
+        $addSchedule('X_TO_1', 'Kamis', 2, 8, 'PRODUKTIF TO', '8A', 'BENGKEL_TO_1');
+        $addSchedule('X_TO_1', 'Kamis', 9, 10, 'PPKN', '19A', 'R_TEORI_101');
+
+        $addSchedule('X_TO_2', 'Kamis', 2, 5, 'INFORMATIKA', '11A', 'BENGKEL_TO_2');
+        $addSchedule('X_TO_2', 'Kamis', 6, 7, 'SEJARAH', '27B', 'R_TEORI_102');
+        $addSchedule('X_TO_2', 'Kamis', 8, 10, 'PJOK', '5A', 'LAPANGAN');
+
+        $addSchedule('XI_TO_1', 'Kamis', 2, 3, 'PPKN', '16A', 'R_TEORI_201');
+        $addSchedule('XI_TO_1', 'Kamis', 4, 5, 'BISNIS DIGITAL', '18B', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Kamis', 6, 7, 'KIK', '30A', 'BENGKEL_TO_1');
+        $addSchedule('XI_TO_1', 'Kamis', 8, 10, 'MATEMATIKA', '36A', 'R_TEORI_201');
+
+        $addSchedule('XI_TO_2', 'Kamis', 2, 5, 'B.INGGRIS', '37A', 'R_TEORI_201');
+        $addSchedule('XI_TO_2', 'Kamis', 6, 7, 'SEJARAH', '2B', 'R_TEORI_201');
+        $addSchedule('XI_TO_2', 'Kamis', 8, 10, 'B.INDONESIA', '34A', 'R_TEORI_201');
+
+        // JUMAT
+        $addSchedule('X_TO_1', 'Jumat', 2, 4, 'B.INGGRIS', '2A', 'R_TEORI_101');
+        $addSchedule('X_TO_1', 'Jumat', 5, 7, 'MATEMATIKA', '4A', 'R_TEORI_101');
+
+        $addSchedule('X_TO_2', 'Jumat', 2, 4, 'MATEMATIKA', '4A', 'R_TEORI_102');
+        $addSchedule('X_TO_2', 'Jumat', 5, 7, 'PAI', '12A', 'R_TEORI_102');
+
+        $addSchedule('XI_TO_1', 'Jumat', 2, 4, 'PAI', '33A', 'R_TEORI_201');
+        $addSchedule('XI_TO_1', 'Jumat', 5, 7, 'B.INDONESIA', '34A', 'R_TEORI_201');
+
+        $addSchedule('XI_TO_2', 'Jumat', 2, 4, 'MATEMATIKA', '36A', 'R_TEORI_201');
+        $addSchedule('XI_TO_2', 'Jumat', 5, 7, 'PAI', '33A', 'R_TEORI_201');
 
         // --- TPFL SCHEDULE DATA (PAGE 6) ---
         // SENIN
@@ -539,6 +759,75 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_TPFL', 'Senin', 4, 5, 'B.INGGRIS', '38A', 'R_TEORI_201');
         $addSchedule('XI_TPFL', 'Senin', 6, 7, 'PPKN', '16A', 'R_TEORI_201');
         $addSchedule('XI_TPFL', 'Senin', 8, 10, 'B.INDONESIA', '34A', 'R_TEORI_201');
+
+        // SELASA
+        $addSchedule('X_TPFL', 'Selasa', 2, 7, 'PRODUKTIF TPFL', '6B', 'BENGKEL_TPFL');
+        $addSchedule('X_TPFL', 'Selasa', 8, 10, 'B.INDONESIA', '29A', 'R_TEORI_101');
+
+        $addSchedule('XI_TPFL', 'Selasa', 2, 4, 'PAI', '33A', 'R_TEORI_201');
+        $addSchedule('XI_TPFL', 'Selasa', 5, 6, 'SEJARAH', '2B', 'R_TEORI_201');
+        $addSchedule('XI_TPFL', 'Selasa', 7, 8, 'B.INGGRIS', '38A', 'R_TEORI_201');
+        $addSchedule('XI_TPFL', 'Selasa', 9, 10, 'PRODUKTIF TPFL', '10A', 'BENGKEL_TPFL');
+
+        // RABU
+        $addSchedule('X_TPFL', 'Rabu', 2, 4, 'PJOK', '5A', 'LAPANGAN');
+        $addSchedule('X_TPFL', 'Rabu', 5, 7, 'IPAS', '30B', 'BENGKEL_TPFL');
+        $addSchedule('X_TPFL', 'Rabu', 8, 10, 'PAI', '4C', 'R_TEORI_101');
+
+        $addSchedule('XI_TPFL', 'Rabu', 2, 10, 'PRODUKTIF TPFL', '10A', 'BENGKEL_TPFL');
+
+        // KAMIS
+        $addSchedule('X_TPFL', 'Kamis', 2, 4, 'B.INGGRIS', '38A', 'R_TEORI_101');
+        $addSchedule('X_TPFL', 'Kamis', 5, 8, 'INFORMATIKA', '28B', 'BENGKEL_TPFL');
+        $addSchedule('X_TPFL', 'Kamis', 9, 10, 'SEJARAH', '29B', 'R_TEORI_101');
+
+        $addSchedule('XI_TPFL', 'Kamis', 2, 3, 'BISNIS DIGITAL', '32B', 'BENGKEL_TPFL');
+        $addSchedule('XI_TPFL', 'Kamis', 4, 8, 'PRODUKTIF TPFL', '9B', 'BENGKEL_TPFL');
+        $addSchedule('XI_TPFL', 'Kamis', 9, 10, 'KIK', '6A', 'BENGKEL_TPFL');
+
+        // JUMAT
+        $addSchedule('X_TPFL', 'Jumat', 2, 3, 'B.SUNDA', '31A', 'R_TEORI_101');
+        $addSchedule('X_TPFL', 'Jumat', 4, 5, 'IPAS', '30B', 'BENGKEL_TPFL');
+        $addSchedule('X_TPFL', 'Jumat', 6, 7, 'PPKN', '19A', 'R_TEORI_101');
+
+        $addSchedule('XI_TPFL', 'Jumat', 2, 4, 'KIK', '6A', 'BENGKEL_TPFL');
+        $addSchedule('XI_TPFL', 'Jumat', 5, 7, 'MATEMATIKA', '36A', 'R_TEORI_201');
+
+        // ADDITIONAL STUDENT ROSTER (All Classes & Sub-Roles)
+        $additionalStudents = [
+            ['name' => 'Dimas Arya Nugraha', 'nisn' => '0068192342', 'class' => 'XI_PPLG_1', 'sub_role' => 'Wakil Ketua Kelas'],
+            ['name' => 'Siti Aisyah Humaira', 'nisn' => '0068192343', 'class' => 'XI_PPLG_1', 'sub_role' => 'Sekretaris'],
+            ['name' => 'Muhammad Rizqi Pratama', 'nisn' => '0068192344', 'class' => 'XI_PPLG_1', 'sub_role' => 'Bendahara'],
+            ['name' => 'Bintang Aditya Kusuma', 'nisn' => '0068192345', 'class' => 'XI_PPLG_1', 'sub_role' => 'Siswa'],
+            ['name' => 'Putri Wulandari', 'nisn' => '0068192346', 'class' => 'XI_PPLG_1', 'sub_role' => 'Siswa'],
+            ['name' => 'Fajar Alamsyah', 'nisn' => '0068192347', 'class' => 'X_PPLG_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Dewi Sartika', 'nisn' => '0068192348', 'class' => 'X_PPLG_2', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Rangga Wijaya', 'nisn' => '0068192349', 'class' => 'X_ANIMASI_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Bayu Saputra', 'nisn' => '0068192350', 'class' => 'XI_ANIMASI_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Cindy Clarissa', 'nisn' => '0068192351', 'class' => 'X_BCF_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Deni Ramdani', 'nisn' => '0068192352', 'class' => 'X_TO_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Eko Prasetyo', 'nisn' => '0068192353', 'class' => 'XI_TO_1', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Gilang Pratama', 'nisn' => '0068192354', 'class' => 'X_TPFL', 'sub_role' => 'Ketua Kelas'],
+            ['name' => 'Hendra Saputra', 'nisn' => '0068192355', 'class' => 'XI_TPFL', 'sub_role' => 'Ketua Kelas'],
+        ];
+
+        foreach ($additionalStudents as $st) {
+            $classModel = $classroomMap[$st['class']] ?? $classroomMap['XI_PPLG_1'];
+            User::updateOrCreate(
+                ['nisn' => $st['nisn']],
+                [
+                    'name' => $st['name'],
+                    'email' => strtolower(str_replace(' ', '.', $st['name'])) . '@edusync.sch.id',
+                    'password' => Hash::make('password'),
+                    'role' => 'siswa',
+                    'sub_role' => $st['sub_role'],
+                    'phone' => '0878' . rand(10000000, 99999999),
+                    'classroom_id' => $classModel->id,
+                    'department_id' => $classModel->department_id,
+                    'status' => 'active',
+                ]
+            );
+        }
 
         // 9. SAMPLE PICKET REPORT
         PicketReport::create([

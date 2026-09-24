@@ -16,7 +16,7 @@ class TeacherController extends Controller
     public function dashboard(Request $request)
     {
         $user = auth()->user();
-        $teacher = $user->teacher ?? Teacher::where('name', $user->name)->first() ?? Teacher::first();
+        $teacher = $user?->teacher ?? ($user ? Teacher::where('name', $user->name)->first() : null) ?? Teacher::first();
 
         // Get personal weekly schedule for this teacher
         $personalSchedules = Schedule::where('teacher_id', $teacher->id)

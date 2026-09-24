@@ -39,8 +39,8 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                 <div className="flex flex-col h-full overflow-hidden">
                     {/* Brand Header */}
                     <div className="p-5 pb-4 border-b border-slate-800/80 shrink-0">
-                        <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
+                        <Link href="/guru/dashboard" className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
                                 <span className="material-symbols-outlined text-[20px]">school</span>
                             </div>
                             <div>
@@ -54,7 +54,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                                     SMK Negeri Vokasi
                                 </p>
                             </div>
-                        </div>
+                        </Link>
                     </div>
 
                     {/* Teacher Quick Identity Card */}
@@ -151,16 +151,32 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                     </div>
 
                     <div className="flex items-center gap-3">
+                        {/* Quick Role Switcher for tester */}
+                        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                            <a
+                                href="/quick-login/admin"
+                                className="px-2 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                                Admin
+                            </a>
+                            <span className="px-2 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow-xs">
+                                Guru
+                            </span>
+                            <a
+                                href="/quick-login/siswa"
+                                className="px-2 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                                Siswa
+                            </a>
+                        </div>
+
                         <Link
                             href="/"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                            <span>Beranda Utama</span>
+                            <span>Beranda</span>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                         </Link>
-                        <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                            {initials}
-                        </div>
                     </div>
                 </header>
 
