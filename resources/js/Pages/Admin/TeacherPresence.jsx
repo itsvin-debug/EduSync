@@ -18,8 +18,8 @@ import {
     FileSpreadsheet,
     ArrowUpRight,
 } from 'lucide-react';
-import { useRealtimeClock } from '@/Hooks/useRealtimeClock';
-import { SCHOOL_PERIODS } from '@/Hooks/useScheduleEvaluator';
+import { useRealtimeClock } from '@/hooks/useRealtimeClock';
+import { SCHOOL_PERIODS } from '@/hooks/useScheduleEvaluator';
 
 export default function TeacherPresence({
     teachers = [],

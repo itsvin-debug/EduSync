@@ -20,6 +20,12 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         if ($user) {
             $user->load(['teacher', 'classroom.department', 'department']);
+            if (!$user->teacher && $user->role === 'guru') {
+                $teacher = \App\Models\Teacher::where('user_id', $user->id)->first() ?? \App\Models\Teacher::where('name', $user->name)->first();
+                if ($teacher) {
+                    $user->setRelation('teacher', $teacher);
+                }
+            }
         }
 
         return [

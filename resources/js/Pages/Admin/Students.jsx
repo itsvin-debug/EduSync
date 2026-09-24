@@ -98,6 +98,18 @@ export default function Students({ students = [], classrooms = [], departments =
         });
     };
 
+    const handleApprove = (id, name) => {
+        if (confirm(`Setujui pendaftaran akun siswa "${name}"? Akun akan langsung aktif.`)) {
+            router.post(`/admin/users/${id}/approve`);
+        }
+    };
+
+    const handleReject = (id, name) => {
+        if (confirm(`Tolak pendaftaran akun siswa "${name}"?`)) {
+            router.post(`/admin/users/${id}/reject`);
+        }
+    };
+
     const handleDelete = (id, name) => {
         if (confirm(`Apakah Anda yakin ingin menghapus akun siswa ${name}?`)) {
             router.delete(`/admin/students/${id}`);
@@ -251,12 +263,47 @@ export default function Students({ students = [], classrooms = [], departments =
                                             </div>
                                         </td>
                                         <td className="py-3 px-4 text-center">
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-                                                {s.status}
-                                            </span>
+                                            {s.status === 'pending_verification' ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 uppercase tracking-wider">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                    <span>Menunggu Verifikasi</span>
+                                                </span>
+                                            ) : s.status === 'rejected' ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
+                                                    <span>Ditolak</span>
+                                                </span>
+                                            ) : s.status === 'inactive' ? (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
+                                                    <span>Non-Aktif</span>
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                    <span>Aktif</span>
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="py-3 px-4 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
+                                                {s.status === 'pending_verification' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleApprove(s.id, s.name)}
+                                                            className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors"
+                                                            title="Verifikasi & Aktifkan Akun"
+                                                        >
+                                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                                            <span>Setujui</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleReject(s.id, s.name)}
+                                                            className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+                                                            title="Tolak Pendaftaran"
+                                                        >
+                                                            <span>Tolak</span>
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button
                                                     onClick={() => {
                                                         setResetPassStudent(s);

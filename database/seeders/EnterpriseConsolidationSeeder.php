@@ -189,5 +189,53 @@ class EnterpriseConsolidationSeeder extends Seeder
         if ($defaultRoom) {
             Classroom::whereNull('room_id')->update(['room_id' => $defaultRoom->id]);
         }
+
+        // 5. ENSURE EVERY CONSOLIDATED TEACHER HAS A VALID USER ACCOUNT
+        foreach (Teacher::all() as $teacher) {
+            $user = null;
+            if ($teacher->user_id) {
+                $user = User::find($teacher->user_id);
+            }
+
+            if (!$user) {
+                // Generate clean slug from name for email
+                $nameParts = explode(',', $teacher->name)[0]; // strip degrees like S.Pd, M.Kom
+                $nameSlug = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '.', $nameParts), '.'));
+                $email = "{$nameSlug}@edusync.sch.id";
+
+                // Ensure email uniqueness
+                if (User::where('email', $email)->exists()) {
+                    $email = "guru.{$teacher->id}@edusync.sch.id";
+                }
+
+                $user = User::updateOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => $teacher->name,
+                        'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                        'role' => 'guru',
+                        'sub_role' => $teacher->title ?? 'Guru Pengampu',
+                        'nip' => $teacher->nip,
+                        'phone' => $teacher->phone ?? ('0812' . str_pad($teacher->id, 8, '0', STR_PAD_LEFT)),
+                        'teacher_id' => $teacher->id,
+                        'department_id' => $teacher->department_id,
+                        'status' => 'active',
+                    ]
+                );
+
+                $teacher->update([
+                    'user_id' => $user->id,
+                    'email' => $email,
+                ]);
+            } else {
+                $user->update([
+                    'teacher_id' => $teacher->id,
+                    'department_id' => $teacher->department_id,
+                    'nip' => $teacher->nip ?? $user->nip,
+                    'status' => 'active',
+                ]);
+                $teacher->update(['email' => $user->email]);
+            }
+        }
     }
 }

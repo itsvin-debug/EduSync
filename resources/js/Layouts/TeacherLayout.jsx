@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import {
     LayoutDashboard,
@@ -11,11 +11,21 @@ import {
     ChevronRight,
     User,
     GraduationCap,
+    CheckCircle2,
+    ClipboardList,
+    Briefcase,
+    Trash2,
+    Clock,
+    ShieldCheck,
+    Menu,
+    X,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
 
-export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', teacher }) {
+export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', teacher, activeTab, onTabChange }) {
     const { auth } = usePage().props;
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     const currentTeacher = teacher || auth?.user?.teacher || {
         name: auth?.user?.name || 'Rizky Muhamad Ramdan, S.Kom',
         nip: auth?.user?.nip || '199208152020121008',
@@ -30,12 +40,53 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
         router.post('/logout');
     };
 
+    const navItems = [
+        { id: 'workspace', label: 'Ruang Kerja Hari Ini', icon: Clock },
+        { id: 'personal', label: 'Jadwal Mingguan Pribadi', icon: CalendarDays },
+        { id: 'presensi', label: 'Presensi Kehadiran Guru', icon: ShieldCheck },
+        { id: 'tugas', label: 'Tugas KBM / Jamkos', icon: ClipboardList },
+        { id: 'izin_dinas', label: 'Izin Keluar Dinas', icon: Briefcase },
+        { id: 'piket', label: 'Verifikasi Piket Siswa', icon: CheckCircle2 },
+        { id: 'lapor_sampah', label: 'Lapor Kebersihan Kelas', icon: Trash2 },
+        { id: 'master', label: 'Cek Jadwal Rombel Lain', icon: BookOpen },
+    ];
+
+    const handleItemClick = (id) => {
+        if (onTabChange) {
+            onTabChange(id);
+        }
+        setIsMobileMenuOpen(false);
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex">
+        <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex flex-col md:flex-row">
             <Toast />
 
-            {/* PERSISTENT DARK SIDEBAR (Width 260px, bg-[#0F172A]) */}
-            <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none">
+            {/* MOBILE TOP BAR */}
+            <div className="md:hidden bg-[#0F172A] text-white p-4 flex items-center justify-between sticky top-0 z-50 border-b border-slate-800">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-sm">
+                        E
+                    </div>
+                    <div>
+                        <div className="font-bold text-sm leading-none">EDUSYNC</div>
+                        <div className="text-[10px] text-indigo-300 font-semibold mt-0.5">Portal Guru</div>
+                    </div>
+                </div>
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:text-white"
+                >
+                    {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+            </div>
+
+            {/* PERSISTENT DARK SIDEBAR */}
+            <aside
+                className={`fixed md:sticky top-0 bottom-0 left-0 w-[260px] bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-transform duration-200 ${
+                    isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+                } h-screen`}
+            >
                 <div className="flex flex-col h-full overflow-hidden">
                     {/* Brand Header */}
                     <div className="p-5 pb-4 border-b border-slate-800/80 shrink-0">
@@ -69,28 +120,39 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                             <p className="text-[10px] text-indigo-300 font-mono mt-0.5 truncate">
                                 NIP: {currentTeacher.nip || '199208152020121008'}
                             </p>
-                            <span className="inline-block text-[10px] text-slate-400 uppercase tracking-wider">
-                                {auth?.user?.sub_role || 'Guru Produktif PPLG'}
+                            <span className="inline-block text-[10px] text-slate-400 uppercase tracking-wider truncate max-w-[150px]">
+                                {currentTeacher.title || auth?.user?.sub_role || 'Guru Pengampu'}
                             </span>
                         </div>
                     </div>
 
                     {/* Nav Section */}
-                    <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">
+                    <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-4 text-xs">
                         <div>
                             <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                 Menu Pengajar
                             </div>
                             <ul className="space-y-1">
-                                <li>
-                                    <Link
-                                        href="/guru/dashboard"
-                                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-indigo-600 text-white font-medium shadow-sm transition-all"
-                                    >
-                                        <LayoutDashboard className="w-4 h-4 text-white" />
-                                        <span>Ruang Kerja / Dashboard</span>
-                                    </Link>
-                                </li>
+                                {navItems.map((item) => {
+                                    const IconComponent = item.icon;
+                                    const isActive = activeTab === item.id;
+                                    return (
+                                        <li key={item.id}>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleItemClick(item.id)}
+                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-all text-left ${
+                                                    isActive
+                                                        ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                                }`}
+                                            >
+                                                <IconComponent className="w-4 h-4 shrink-0" />
+                                                <span className="truncate">{item.label}</span>
+                                            </button>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
 
@@ -103,7 +165,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                                     href="/quick-login/admin"
                                     className="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
                                 >
-                                    <span>Portal Admin Kurikulum</span>
+                                    <span>Portal Admin</span>
                                     <ExternalLink className="w-3 h-3 text-slate-500" />
                                 </a>
                                 <a
@@ -133,56 +195,33 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                 </div>
             </aside>
 
-            {/* MAIN CONTENT */}
-            <div className="pl-[260px] flex-1 flex flex-col min-w-0">
+            {/* MAIN CONTENT AREA */}
+            <div className="flex-1 flex flex-col min-w-0">
                 <header className="sticky top-0 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 z-40 px-6 sm:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <span className="font-semibold text-indigo-600">EDUSYNC</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                            <span>Portal Guru</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="font-medium text-slate-900">{title}</span>
+                            <span className="font-semibold text-slate-800">Ruang Kerja Guru</span>
+                            <span>/</span>
+                            <span className="text-indigo-600 font-medium">{title}</span>
                         </div>
-                        <div className="h-4 w-px bg-slate-200 hidden sm:block"></div>
-                        <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-tight border border-emerald-200">
-                            TA 2024/2025 Genap Aktif
-                        </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Quick Role Switcher for tester */}
-                        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-                            <a
-                                href="/quick-login/admin"
-                                className="px-2 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
-                            >
-                                Admin
-                            </a>
-                            <span className="px-2 py-1 rounded-lg bg-white text-indigo-700 font-bold shadow-xs">
-                                Guru
-                            </span>
-                            <a
-                                href="/quick-login/siswa"
-                                className="px-2 py-1 rounded-lg text-slate-600 hover:text-slate-900 transition-colors"
-                            >
-                                Siswa
-                            </a>
+                    <div className="flex items-center gap-4 text-xs">
+                        <div className="hidden sm:flex items-center gap-2 text-slate-500">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Koneksi Real-time Aktif</span>
                         </div>
-
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                        >
-                            <span>Beranda</span>
-                            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                        </Link>
                     </div>
                 </header>
 
                 <main className="p-6 sm:p-8 flex-1">
                     {children}
                 </main>
+
+                <footer className="px-6 sm:px-8 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <span>© 2026 EDUSYNC SMK Negeri — Sistem Manajemen Kehadiran & Aktivitas Kelas</span>
+                    <span className="text-slate-400">Portal Guru Terintegrasi Dapodik</span>
+                </footer>
             </div>
         </div>
     );

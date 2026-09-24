@@ -57,20 +57,44 @@ class AdminController extends Controller
                 if ($a->day === $b->day) {
                     $overlap = max($a->period_start, $b->period_start) <= min($a->period_end, $b->period_end);
                     if ($overlap) {
-                        if ($a->teacher_id === $b->teacher_id && $a->classroom_id !== $b->classroom_id) {
+                        // 1. Teacher Collision
+                        if ($a->teacher_id && $a->teacher_id === $b->teacher_id && $a->id !== $b->id) {
+                            $teacherName = $a->teacher?->name ?? $b->teacher?->name ?? 'Guru #' . $a->teacher_id;
+                            $classA = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
+                            $classB = $b->classroom?->name ?? 'Kelas #' . $b->classroom_id;
                             $conflicts[] = [
                                 'type' => 'TEACHER_COLLISION',
-                                'message' => "Tabrakan Pengajar: {$a->teacher->name} terjadwal di {$a->classroom->name} dan {$b->classroom->name} pada {$a->day} (Jam ke-{$a->period_start}-{$a->period_end}).",
+                                'message' => "Tabrakan Pengajar: {$teacherName} terjadwal di {$classA} dan {$classB} pada {$a->day} (Jam ke-{$a->period_start}-{$a->period_end} & {$b->period_start}-{$b->period_end}).",
                                 'day' => $a->day,
                                 'period' => "Jam {$a->period_start}-{$a->period_end}",
                                 'schedules' => [$a->id, $b->id],
                             ];
                         }
 
+                        // 2. Classroom Collision (Same class having multiple lessons simultaneously)
+                        if ($a->classroom_id && $a->classroom_id === $b->classroom_id && $a->id !== $b->id) {
+                            $className = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
+                            $subA = $a->subject?->name ?? 'Mapel #' . $a->subject_id;
+                            $subB = $b->subject?->name ?? 'Mapel #' . $b->subject_id;
+                            $teacherA = $a->teacher?->name ?? 'Guru A';
+                            $teacherB = $b->teacher?->name ?? 'Guru B';
+                            $conflicts[] = [
+                                'type' => 'CLASSROOM_COLLISION',
+                                'message' => "Tabrakan Kelas: {$className} terjadwal 2 mata pelajaran bersamaan ({$subA} oleh {$teacherA} & {$subB} oleh {$teacherB}) pada {$a->day} (Jam ke-{$a->period_start}-{$a->period_end} & {$b->period_start}-{$b->period_end}).",
+                                'day' => $a->day,
+                                'period' => "Jam {$a->period_start}-{$a->period_end}",
+                                'schedules' => [$a->id, $b->id],
+                            ];
+                        }
+
+                        // 3. Room Collision
                         if ($a->room_id && $a->room_id === $b->room_id && $a->classroom_id !== $b->classroom_id) {
+                            $roomName = $a->room?->name ?? $b->room?->name ?? 'Ruang #' . $a->room_id;
+                            $classA = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
+                            $classB = $b->classroom?->name ?? 'Kelas #' . $b->classroom_id;
                             $conflicts[] = [
                                 'type' => 'ROOM_COLLISION',
-                                'message' => "Tabrakan Ruangan: Ruang {$a->room->name} dipakai oleh {$a->classroom->name} dan {$b->classroom->name} pada {$a->day} (Jam ke-{$a->period_start}-{$a->period_end}).",
+                                'message' => "Tabrakan Ruangan: Ruang {$roomName} dipakai oleh {$classA} dan {$classB} pada {$a->day} (Jam ke-{$a->period_start}-{$a->period_end} & {$b->period_start}-{$b->period_end}).",
                                 'day' => $a->day,
                                 'period' => "Jam {$a->period_start}-{$a->period_end}",
                                 'schedules' => [$a->id, $b->id],
@@ -82,6 +106,47 @@ class AdminController extends Controller
         }
 
         return $conflicts;
+    }
+
+    /**
+     * Check if a schedule slot conflicts with any existing schedules
+     */
+    private function validateScheduleConflict(string $day, int $start, int $end, int $teacherId, int $classroomId, ?int $roomId = null, ?int $excludeScheduleId = null): ?string
+    {
+        $overlapping = Schedule::with(['teacher', 'classroom', 'room', 'subject'])
+            ->where('day', $day)
+            ->where(function ($q) use ($start, $end) {
+                $q->where('period_start', '<=', $end)
+                  ->where('period_end', '>=', $start);
+            })
+            ->when($excludeScheduleId, fn($q) => $q->where('id', '!=', $excludeScheduleId))
+            ->get();
+
+        foreach ($overlapping as $s) {
+            // Check teacher conflict
+            if ($s->teacher_id == $teacherId) {
+                $teacherName = $s->teacher?->name ?? 'Guru tersebut';
+                $className = $s->classroom?->name ?? 'kelas lain';
+                return "Konflik Pengajar: {$teacherName} sudah memiliki jadwal mengajar di {$className} pada hari {$day} (Jam ke-{$s->period_start}-{$s->period_end}).";
+            }
+
+            // Check classroom conflict
+            if ($s->classroom_id == $classroomId) {
+                $className = $s->classroom?->name ?? 'Kelas tersebut';
+                $subjectName = $s->subject?->name ?? 'mata pelajaran lain';
+                $teacherName = $s->teacher?->name ?? 'guru lain';
+                return "Konflik Kelas: {$className} sudah dialokasikan untuk {$subjectName} ({$teacherName}) pada hari {$day} (Jam ke-{$s->period_start}-{$s->period_end}).";
+            }
+
+            // Check room conflict
+            if ($roomId && $s->room_id && $s->room_id == $roomId) {
+                $roomName = $s->room?->name ?? 'Ruangan tersebut';
+                $className = $s->classroom?->name ?? 'kelas lain';
+                return "Konflik Ruangan: Ruang {$roomName} sudah digunakan oleh {$className} pada hari {$day} (Jam ke-{$s->period_start}-{$s->period_end}).";
+            }
+        }
+
+        return null;
     }
 
     // ==========================================
@@ -553,6 +618,11 @@ class AdminController extends Controller
     public function toggleDutyStatus($id)
     {
         $leave = OfficialDutyLeave::findOrFail($id);
+
+        if ($leave->status !== 'approved') {
+            return back()->with('error', 'Hanya permohonan dinas yang telah disetujui (ACC) yang dapat diubah status kedinasannya.');
+        }
+
         $newStatus = $leave->duty_status === 'di_luar_dinas' ? 'selesai' : 'di_luar_dinas';
         $leave->update([
             'duty_status' => $newStatus,
@@ -611,20 +681,27 @@ class AdminController extends Controller
 
     public function convertTrashReportToFine(Request $request, $id)
     {
-        $report = TrashReport::findOrFail($id);
+        $report = TrashReport::with('classroom')->findOrFail($id);
+
+        if ($report->status === 'fined' || ClassFine::where('trash_report_id', $report->id)->exists()) {
+            return back()->with('error', 'Laporan sampah ini sudah dikonversi menjadi denda kebersihan sebelumnya.');
+        }
+
         $amount = (int) $request->input('amount', 50000);
 
-        $fine = ClassFine::create([
-            'trash_report_id' => $report->id,
-            'classroom_id' => $report->classroom_id,
-            'issued_by_teacher_id' => $report->teacher_id,
-            'homeroom_teacher_id' => $report->classroom->homeroom_teacher_id,
-            'amount' => $amount,
-            'reason' => "Denda Pelanggaran Kebersihan Kelas: {$report->quantity_description}",
-            'payment_status' => 'belum_dibayar',
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($report, $amount) {
+            ClassFine::create([
+                'trash_report_id' => $report->id,
+                'classroom_id' => $report->classroom_id,
+                'issued_by_teacher_id' => $report->teacher_id,
+                'homeroom_teacher_id' => $report->classroom?->homeroom_teacher_id,
+                'amount' => $amount,
+                'reason' => "Denda Pelanggaran Kebersihan Kelas: {$report->quantity_description}",
+                'payment_status' => 'belum_dibayar',
+            ]);
 
-        $report->update(['status' => 'fined']);
+            $report->update(['status' => 'fined']);
+        });
 
         $this->logAction('TRASH_CONVERTED_TO_FINE', "Admin menerbitkan denda kebersihan Rp " . number_format($amount, 0, ',', '.') . " untuk {$report->classroom->name}");
 
@@ -683,6 +760,11 @@ class AdminController extends Controller
     public function settleClassFine(Request $request, $id)
     {
         $fine = ClassFine::findOrFail($id);
+
+        if ($fine->payment_status === 'lunas') {
+            return back()->with('error', 'Denda kebersihan kelas ini sudah berstatus lunas sebelumnya.');
+        }
+
         $fine->update([
             'payment_status' => 'lunas',
             'verified_by_user_id' => auth()->id(),
@@ -697,9 +779,14 @@ class AdminController extends Controller
     public function rejectClassFineSettlement($id)
     {
         $fine = ClassFine::findOrFail($id);
+
+        if ($fine->payment_status === 'lunas') {
+            return back()->with('error', 'Denda yang sudah lunas tidak dapat ditolak.');
+        }
+
         $fine->update([
             'payment_status' => 'belum_dibayar',
-            'payment_notes' => 'Bukti pembayaran ditolak oleh admin. Harap unggah bukti transfer/kas yang valid.',
+            'payment_notes' => 'Bukti pembayaran ditolak oleh admin. Harap koordinasikan dengan bendahara kelas / pembina.',
         ]);
 
         $this->logAction('FINE_SETTLEMENT_REJECTED', "Admin menolak bukti pembayaran denda untuk {$fine->classroom->name}");
@@ -977,6 +1064,36 @@ class AdminController extends Controller
         ]);
 
         $newRoom = Room::findOrFail($validated['room_id']);
+        if ($classroom->room_id === $newRoom->id) {
+            return back()->with('info', "Kelas {$classroom->name} sudah berada di ruang {$newRoom->name}.");
+        }
+
+        // Check if relocating will create room collisions with another class
+        $classSchedules = Schedule::where('classroom_id', $classroom->id)->get();
+        $conflictsFound = [];
+        foreach ($classSchedules as $cs) {
+            $conflictSchedule = Schedule::where('room_id', $newRoom->id)
+                ->where('classroom_id', '!=', $classroom->id)
+                ->where('day', $cs->day)
+                ->where('period_start', '<=', $cs->period_end)
+                ->where('period_end', '>=', $cs->period_start)
+                ->with('classroom')
+                ->first();
+
+            if ($conflictSchedule) {
+                $otherClass = $conflictSchedule->classroom?->name ?? 'kelas lain';
+                $conflictsFound[] = "Hari {$cs->day} Jam ke-{$cs->period_start}-{$cs->period_end} (bentrok dengan {$otherClass})";
+            }
+        }
+
+        if (!empty($conflictsFound)) {
+            $msg = "Relokasi dibatalkan: Ruang {$newRoom->name} sedang digunakan pada: " . implode(', ', array_slice($conflictsFound, 0, 2));
+            if (count($conflictsFound) > 2) {
+                $msg .= ", dan " . (count($conflictsFound) - 2) . " jadwal lainnya.";
+            }
+            return back()->withErrors(['room_id' => $msg]);
+        }
+
         $oldRoomName = $classroom->room?->name ?? 'Belum Ditentukan';
 
         $classroom->update(['room_id' => $newRoom->id]);
@@ -1132,6 +1249,19 @@ class AdminController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $conflictError = $this->validateScheduleConflict(
+            $validated['day'],
+            (int) $validated['period_start'],
+            (int) $validated['period_end'],
+            (int) $validated['teacher_id'],
+            (int) $validated['classroom_id'],
+            !empty($validated['room_id']) ? (int) $validated['room_id'] : null
+        );
+
+        if ($conflictError) {
+            return back()->withErrors(['period_start' => $conflictError])->withInput();
+        }
+
         Schedule::create($validated);
         $this->logAction('SCHEDULE_CREATED', "Admin menambahkan alokasi jadwal sesi {$validated['day']} Jam ke-{$validated['period_start']}-{$validated['period_end']}");
 
@@ -1149,6 +1279,27 @@ class AdminController extends Controller
             'teacher_id' => 'sometimes|exists:teachers,id',
             'subject_id' => 'sometimes|exists:subjects,id',
         ]);
+
+        $day = $validated['day'] ?? $schedule->day;
+        $periodStart = isset($validated['period_start']) ? (int) $validated['period_start'] : $schedule->period_start;
+        $periodEnd = isset($validated['period_end']) ? (int) $validated['period_end'] : $schedule->period_end;
+        $teacherId = isset($validated['teacher_id']) ? (int) $validated['teacher_id'] : $schedule->teacher_id;
+        $classroomId = $schedule->classroom_id;
+        $roomId = array_key_exists('room_id', $validated) ? ($validated['room_id'] ? (int) $validated['room_id'] : null) : $schedule->room_id;
+
+        $conflictError = $this->validateScheduleConflict(
+            $day,
+            $periodStart,
+            $periodEnd,
+            $teacherId,
+            $classroomId,
+            $roomId,
+            $schedule->id
+        );
+
+        if ($conflictError) {
+            return back()->withErrors(['period_start' => $conflictError])->withInput();
+        }
 
         $schedule->update($validated);
         $this->logAction('SCHEDULE_UPDATED', "Admin memperbarui alokasi jadwal ID #{$schedule->id}");
@@ -1197,13 +1348,33 @@ class AdminController extends Controller
 
     public function approveInval($id)
     {
-        $inval = InvalRequest::findOrFail($id);
+        $inval = InvalRequest::with(['requester', 'substitute', 'schedule'])->findOrFail($id);
+
+        if ($inval->status === 'approved') {
+            return back()->with('error', 'Permohonan inval ini sudah disetujui sebelumnya.');
+        }
+
+        // Validate substitute teacher has no conflicting schedule
+        if ($inval->substitute_teacher_id && $inval->schedule) {
+            $conflict = Schedule::where('teacher_id', $inval->substitute_teacher_id)
+                ->where('day', $inval->schedule->day)
+                ->where('period_start', '<=', $inval->schedule->period_end)
+                ->where('period_end', '>=', $inval->schedule->period_start)
+                ->exists();
+
+            if ($conflict) {
+                $subName = $inval->substitute?->name ?? 'Guru Pengganti';
+                return back()->with('error', "Guru pengganti ({$subName}) memiliki jadwal mengajar lain pada jam tersebut. Silakan pilih guru pengganti lain.");
+            }
+        }
+
         $inval->update([
             'status' => 'approved',
             'reviewed_by_user_id' => auth()->id(),
         ]);
 
-        $this->logAction('INVAL_APPROVED', "Menyetujui substitusi guru pengampu untuk {$inval->requester->name}");
+        $subName = $inval->substitute?->name ?? 'Guru Pengganti';
+        $this->logAction('INVAL_APPROVED', "Menyetujui substitusi guru pengampu {$inval->requester?->name} digantikan oleh {$subName}");
 
         return back()->with('success', 'Pengajuan penggantian guru (inval) telah disetujui.');
     }
@@ -1217,8 +1388,69 @@ class AdminController extends Controller
             'notes' => $request->input('notes', 'Tidak memenuhi kriteria alokasi JP pengganti.'),
         ]);
 
-        $this->logAction('INVAL_REJECTED', "Menolak substitusi guru pengampu untuk {$inval->requester->name}");
+        $this->logAction('INVAL_REJECTED', "Menolak substitusi guru pengampu untuk {$inval->requester?->name}");
 
         return back()->with('success', 'Pengajuan penggantian guru telah ditolak.');
+    }
+
+    // ==========================================
+    // 14. ACCOUNT VERIFICATION (Siswa & Guru)
+    // ==========================================
+    public function approveUser(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            $teacher = Teacher::find($id);
+            if ($teacher && $teacher->user) {
+                $user = $teacher->user;
+            } elseif ($teacher) {
+                $teacher->update(['status' => 'active']);
+                $this->logAction('TEACHER_APPROVED', "Admin menyetujui akun guru {$teacher->name}");
+                return back()->with('success', "Akun guru {$teacher->name} berhasil diverifikasi dan kini aktif.");
+            }
+        }
+
+        if (!$user) {
+            return back()->with('error', 'Data pengguna tidak ditemukan.');
+        }
+
+        $user->update(['status' => 'active']);
+
+        if ($user->teacher) {
+            $user->teacher->update(['status' => 'active']);
+        }
+
+        $this->logAction('USER_APPROVED', "Admin menyetujui akun {$user->role} untuk {$user->name} ({$user->email})");
+
+        return back()->with('success', "Akun {$user->name} ({$user->role}) berhasil diverifikasi dan kini aktif.");
+    }
+
+    public function rejectUser(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            $teacher = Teacher::find($id);
+            if ($teacher && $teacher->user) {
+                $user = $teacher->user;
+            } elseif ($teacher) {
+                $teacher->update(['status' => 'rejected']);
+                $this->logAction('TEACHER_REJECTED', "Admin menolak permohonan akun guru {$teacher->name}");
+                return back()->with('success', "Pendaftaran akun guru {$teacher->name} telah ditolak.");
+            }
+        }
+
+        if (!$user) {
+            return back()->with('error', 'Data pengguna tidak ditemukan.');
+        }
+
+        $user->update(['status' => 'rejected']);
+
+        if ($user->teacher) {
+            $user->teacher->update(['status' => 'rejected']);
+        }
+
+        $this->logAction('USER_REJECTED', "Admin menolak permohonan akun {$user->role} untuk {$user->name} ({$user->email})");
+
+        return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
     }
 }

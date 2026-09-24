@@ -7,6 +7,10 @@ use App\Models\Classroom;
 use App\Models\Schedule;
 use App\Models\Teacher;
 use App\Models\PicketReport;
+use App\Models\ClassFine;
+use App\Models\LearningTask;
+use App\Models\StudentAttendance;
+use App\Models\SchoolOrganization;
 use App\Models\AuditLog;
 use Inertia\Inertia;
 
@@ -43,7 +47,30 @@ class StudentController extends Controller
         $picketHistory = PicketReport::where('classroom_id', $classroom->id)
             ->with('student')
             ->latest()
-            ->take(5)
+            ->take(10)
+            ->get();
+
+        // Sync with Admin: Denda Kebersihan Kelas (Class Fines)
+        $classFines = ClassFine::where('classroom_id', $classroom->id)
+            ->latest()
+            ->get();
+
+        // Sync with Admin: Tugas KBM Mandiri Hari Ini (Learning Tasks)
+        $learningTasks = LearningTask::where('classroom_id', $classroom->id)
+            ->with(['subject', 'teacher'])
+            ->whereDate('date', now()->toDateString())
+            ->latest()
+            ->get();
+
+        // Sync with Admin: Presensi Kelas Hari Ini
+        $todayAttendances = StudentAttendance::where('classroom_id', $classroom->id)
+            ->whereDate('date', now()->toDateString())
+            ->with('user')
+            ->get();
+
+        // Sync with Admin: Organisasi & Ekstrakurikuler
+        $organizations = SchoolOrganization::where('status', 'active')
+            ->with('supervisorTeacher')
             ->get();
 
         return Inertia::render('Student/Dashboard', [
@@ -55,6 +82,10 @@ class StudentController extends Controller
             'todayName' => $todayName,
             'teachers' => $teachers,
             'picketHistory' => $picketHistory,
+            'classFines' => $classFines,
+            'learningTasks' => $learningTasks,
+            'todayAttendances' => $todayAttendances,
+            'organizations' => $organizations,
         ]);
     }
 
@@ -62,11 +93,15 @@ class StudentController extends Controller
     {
         $validated = $request->validate([
             'notes' => 'required|string|min:5',
-            'photo' => 'nullable|image|max:5120', // 5MB
+            'photo' => 'nullable|image|max:5120',
         ]);
 
         $user = auth()->user();
-        $classroomId = $user->classroom_id ?? Classroom::first()->id;
+        $classroomId = $user->classroom_id ?? Classroom::first()?->id;
+
+        if (!$classroomId) {
+            return back()->with('error', 'Data kelas Anda tidak ditemukan di sistem.');
+        }
 
         $photoUrl = '/images/piket_demo.jpg';
         if ($request->hasFile('photo')) {
@@ -88,8 +123,49 @@ class StudentController extends Controller
             'action' => 'PICKET_SUBMITTED',
             'description' => "Pengajuan bukti piket diajukan oleh {$user->name}",
             'details' => $report->toArray(),
+            'ip_address' => $request->ip(),
         ]);
 
         return back()->with('success', 'Laporan piket kelas berhasil dikirimkan ke Wali Kelas. Menunggu verifikasi.');
+    }
+
+    public function submitFinePayment(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'payment_notes' => 'required|string|min:3',
+        ]);
+
+        $fine = ClassFine::findOrFail($id);
+        $user = auth()->user();
+
+        // 1. Authorization: Only students in the same class or admin can confirm
+        if ($user->role !== 'admin' && $user->classroom_id && $user->classroom_id !== $fine->classroom_id) {
+            return back()->with('error', 'Anda tidak memiliki hak untuk mengonfirmasi denda kelas lain.');
+        }
+
+        // 2. Prevent re-submission if already paid
+        if ($fine->payment_status === 'lunas') {
+            return back()->with('error', 'Denda kebersihan kelas ini sudah berstatus lunas.');
+        }
+
+        // 3. Prevent duplicate submission if already waiting confirmation
+        if ($fine->payment_status === 'menunggu_konfirmasi') {
+            return back()->with('info', 'Konfirmasi pelunasan sudah diajukan sebelumnya dan sedang menunggu verifikasi.');
+        }
+
+        $fine->update([
+            'payment_status' => 'menunggu_konfirmasi',
+            'payment_notes' => $validated['payment_notes'],
+            'submitted_payment_at' => now(),
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'FINE_SETTLEMENT_SUBMITTED',
+            'description' => "Siswa {$user->name} mengajukan konfirmasi pelunasan denda kebersihan Rp " . number_format($fine->amount, 0, ',', '.'),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Konfirmasi penyelesaian denda kelas berhasil diajukan! Menunggu verifikasi Pembina/Admin.');
     }
 }

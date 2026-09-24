@@ -13,11 +13,27 @@ Route::get('/', [LandingController::class, 'index'])->name('home');
 // 2. Authentication & Quick Role Switching (Screen 3)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/quick-login/{role}', [AuthController::class, 'quickLogin'])->name('quick-login');
 
+// Central /dashboard redirect
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    if (!$user) return redirect('/login');
+    if ($user->status !== 'active') {
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect()->route('login')->withErrors(['email' => 'Akun Anda tidak aktif atau sedang menunggu verifikasi.']);
+    }
+    if ($user->role === 'admin') return redirect()->route('admin.dashboard');
+    if ($user->role === 'guru') return redirect()->route('guru.dashboard');
+    return redirect()->route('siswa.dashboard');
+})->middleware('auth')->name('dashboard');
+
 // 3. Admin Portal (The 13 Core Features)
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Feature 1 & 2: Real-time Attendance Analytics & Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/kbm-monitor', [AdminController::class, 'kbmMonitor'])->name('admin.kbm');
@@ -99,17 +115,30 @@ Route::prefix('admin')->group(function () {
     Route::get('/inval', [AdminController::class, 'invalManagement'])->name('admin.inval');
     Route::post('/inval/{id}/approve', [AdminController::class, 'approveInval'])->name('admin.inval.approve');
     Route::post('/inval/{id}/reject', [AdminController::class, 'rejectInval'])->name('admin.inval.reject');
+
+    // User Account Verification (Siswa & Guru - Cegah orang luar buat akun)
+    Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('admin.users.approve');
+    Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('admin.users.reject');
 });
 
 // 4. Teacher Portal (Screen 5 & Teacher Specification)
-Route::prefix('guru')->group(function () {
+Route::prefix('guru')->middleware(['auth', 'role:guru,admin'])->group(function () {
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('guru.dashboard');
     Route::post('/swap-request', [TeacherController::class, 'swapRequest'])->name('guru.swap');
     Route::post('/picket/{id}/verify', [TeacherController::class, 'verifyPicket'])->name('guru.picket.verify');
+
+    // Guru Feature Expansions (Sync dengan Admin)
+    Route::post('/attendance/check-in', [TeacherController::class, 'checkInAttendance'])->name('guru.attendance.checkin');
+    Route::post('/learning-tasks', [TeacherController::class, 'storeLearningTask'])->name('guru.learning-tasks.store');
+    Route::post('/duty-leaves', [TeacherController::class, 'storeDutyLeave'])->name('guru.duty-leaves.store');
+    Route::post('/trash-reports', [TeacherController::class, 'storeTrashReport'])->name('guru.trash-reports.store');
 });
 
 // 5. Student Portal (Screen 6 & Student Mobile-First Specification)
-Route::prefix('siswa')->group(function () {
+Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('siswa.dashboard');
     Route::post('/picket', [StudentController::class, 'submitPicket'])->name('siswa.picket.submit');
+
+    // Siswa Feature Expansions (Sync dengan Admin)
+    Route::post('/fines/{id}/pay', [StudentController::class, 'submitFinePayment'])->name('siswa.fines.pay');
 });

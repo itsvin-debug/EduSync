@@ -326,7 +326,9 @@ class EduSyncSeeder extends Seeder
 
         // 8. EXACT COMPLETE SCHEDULE ENTRIES FROM REAL PDF MATRIX (PPLG, ANIMASI, BCF, TO, TPFL)
         // Clear previous schedules to ensure 100% sync
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         Schedule::truncate();
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         // Helper to insert a schedule slot
         $addSchedule = function($classCode, $day, $pStart, $pEnd, $subjectCodeOrName, $teacherCode, $roomCode = null, $notes = null) use ($classroomMap, $teacherMap, $roomMap, $resolveSubject, $subjectMap) {

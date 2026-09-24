@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function Dashboard({
-    metrics,
+    metrics = {},
     attendanceStats = {},
     studentAttendancesToday = [],
     teacherAttendancesToday = [],
@@ -40,28 +40,28 @@ export default function Dashboard({
     const statCards = [
         {
             title: 'Total Guru Pengampu',
-            value: `${metrics.total_teachers} Guru`,
+            value: `${metrics?.total_teachers ?? 0} Guru`,
             subtext: '100% Beban Jam Linear',
             icon: Users,
             color: 'indigo',
         },
         {
             title: 'Total Siswa Terdaftar',
-            value: `${metrics.total_students} Siswa`,
+            value: `${metrics?.total_students ?? 0} Siswa`,
             subtext: 'Sinkron Dapodik Semester Genap',
             icon: GraduationCap,
             color: 'teal',
         },
         {
             title: 'Rombongan Belajar (Rombel)',
-            value: `${metrics.active_classes} Kelas`,
+            value: `${metrics?.active_classes ?? 0} Kelas`,
             subtext: 'Kelas X, XI Aktif (XII PKL)',
             icon: School,
             color: 'amber',
         },
         {
             title: 'Ruang Fisik & Bengkel Lab',
-            value: `${metrics.total_rooms} Unit`,
+            value: `${metrics?.total_rooms ?? 0} Unit`,
             subtext: '12 Ruang Praktik / Teori',
             icon: Building2,
             color: 'emerald',

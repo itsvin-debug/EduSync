@@ -122,6 +122,18 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
         });
     };
 
+    const handleApprove = (userId, name) => {
+        if (confirm(`Setujui pendaftaran akun guru "${name}"? Akun akan langsung aktif.`)) {
+            router.post(`/admin/users/${userId}/approve`);
+        }
+    };
+
+    const handleReject = (userId, name) => {
+        if (confirm(`Tolak pendaftaran akun guru "${name}"?`)) {
+            router.post(`/admin/users/${userId}/reject`);
+        }
+    };
+
     const handleDelete = (t) => {
         if (confirm(`Apakah Anda yakin ingin menghapus akun pengajar ${t.name}?`)) {
             router.delete(`/admin/teachers/${t.id}`);
@@ -320,16 +332,46 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                        t.status === 'active'
-                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                            : 'bg-slate-100 text-slate-600 border border-slate-200'
-                                                    }`}>
-                                                        <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                                                        {t.status === 'active' ? 'Aktif' : 'Non-Aktif'}
-                                                    </span>
+                                                    {(t.user?.status === 'pending_verification' || t.status === 'pending_verification') ? (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                            <span>Verifikasi</span>
+                                                        </span>
+                                                    ) : (t.user?.status === 'rejected' || t.status === 'rejected') ? (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                            <span>Ditolak</span>
+                                                        </span>
+                                                    ) : t.status === 'active' ? (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                            <span>Aktif</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                                            <span>Non-Aktif</span>
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-1.5">
+                                                    {(t.user?.status === 'pending_verification' || t.status === 'pending_verification') && t.user_id && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleApprove(t.user_id, t.name)}
+                                                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
+                                                                title="Setujui Akun Guru"
+                                                            >
+                                                                <span>Setujui</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleReject(t.user_id, t.name)}
+                                                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-colors"
+                                                                title="Tolak Akun Guru"
+                                                            >
+                                                                <span>Tolak</span>
+                                                            </button>
+                                                        </>
+                                                    )}
                                                     <button
                                                         onClick={() => setResetPassTeacher(t)}
                                                         className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"

@@ -21,6 +21,13 @@ import {
     Check,
     MapPin,
     Coffee,
+    Plus,
+    ShieldCheck,
+    ClipboardList,
+    Briefcase,
+    Trash2,
+    ExternalLink,
+    FileText,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -35,8 +42,13 @@ export default function Dashboard({
     invalRequests = [],
     picketReports = [],
     allTeachers = [],
+    todayAttendance = null,
+    myLearningTasks = [],
+    myDutyLeaves = [],
+    myTrashReports = [],
+    subjects = [],
 }) {
-    const [activeTab, setActiveTab] = useState('workspace'); // 'workspace', 'personal', 'piket', 'master', 'inval'
+    const [activeTab, setActiveTab] = useState('workspace'); // 'workspace', 'personal', 'presensi', 'tugas', 'izin_dinas', 'piket', 'lapor_sampah', 'master', 'inval'
     const [selectedWeeklyDay, setSelectedWeeklyDay] = useState('Senin');
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
 
@@ -47,6 +59,89 @@ export default function Dashboard({
         reason: '',
         notes: '',
     });
+
+    // Attendance check-in form
+    const {
+        data: attendanceData,
+        setData: setAttendanceData,
+        post: postAttendance,
+        processing: attendanceProcessing,
+    } = useForm({
+        status: todayAttendance?.status || 'hadir',
+        notes: todayAttendance?.notes || '',
+    });
+
+    const handleAttendanceSubmit = (e) => {
+        e.preventDefault();
+        postAttendance('/guru/attendance/check-in');
+    };
+
+    // Learning Task form
+    const {
+        data: taskData,
+        setData: setTaskData,
+        post: postTask,
+        reset: resetTask,
+        processing: taskProcessing,
+    } = useForm({
+        classroom_id: classrooms[0]?.id || '',
+        subject_id: subjects[0]?.id || '',
+        period_start: 1,
+        period_end: 3,
+        title: '',
+        instructions: '',
+        file_url: '',
+    });
+
+    const handleTaskSubmit = (e) => {
+        e.preventDefault();
+        postTask('/guru/learning-tasks', {
+            onSuccess: () => resetTask(),
+        });
+    };
+
+    // Duty Leave form
+    const {
+        data: dutyData,
+        setData: setDutyData,
+        post: postDuty,
+        reset: resetDuty,
+        processing: dutyProcessing,
+    } = useForm({
+        date: new Date().toISOString().split('T')[0],
+        start_time: '08:00',
+        end_time: '14:00',
+        destination: '',
+        purpose: '',
+        letter_number: '',
+    });
+
+    const handleDutySubmit = (e) => {
+        e.preventDefault();
+        postDuty('/guru/duty-leaves', {
+            onSuccess: () => resetDuty(),
+        });
+    };
+
+    // Trash Report form
+    const {
+        data: trashData,
+        setData: setTrashData,
+        post: postTrash,
+        reset: resetTrash,
+        processing: trashProcessing,
+    } = useForm({
+        classroom_id: classrooms[0]?.id || '',
+        quantity_description: '',
+        period_time: 'Jam ke-4',
+    });
+
+    const handleTrashSubmit = (e) => {
+        e.preventDefault();
+        postTrash('/guru/trash-reports', {
+            onSuccess: () => resetTrash(),
+        });
+    };
 
     const handleLookupClassChange = (classId) => {
         router.get('/guru/dashboard', { lookup_class_id: classId }, { preserveState: true });
@@ -77,8 +172,8 @@ export default function Dashboard({
     const { clock, engineState, nextSlot, getPeriodStatus } = useScheduleEngine(personalSchedules);
 
     return (
-        <TeacherLayout teacher={teacher} title="Ruang Kerja & Jadwal Mengajar">
-            <Head title={`Ruang Kerja Guru - ${teacher.name} - EDUSYNC`} />
+        <TeacherLayout teacher={teacher} title="Ruang Kerja & Jadwal Mengajar" activeTab={activeTab} onTabChange={setActiveTab}>
+            <Head title={`Ruang Kerja Guru - ${teacher?.name || 'Guru'} - EDUSYNC`} />
 
             {/* TOP ACTIVE CLASS HERO BANNER WITH REAL-TIME CLOCK */}
             <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
@@ -95,7 +190,7 @@ export default function Dashboard({
                             <span className="text-xs text-slate-400 font-medium">
                                 {clock.dateFormatted} • TA {clock.academicYear}
                             </span>
-                            <span className="text-xs text-indigo-300 font-medium">NIP: {teacher.nip || '-'}</span>
+                            <span className="text-xs text-indigo-300 font-medium">NIP: {teacher?.nip || '-'}</span>
                         </div>
 
                         {engineState.state === 'CLASS_ACTIVE' && engineState.activeSlot ? (
@@ -276,7 +371,7 @@ export default function Dashboard({
                     }`}
                 >
                     <Clock className="w-4 h-4" />
-                    <span>Ruang Kerja Hari Ini ({todaySchedules.length} Sesi)</span>
+                    <span>Ruang Kerja Hari Ini ({todaySchedules.length})</span>
                 </button>
 
                 <button
@@ -288,7 +383,43 @@ export default function Dashboard({
                     }`}
                 >
                     <CalendarDays className="w-4 h-4" />
-                    <span>Jadwal Mingguan Pribadi ({personalSchedules.length} Total)</span>
+                    <span>Jadwal Mingguan ({personalSchedules.length})</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveTab('presensi')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        activeTab === 'presensi'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Presensi Guru {todayAttendance ? `(${todayAttendance.status === 'hadir' ? 'Hadir' : 'Izin'})` : '(Belum)'}</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveTab('tugas')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        activeTab === 'tugas'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                >
+                    <ClipboardList className="w-4 h-4" />
+                    <span>Tugas KBM / Jamkos ({myLearningTasks.length})</span>
+                </button>
+
+                <button
+                    onClick={() => setActiveTab('izin_dinas')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        activeTab === 'izin_dinas'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                >
+                    <Briefcase className="w-4 h-4" />
+                    <span>Izin Dinas ({myDutyLeaves.length})</span>
                 </button>
 
                 <button
@@ -300,12 +431,24 @@ export default function Dashboard({
                     }`}
                 >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Verifikasi Piket Siswa</span>
+                    <span>Verifikasi Piket</span>
                     {pendingPicketCount > 0 && (
                         <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-bold">
                             {pendingPicketCount}
                         </span>
                     )}
+                </button>
+
+                <button
+                    onClick={() => setActiveTab('lapor_sampah')}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        activeTab === 'lapor_sampah'
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Lapor Sampah ({myTrashReports.length})</span>
                 </button>
 
                 <button
@@ -317,7 +460,7 @@ export default function Dashboard({
                     }`}
                 >
                     <BookOpen className="w-4 h-4" />
-                    <span>Cek Jadwal Kelas Lain</span>
+                    <span>Cek Rombel Lain</span>
                 </button>
 
                 <button
@@ -329,7 +472,7 @@ export default function Dashboard({
                     }`}
                 >
                     <ArrowLeftRight className="w-4 h-4" />
-                    <span>Pengajuan Inval ({invalRequests.length})</span>
+                    <span>Inval ({invalRequests.length})</span>
                 </button>
             </div>
 
@@ -591,6 +734,536 @@ export default function Dashboard({
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* TAB: PRESENSI MANDIRI GURU */}
+            {activeTab === 'presensi' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Formulir Presensi Harian</h3>
+                                <p className="text-[11px] text-slate-500">Pencatatan check-in mandiri kehadiran guru</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleAttendanceSubmit} className="space-y-4 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-2">Status Kehadiran Hari Ini</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { val: 'hadir', label: 'Hadir', activeClass: 'bg-emerald-600 text-white' },
+                                        { val: 'izin_dinas', label: 'Izin Dinas', activeClass: 'bg-indigo-600 text-white' },
+                                        { val: 'sakit', label: 'Sakit', activeClass: 'bg-amber-600 text-white' },
+                                    ].map((opt) => (
+                                        <button
+                                            key={opt.val}
+                                            type="button"
+                                            onClick={() => setAttendanceData('status', opt.val)}
+                                            className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all ${
+                                                attendanceData.status === opt.val
+                                                    ? `${opt.activeClass} border-transparent shadow-xs`
+                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Catatan / Keterangan Tambahan</label>
+                                <textarea
+                                    value={attendanceData.notes}
+                                    onChange={(e) => setAttendanceData('notes', e.target.value)}
+                                    rows={3}
+                                    placeholder="Contoh: Mengajar tepat waktu sesi pagi, hadir di sekolah pukul 06.40 WIB."
+                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={attendanceProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                            >
+                                {attendanceProcessing ? 'Menyimpan...' : (todayAttendance ? 'Perbarui Presensi Hari Ini' : 'Simpan Presensi Hari Ini')}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base">Status Kehadiran Hari Ini ({todayName})</h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">Sinkronisasi otomatis ke buku induk presensi dan radar piket</p>
+                                </div>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                                    todayAttendance?.status === 'hadir'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : todayAttendance?.status === 'izin_dinas'
+                                        ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                        : todayAttendance?.status === 'sakit'
+                                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                                }`}>
+                                    {todayAttendance ? (todayAttendance.status === 'hadir' ? 'Tercatat Hadir' : todayAttendance.status === 'izin_dinas' ? 'Izin Keluar Dinas' : 'Sakit') : 'Belum Check-In'}
+                                </span>
+                            </div>
+
+                            {todayAttendance ? (
+                                <div className="space-y-4">
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="text-slate-500">Waktu Check-In:</span>
+                                            <span className="font-mono font-bold text-slate-900">{todayAttendance.check_in_time || '07:00'} WIB</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="text-slate-500">Status Verifikasi:</span>
+                                            <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                                                <Check className="w-3.5 h-3.5" /> Terverifikasi Sistem
+                                            </span>
+                                        </div>
+                                        <div className="pt-2 border-t border-slate-200/60 text-xs">
+                                            <span className="text-slate-500 block mb-0.5">Catatan Pengajar:</span>
+                                            <p className="font-medium text-slate-800 italic">"{todayAttendance.notes || '-'}"</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/50 text-xs text-indigo-900 leading-relaxed">
+                                        💡 <strong>Informasi Ketertiban Guru:</strong> Presensi mandiri yang Anda simpan langsung dilaporkan ke akun Admin Kurikulum dan tampil di dashboard pemantauan pimpinan sekolah.
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-xs text-slate-400">
+                                    <Clock className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                    <p className="font-medium text-slate-600">Belum ada catatan presensi untuk hari ini</p>
+                                    <p className="text-[11px] mt-1">Silakan lakukan konfirmasi kehadiran pada formulir di sebelah kiri.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* TAB: TUGAS KBM MANDIRI & JAMKOS */}
+            {activeTab === 'tugas' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <ClipboardList className="w-5 h-5 text-indigo-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Terbitkan Tugas Mandiri</h3>
+                                <p className="text-[11px] text-slate-500">Untuk kelas kosong / dinas luar</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleTaskSubmit} className="space-y-3.5 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Rombongan Belajar (Kelas)</label>
+                                <select
+                                    value={taskData.classroom_id}
+                                    onChange={(e) => setTaskData('classroom_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Mata Pelajaran</label>
+                                <select
+                                    value={taskData.subject_id}
+                                    onChange={(e) => setTaskData('subject_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {subjects.map((s) => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Awal)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={taskData.period_start}
+                                        onChange={(e) => setTaskData('period_start', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Akhir)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={taskData.period_end}
+                                        onChange={(e) => setTaskData('period_end', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Judul Tugas / Modul</label>
+                                <input
+                                    type="text"
+                                    value={taskData.title}
+                                    onChange={(e) => setTaskData('title', e.target.value)}
+                                    placeholder="Contoh: Pembuatan CRUD Laravel API & Review ERD"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Instruksi Lengkap Pengerjaan</label>
+                                <textarea
+                                    value={taskData.instructions}
+                                    onChange={(e) => setTaskData('instructions', e.target.value)}
+                                    rows={4}
+                                    placeholder="Tuliskan petunjuk pengerjaan tugas, target capaian praktikum, dan format pengumpulan..."
+                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Tautan Lampiran / Google Drive (Opsional)</label>
+                                <input
+                                    type="url"
+                                    value={taskData.file_url}
+                                    onChange={(e) => setTaskData('file_url', e.target.value)}
+                                    placeholder="https://drive.google.com/..."
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={taskProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                            >
+                                {taskProcessing ? 'Menerbitkan...' : 'Terbitkan Tugas ke Siswa'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">Tugas Mandiri yang Anda Terbitkan</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Tampil langsung di dashboard siswa kelas terkait</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {myLearningTasks.length} Tugas Terbit
+                            </span>
+                        </div>
+
+                        {myLearningTasks.length === 0 ? (
+                            <div className="text-center py-12 text-xs text-slate-400">
+                                <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                <p className="font-medium text-slate-600">Belum ada tugas mandiri yang diterbitkan</p>
+                                <p className="text-[11px] mt-1">Gunakan form di samping jika Anda berhalangan hadir mengajar.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myLearningTasks.map((t) => (
+                                    <div
+                                        key={t.id}
+                                        className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between gap-2"
+                                    >
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                {t.classroom?.name} • {t.subject?.name}
+                                            </span>
+                                            <span className="text-slate-400 font-mono text-[11px]">
+                                                Jam ke-{t.period_start}-{t.period_end} • {t.date}
+                                            </span>
+                                        </div>
+
+                                        <h4 className="font-bold text-slate-900 text-sm">{t.title}</h4>
+                                        <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            {t.instructions}
+                                        </p>
+
+                                        {t.file_url && (
+                                            <div className="pt-2 flex justify-end">
+                                                <a
+                                                    href={t.file_url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="inline-flex items-center gap-1 text-[11px] text-indigo-600 font-semibold hover:underline"
+                                                >
+                                                    <ExternalLink className="w-3 h-3" />
+                                                    Tautan Bahan Ajar
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* TAB: IZIN KELUAR DINAS */}
+            {activeTab === 'izin_dinas' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <Briefcase className="w-5 h-5 text-indigo-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Formulir Izin Keluar Dinas</h3>
+                                <p className="text-[11px] text-slate-500">Permohonan tugas luar sekolah / dinas</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleDutySubmit} className="space-y-3.5 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Tanggal Dinas</label>
+                                <input
+                                    type="date"
+                                    value={dutyData.date}
+                                    onChange={(e) => setDutyData('date', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Mulai</label>
+                                    <input
+                                        type="time"
+                                        value={dutyData.start_time}
+                                        onChange={(e) => setDutyData('start_time', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Selesai</label>
+                                    <input
+                                        type="time"
+                                        value={dutyData.end_time}
+                                        onChange={(e) => setDutyData('end_time', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Tujuan / Lokasi Dinas</label>
+                                <input
+                                    type="text"
+                                    value={dutyData.destination}
+                                    onChange={(e) => setDutyData('destination', e.target.value)}
+                                    placeholder="Contoh: Balai Besar Pengembangan Penjaminan Mutu Pendidikan Vokasi (BBPPMPV)"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Nomor Surat Tugas (Bila Ada)</label>
+                                <input
+                                    type="text"
+                                    value={dutyData.letter_number}
+                                    onChange={(e) => setDutyData('letter_number', e.target.value)}
+                                    placeholder="Contoh: 800/124/SMKN-CADISDIK/2026"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Uraian / Keperluan Tugas</label>
+                                <textarea
+                                    value={dutyData.purpose}
+                                    onChange={(e) => setDutyData('purpose', e.target.value)}
+                                    rows={3}
+                                    placeholder="Contoh: Menghadiri Lokakarya Kurikulum Berbasis Industri dan Uji Kompetensi Keahlian..."
+                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={dutyProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                            >
+                                {dutyProcessing ? 'Mengirimkan...' : 'Kirim Permohonan Izin Dinas'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">Riwayat Permohonan Izin Dinas</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Diverifikasi oleh Tim Manajemen Kurikulum & Kepala Sekolah</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+                                Total: {myDutyLeaves.length} Pengajuan
+                            </span>
+                        </div>
+
+                        {myDutyLeaves.length === 0 ? (
+                            <div className="text-center py-12 text-xs text-slate-400">
+                                <Briefcase className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                <p className="font-medium text-slate-600">Belum ada riwayat izin keluar dinas</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myDutyLeaves.map((d) => (
+                                    <div
+                                        key={d.id}
+                                        className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-slate-900">{d.destination}</span>
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                                    d.status === 'approved'
+                                                        ? 'bg-emerald-100 text-emerald-800'
+                                                        : d.status === 'rejected'
+                                                        ? 'bg-rose-100 text-rose-800'
+                                                        : 'bg-amber-100 text-amber-800'
+                                                }`}>
+                                                    {d.status === 'approved' ? 'Disetujui' : d.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
+                                                </span>
+                                            </div>
+                                            <p className="text-slate-600">{d.purpose}</p>
+                                            <p className="text-slate-400 text-[11px]">
+                                                Tanggal: {d.date} • Pukul: {d.start_time} - {d.end_time} WIB {d.letter_number && `• No: ${d.letter_number}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* TAB: LAPOR SAMPAH / KEBERSIHAN KELAS */}
+            {activeTab === 'lapor_sampah' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <Trash2 className="w-5 h-5 text-rose-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Laporkan Kondisi Kebersihan</h3>
+                                <p className="text-[11px] text-slate-500">Pemberitahuan ruang kelas / lab kotor</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleTrashSubmit} className="space-y-3.5 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Ruang Kelas / Laboratorium</label>
+                                <select
+                                    value={trashData.classroom_id}
+                                    onChange={(e) => setTrashData('classroom_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Sesi Waktu / Jam Pelajaran</label>
+                                <input
+                                    type="text"
+                                    value={trashData.period_time}
+                                    onChange={(e) => setTrashData('period_time', e.target.value)}
+                                    placeholder="Contoh: Jam ke-4 setelah istirahat"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Deskripsi Kondisi / Sampah</label>
+                                <textarea
+                                    value={trashData.quantity_description}
+                                    onChange={(e) => setTrashData('quantity_description', e.target.value)}
+                                    rows={4}
+                                    placeholder="Contoh: Sampah plastik dan kemasan sisa makanan berserakan di bawah meja pojok belakang, papan tulis belum dihapus..."
+                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={trashProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                            >
+                                {trashProcessing ? 'Mengirimkan...' : 'Kirim Laporan Kebersihan'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">Laporan Kebersihan yang Anda Catat</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Diteruskan ke Wali Kelas dan Tim Satgas Ketertiban</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+                                Total: {myTrashReports.length} Laporan
+                            </span>
+                        </div>
+
+                        {myTrashReports.length === 0 ? (
+                            <div className="text-center py-12 text-xs text-slate-400">
+                                <Trash2 className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                <p className="font-medium text-slate-600">Belum ada laporan kebersihan yang dicatat</p>
+                                <p className="text-[11px] mt-1">Ruangan kelas dan laboratorium terjaga bersih.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myTrashReports.map((r) => (
+                                    <div
+                                        key={r.id}
+                                        className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between gap-2 text-xs"
+                                    >
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="font-bold text-slate-900">
+                                                {r.classroom?.name}
+                                            </span>
+                                            <span className="text-[11px] font-mono text-slate-500">
+                                                {r.date} • {r.period_time}
+                                            </span>
+                                        </div>
+                                        <p className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            {r.quantity_description}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -18,6 +18,7 @@ import {
     CheckCircle2,
     Calendar,
     FileText,
+    AlertCircle,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
 
@@ -156,6 +157,48 @@ export default function StudentLayout({
                                             <span>Piket & Kebersihan Lab</span>
                                         </div>
                                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => onTabChange && onTabChange('tugas')}
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            activeTab === 'tugas'
+                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <FileText className="w-4 h-4 shrink-0" />
+                                        <span>Tugas KBM / Jamkos</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => onTabChange && onTabChange('denda')}
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            activeTab === 'denda'
+                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <AlertCircle className="w-4 h-4 shrink-0" />
+                                        <span>Denda Kebersihan Kelas</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => onTabChange && onTabChange('ekskul')}
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            activeTab === 'ekskul'
+                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <Users className="w-4 h-4 shrink-0" />
+                                        <span>Organisasi & Ekskul</span>
                                     </button>
                                 </li>
                                 <li>
