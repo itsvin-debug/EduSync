@@ -37,7 +37,19 @@ export function useRealtimeClock() {
         year: 'numeric',
     }).format(now);
 
-    const academicYear = '2024/2025 Genap';
+    // Dynamic Academic Year calculation
+    // Month is 0-indexed: Jan=0 ... Jul=6 ... Dec=11
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const isOddSemester = currentMonth >= 6; // Month >= July
+
+    const academicYearShort = isOddSemester
+        ? `${currentYear}/${currentYear + 1}`
+        : `${currentYear - 1}/${currentYear}`;
+
+    const semester = isOddSemester ? 'Ganjil' : 'Genap';
+    const academicYear = `${academicYearShort} ${semester}`;
+    const academicYearFull = `${academicYearShort} Semester ${semester}`;
 
     return {
         now,
@@ -49,6 +61,10 @@ export function useRealtimeClock() {
         dayName,
         dateFormatted,
         academicYear,
+        academicYearShort,
+        academicYearFull,
+        semester,
+        isOddSemester,
         isSchoolDay,
         isWeekend,
     };

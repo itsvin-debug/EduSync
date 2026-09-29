@@ -21,6 +21,7 @@ use App\Models\PicketReport;
 use App\Models\TrashReport;
 use App\Models\ClassFine;
 use App\Models\SchoolOrganization;
+use App\Models\StudentLeaveRequest;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -639,10 +640,12 @@ class AdminController extends Controller
     // ==========================================
     public function picket()
     {
-        $picketReports = PicketReport::with(['student', 'classroom', 'validator'])->latest()->get();
+        $picketReports = PicketReport::with(['student', 'submittedBy', 'classroom.department', 'validator'])->latest()->get();
+        $trashReports = TrashReport::with(['teacher', 'classroom.department', 'department'])->latest()->get();
 
         return Inertia::render('Admin/Picket', [
             'picketReports' => $picketReports,
+            'trashReports' => $trashReports,
         ]);
     }
 
@@ -1420,6 +1423,10 @@ class AdminController extends Controller
             $user->teacher->update(['status' => 'active']);
         }
 
+        if ($user->is_class_leader && $user->classroom_id) {
+            Classroom::where('id', $user->classroom_id)->update(['class_leader_id' => $user->id]);
+        }
+
         $this->logAction('USER_APPROVED', "Admin menyetujui akun {$user->role} untuk {$user->name} ({$user->email})");
 
         return back()->with('success', "Akun {$user->name} ({$user->role}) berhasil diverifikasi dan kini aktif.");
@@ -1452,5 +1459,141 @@ class AdminController extends Controller
         $this->logAction('USER_REJECTED', "Admin menolak permohonan akun {$user->role} untuk {$user->name} ({$user->email})");
 
         return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
+    }
+
+    // ==========================================
+    // 15. MASTER ATTENDANCE & LEAVE MANAGEMENT OVERRIDE
+    // ==========================================
+    public function overrideAttendance(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:hadir,sakit,izin,alpha,dispensasi',
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $attendance = StudentAttendance::with(['student', 'classroom'])->findOrFail($id);
+        $oldStatus = $attendance->status;
+
+        $attendance->update([
+            'status' => $validated['status'],
+            'notes' => $validated['notes'] ?? "Status di-override oleh Admin Kurikulum (sebelumnya: {$oldStatus})",
+            'is_locked' => true,
+            'overridden_by_admin' => true,
+        ]);
+
+        $this->logAction(
+            'ATTENDANCE_OVERRIDE',
+            "Admin meng-override presensi {$attendance->student?->name} ({$attendance->classroom?->name}) dari '{$oldStatus}' menjadi '{$validated['status']}'"
+        );
+
+        return back()->with('success', "Presensi siswa {$attendance->student?->name} berhasil diperbarui menjadi " . ucfirst($validated['status']));
+    }
+
+    public function approveStudentLeave(Request $request, $id)
+    {
+        $leave = StudentLeaveRequest::with(['student', 'classroom'])->findOrFail($id);
+        $leave->update([
+            'status' => 'approved',
+            'reviewed_by_user_id' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        // Auto-sync into student_attendances table for date range
+        $start = Carbon::parse($leave->start_date);
+        $end = Carbon::parse($leave->end_date);
+        $status = in_array($leave->type, ['sakit', 'izin', 'dispensasi']) ? $leave->type : 'izin';
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            if ($date->isWeekend()) continue;
+
+            StudentAttendance::updateOrCreate(
+                [
+                    'user_id' => $leave->student_id,
+                    'date' => $date->toDateString(),
+                ],
+                [
+                    'classroom_id' => $leave->classroom_id,
+                    'submitted_by_user_id' => auth()->id(),
+                    'status' => $status,
+                    'notes' => "Surat {$leave->type} disetujui Admin Kurikulum: " . ($leave->notes ?? '-'),
+                    'submitted_time' => now()->format('H:i') . ' WIB',
+                    'is_locked' => true,
+                    'overridden_by_admin' => true,
+                ]
+            );
+        }
+
+        $this->logAction('STUDENT_LEAVE_APPROVED', "Admin menyetujui surat {$leave->type} untuk {$leave->student?->name}");
+
+        return back()->with('success', "Permohonan {$leave->type} siswa {$leave->student?->name} berhasil disetujui & presensi otomatis diperbarui.");
+    }
+
+    public function rejectStudentLeave(Request $request, $id)
+    {
+        $leave = StudentLeaveRequest::with('student')->findOrFail($id);
+        $leave->update([
+            'status' => 'rejected',
+            'reviewed_by_user_id' => auth()->id(),
+            'rejection_note' => $request->input('notes', 'Bukti surat izin tidak memenuhi kriteria.'),
+            'reviewed_at' => now(),
+        ]);
+
+        $this->logAction('STUDENT_LEAVE_REJECTED', "Admin menolak permohonan {$leave->type} untuk {$leave->student?->name}");
+
+        return back()->with('success', "Permohonan izin siswa telah ditolak.");
+    }
+
+    public function toggleClassLeader(Request $request, $id)
+    {
+        $user = User::where('role', 'siswa')->findOrFail($id);
+        $newStatus = !$user->is_class_leader;
+
+        $user->update([
+            'is_class_leader' => $newStatus,
+            'sub_role' => $newStatus ? 'Ketua Kelas' : 'Siswa',
+        ]);
+
+        if ($user->classroom_id) {
+            $classroom = Classroom::find($user->classroom_id);
+            if ($classroom) {
+                if ($newStatus) {
+                    User::where('classroom_id', $classroom->id)
+                        ->where('id', '!=', $user->id)
+                        ->where('is_class_leader', true)
+                        ->update(['is_class_leader' => false, 'sub_role' => 'Siswa']);
+
+                    $classroom->update(['class_leader_id' => $user->id]);
+                } else if ($classroom->class_leader_id == $user->id) {
+                    $classroom->update(['class_leader_id' => null]);
+                }
+            }
+        }
+
+        $actionText = $newStatus ? 'diangkat sebagai Ketua Kelas' : 'dilepas dari status Ketua Kelas';
+        $this->logAction('CLASS_LEADER_TOGGLED', "Admin mengubah status {$user->name}: {$actionText}");
+
+        return back()->with('success', "Status {$user->name} berhasil {$actionText}.");
+    }
+
+    public function assignClassroomLeaders(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
+            'class_leader_id' => 'nullable|exists:users,id',
+        ]);
+
+        $classroom = Classroom::findOrFail($id);
+        $classroom->update($validated);
+
+        if (!empty($validated['class_leader_id'])) {
+            User::where('id', $validated['class_leader_id'])->update([
+                'is_class_leader' => true,
+                'sub_role' => 'Ketua Kelas',
+            ]);
+        }
+
+        $this->logAction('CLASSROOM_LEADERS_ASSIGNED', "Admin memperbarui Wali Kelas & Ketua Kelas untuk {$classroom->name}");
+
+        return back()->with('success', "Penetapan Wali Kelas dan Ketua Kelas untuk {$classroom->name} berhasil disimpan.");
     }
 }

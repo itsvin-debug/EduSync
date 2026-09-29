@@ -21,6 +21,7 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
+import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 
 export default function StudentLayout({
     children,
@@ -29,13 +30,18 @@ export default function StudentLayout({
     classroom,
     activeTab,
     onTabChange,
+    isClassLeader: propIsClassLeader,
 }) {
     const { auth } = usePage().props;
+    const clock = useRealtimeClock();
     const currentStudent = student || auth?.user || {
         name: 'Muhammad Farhan',
         nisn: '006841289',
         sub_role: 'Siswa',
     };
+    const isClassLeader = propIsClassLeader !== undefined
+        ? Boolean(propIsClassLeader)
+        : Boolean(currentStudent.is_class_leader || currentStudent.sub_role === 'Ketua Kelas');
     const currentClass = classroom || auth?.user?.classroom || {
         name: 'XI PPLG 1',
         department: { name: 'Rekayasa Perangkat Lunak' },
@@ -136,12 +142,78 @@ export default function StudentLayout({
                             </ul>
                         </div>
 
+                        {/* Section: PRESENSI & PERIZINAN */}
+                        <div>
+                            <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                                <span>{isClassLeader ? 'Presensi & Perizinan' : 'Perizinan Siswa'}</span>
+                                {isClassLeader && (
+                                    <span className="text-[9px] bg-amber-400/20 text-amber-300 font-semibold px-1.5 py-0.2 rounded border border-amber-400/30">
+                                        Ketua Kelas
+                                    </span>
+                                )}
+                            </div>
+                            <ul className="space-y-1">
+                                {isClassLeader && (
+                                    <li>
+                                        <button
+                                            type="button"
+                                            onClick={() => onTabChange && onTabChange('absensi')}
+                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                                activeTab === 'absensi'
+                                                    ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2.5">
+                                                <ShieldCheck className="w-4 h-4 shrink-0 text-amber-300" />
+                                                <span>Presensi Harian Kelas</span>
+                                            </div>
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">
+                                                13:00
+                                            </span>
+                                        </button>
+                                    </li>
+                                )}
+
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => onTabChange && onTabChange('izin')}
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            activeTab === 'izin'
+                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <Calendar className="w-4 h-4 shrink-0 text-sky-400" />
+                                        <span>Pengajuan Izin / Sakit</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
                         {/* Section: AKADEMIK & KEJURUAN */}
                         <div>
                             <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                 Akademik & Kejuruan
                             </div>
                             <ul className="space-y-1">
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => onTabChange && onTabChange('tugas')}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            activeTab === 'tugas'
+                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
+                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2.5">
+                                            <FileText className="w-4 h-4 shrink-0" />
+                                            <span>{isClassLeader ? 'Tugas Guru Pengganti' : 'Tugas KBM / Jamkos'}</span>
+                                        </div>
+                                    </button>
+                                </li>
                                 <li>
                                     <button
                                         type="button"
@@ -154,23 +226,9 @@ export default function StudentLayout({
                                     >
                                         <div className="flex items-center gap-2.5">
                                             <CheckSquare className="w-4 h-4 shrink-0" />
-                                            <span>Piket & Kebersihan Lab</span>
+                                            <span>{isClassLeader ? 'Verifikasi Piket Kelas' : 'Piket & Kebersihan Lab'}</span>
                                         </div>
                                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        type="button"
-                                        onClick={() => onTabChange && onTabChange('tugas')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                            activeTab === 'tugas'
-                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
-                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                                        }`}
-                                    >
-                                        <FileText className="w-4 h-4 shrink-0" />
-                                        <span>Tugas KBM / Jamkos</span>
                                     </button>
                                 </li>
                                 <li>
@@ -287,13 +345,13 @@ export default function StudentLayout({
                     <div className="flex items-center gap-3 shrink-0">
                         {/* Semester Badge */}
                         <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
-                            Semester Genap 2024/2025
+                            {clock.semester} {clock.academicYear}
                         </span>
 
                         {/* Hadir Status Pill */}
                         <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>Hadir Tepat Waktu</span>
+                            <span>{isClassLeader ? 'Ketua Kelas Aktif' : 'Hadir Tepat Waktu'}</span>
                         </div>
 
                         {/* Quick Switcher */}
@@ -325,7 +383,7 @@ export default function StudentLayout({
                                     {currentStudent.name}
                                 </span>
                                 <span className="text-[10px] text-slate-500 font-mono">
-                                    {currentClass.name}
+                                    {currentClass.name} {isClassLeader && '• Ketua Kelas'}
                                 </span>
                             </div>
                         </div>
@@ -344,7 +402,7 @@ export default function StudentLayout({
                             <span className="font-semibold text-slate-800">EDUSYNC</span> • Portal Akademik & Jadwal SMK Negeri 1 Rekayasa Teknologi
                         </div>
                         <div className="flex items-center gap-3 text-slate-400 text-[11px]">
-                            <span>Tahun Ajaran 2024/2025 Genap</span>
+                            <span>Tahun Ajaran {clock.academicYear} • {clock.semester}</span>
                             <span>•</span>
                             <span className="text-emerald-600 font-medium">Validasi Dapodik 100%</span>
                         </div>

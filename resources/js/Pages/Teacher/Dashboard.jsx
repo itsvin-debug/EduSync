@@ -28,6 +28,9 @@ import {
     Trash2,
     ExternalLink,
     FileText,
+    Send,
+    UserCheck,
+    UserX,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -47,11 +50,20 @@ export default function Dashboard({
     myDutyLeaves = [],
     myTrashReports = [],
     subjects = [],
+    departments = [],
+    classLeaders = [],
+    studentLeaveRequests = [],
+    attendanceMetrics = { hadir: 0, sakit: 0, izin: 0, dispensasi: 0, alpha: 0, total: 0 },
+    selectedClassAttendances = [],
+    selectedClassStudents = [],
 }) {
-    const [activeTab, setActiveTab] = useState('workspace'); // 'workspace', 'personal', 'presensi', 'tugas', 'izin_dinas', 'piket', 'lapor_sampah', 'master', 'inval'
+    // Tabs: workspace, personal, presensi_kelas, perizinan_siswa, tugas, presensi, izin_dinas, picket, lapor_sampah, master, inval
+    const [activeTab, setActiveTab] = useState('workspace');
     const [selectedWeeklyDay, setSelectedWeeklyDay] = useState('Senin');
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
+    const [selectedProofModal, setSelectedProofModal] = useState(null);
 
+    // Inval swap form
     const { data: swapData, setData: setSwapData, post: postSwap, reset: resetSwap, processing: swapProcessing, errors: swapErrors } = useForm({
         schedule_id: personalSchedules[0]?.id || '',
         substitute_teacher_id: allTeachers[0]?.id || '',
@@ -60,7 +72,7 @@ export default function Dashboard({
         notes: '',
     });
 
-    // Attendance check-in form
+    // Attendance check-in form for teacher
     const {
         data: attendanceData,
         setData: setAttendanceData,
@@ -76,7 +88,7 @@ export default function Dashboard({
         postAttendance('/guru/attendance/check-in');
     };
 
-    // Learning Task form
+    // Learning Task Delegation form with Dynamic Class Leader Dropdown
     const {
         data: taskData,
         setData: setTaskData,
@@ -85,6 +97,7 @@ export default function Dashboard({
         processing: taskProcessing,
     } = useForm({
         classroom_id: classrooms[0]?.id || '',
+        class_leader_id: classLeaders[0]?.id || '',
         subject_id: subjects[0]?.id || '',
         period_start: 1,
         period_end: 3,
@@ -93,10 +106,17 @@ export default function Dashboard({
         file_url: '',
     });
 
+    const filteredClassLeaders = classLeaders.filter(
+        (cl) => !taskData.classroom_id || String(cl.classroom_id) === String(taskData.classroom_id)
+    );
+
     const handleTaskSubmit = (e) => {
         e.preventDefault();
         postTask('/guru/learning-tasks', {
-            onSuccess: () => resetTask(),
+            onSuccess: () => {
+                resetTask();
+                alert('Tugas mandiri berhasil didelegasikan langsung ke portal Ketua Kelas & tercatat di Admin.');
+            },
         });
     };
 
@@ -123,7 +143,7 @@ export default function Dashboard({
         });
     };
 
-    // Trash Report form
+    // Enhanced Trash Report form with multi-photos, department, and location tag
     const {
         data: trashData,
         setData: setTrashData,
@@ -132,14 +152,20 @@ export default function Dashboard({
         processing: trashProcessing,
     } = useForm({
         classroom_id: classrooms[0]?.id || '',
+        department_id: departments[0]?.id || '',
+        location_tag: '',
         quantity_description: '',
         period_time: 'Jam ke-4',
+        photos: [],
     });
 
     const handleTrashSubmit = (e) => {
         e.preventDefault();
         postTrash('/guru/trash-reports', {
-            onSuccess: () => resetTrash(),
+            onSuccess: () => {
+                resetTrash();
+                alert('Laporan kebersihan & sampah berhasil dikirimkan ke Admin dan diteruskan ke sistem denda.');
+            },
         });
     };
 
@@ -161,15 +187,32 @@ export default function Dashboard({
         router.post(`/guru/picket/${id}/verify`, { status });
     };
 
-    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-    const pendingPicketCount = picketReports.filter(p => p.status === 'pending').length;
-    const weeklyDaySchedules = personalSchedules.filter(s => s.day === selectedWeeklyDay);
+    // Student Leave Approval Actions (Auto-syncs student attendance!)
+    const handleApproveLeave = (leaveId) => {
+        if (confirm('Setujui permohonan izin ini? Status kehadiran siswa pada kelas akan otomatis terisi (Auto-Sync).')) {
+            router.post(`/guru/student-leaves/${leaveId}/approve`, {}, {
+                preserveScroll: true,
+                onSuccess: () => alert('Permohonan izin disetujui & presensi siswa otomatis diperbarui!'),
+            });
+        }
+    };
 
-    const totalTeachingHours = personalSchedules.reduce((acc, s) => acc + (s.period_end - s.period_start + 1), 0);
-    const uniqueClassCount = new Set(personalSchedules.map(s => s.classroom_id)).size;
+    const handleRejectLeave = (leaveId) => {
+        const note = prompt('Masukkan alasan penolakan izin (opsional):', 'Bukti surat dokter tidak jelas atau tidak memenuhi kriteria.');
+        if (note !== null) {
+            router.post(`/guru/student-leaves/${leaveId}/reject`, { notes: note }, {
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+    const pendingPicketCount = picketReports.filter((p) => p.status === 'pending').length;
+    const pendingStudentLeaves = studentLeaveRequests.filter((l) => l.status === 'pending');
+    const weeklyDaySchedules = personalSchedules.filter((s) => s.day === selectedWeeklyDay);
 
     // Real-time schedule engine for teacher
-    const { clock, engineState, nextSlot, getPeriodStatus } = useScheduleEngine(personalSchedules);
+    const { clock, engineState } = useScheduleEngine(personalSchedules);
 
     return (
         <TeacherLayout teacher={teacher} title="Ruang Kerja & Jadwal Mengajar" activeTab={activeTab} onTabChange={setActiveTab}>
@@ -188,7 +231,7 @@ export default function Dashboard({
                                 {clock.timeString}
                             </span>
                             <span className="text-xs text-slate-400 font-medium">
-                                {clock.dateFormatted} • TA {clock.academicYear}
+                                {clock.dateFormatted} • TA {clock.academicYear} ({clock.semester})
                             </span>
                             <span className="text-xs text-indigo-300 font-medium">NIP: {teacher?.nip || '-'}</span>
                         </div>
@@ -198,301 +241,665 @@ export default function Dashboard({
                                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
                                     {engineState.activeSlot.classroom?.name} — {engineState.activeSlot.subject?.name}
                                 </h1>
-                                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 mt-2.5">
-                                    <div className="flex items-center gap-1.5">
-                                        <MapPin className="w-4 h-4 text-indigo-400" />
-                                        <span className="font-medium text-white">{engineState.activeSlot.room?.name || 'Ruang Teori'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock className="w-4 h-4 text-indigo-400" />
-                                        <span>Jam ke-{engineState.activeSlot.period_start} s/d {engineState.activeSlot.period_end}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 font-mono text-emerald-300">
-                                        <span>Sisa Mengajar: {engineState.countdownFormatted}</span>
-                                    </div>
-                                </div>
-                                <div className="w-full max-w-md bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
-                                    <div
-                                        className="bg-emerald-400 h-full rounded-full transition-all duration-1000"
-                                        style={{ width: `${engineState.progressPercent}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ) : engineState.state === 'BREAK_TIME' ? (
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-amber-300">
-                                    {engineState.label}
-                                </h1>
-                                <p className="text-xs text-slate-300 mt-1 flex items-center gap-1.5">
-                                    <Coffee className="w-4 h-4 text-amber-400" />
-                                    <span>Waktu Istirahat Guru & Siswa • Sisa waktu: {engineState.countdownFormatted}</span>
-                                </p>
-                            </div>
-                        ) : engineState.state === 'WEEKEND_HOLIDAY' ? (
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-white">
-                                    Libur Akhir Pekan
-                                </h1>
-                                <p className="text-xs text-slate-400 mt-1">
-                                    Kegiatan belajar mengajar dimulai kembali hari Senin pukul 06:30.
+                                <p className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                                    <span>
+                                        {engineState.activeSlot.room?.name || 'Ruang Teori'} • Jam ke-
+                                        {engineState.activeSlot.period_start} s/d {engineState.activeSlot.period_end}
+                                    </span>
                                 </p>
                             </div>
                         ) : (
                             <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-white">
-                                    Tidak Ada Jam Mengajar Berlangsung Saat Ini
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                                    {engineState.label}
                                 </h1>
-                                <p className="text-xs text-slate-400 mt-1">
-                                    {nextSlot ? `Sesi mengajar berikutnya: ${nextSlot.classroom?.name} (${nextSlot.subject?.name}) jam ke-${nextSlot.period_start}` : 'Waktu luang dapat digunakan untuk persiapan modul ajar atau pemeriksaan evaluasi siswa.'}
+                                <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                                    {engineState.sublabel}
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2">
                         <button
-                            onClick={() => setIsSwapModalOpen(true)}
+                            onClick={() => setActiveTab('presensi_kelas')}
                             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors"
                         >
-                            <ArrowLeftRight className="w-4 h-4 text-indigo-200" />
-                            <span>Ajukan Tukar Jam (Inval)</span>
+                            <Users className="w-4 h-4" />
+                            <span>Pantau Presensi Siswa</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('tugas')}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-colors"
+                        >
+                            <ClipboardList className="w-4 h-4 text-amber-300" />
+                            <span>Delegasi Tugas Ketua Kelas</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* 4 OPERATIONAL METRICS GRID (Stitch Screen 5) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            Beban Jam Mengajar
-                        </span>
-                        <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <Clock className="w-4 h-4" />
-                        </div>
+            {/* 1. REAL-TIME AGGREGATE CLASS ATTENDANCE METRICS CARD */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                            <span>Metrik Agregat Kehadiran Siswa Kelas Bimbingan Hari Ini</span>
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            Data terupdate otomatis saat Ketua Kelas menyetorkan presensi harian
+                        </p>
                     </div>
-                    <div className="my-2">
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold font-mono text-slate-900">{totalTeachingHours || personalSchedules.length * 3} JP</span>
-                            <span className="text-xs font-semibold text-emerald-600">100% Linear</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">Alokasi Mingguan Terjadwal</p>
-                    </div>
-                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                        <span>Standar Guru: 24-32 JP</span>
-                        <span className="text-emerald-600 font-medium">Terpenuhi</span>
-                    </div>
+                    <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
+                        {attendanceMetrics.total} Total Siswa Terdata
+                    </span>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            Kelas Diampu
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                        <span className="text-[10px] uppercase font-bold text-emerald-700">Hadir</span>
+                        <div className="text-2xl font-bold font-mono text-emerald-800 mt-0.5">{attendanceMetrics.hadir}</div>
+                        <span className="text-[10px] text-emerald-600">
+                            {attendanceMetrics.total ? Math.round((attendanceMetrics.hadir / attendanceMetrics.total) * 100) : 0}%
                         </span>
-                        <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <Users className="w-4 h-4" />
-                        </div>
                     </div>
-                    <div className="my-2">
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold font-mono text-slate-900">{uniqueClassCount || 4} Rombel</span>
-                            <span className="text-xs font-semibold text-indigo-600">Kejuruan</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">Tingkat X, XI, & XII</p>
+
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                        <span className="text-[10px] uppercase font-bold text-amber-700">Sakit</span>
+                        <div className="text-2xl font-bold font-mono text-amber-800 mt-0.5">{attendanceMetrics.sakit}</div>
+                        <span className="text-[10px] text-amber-600">Surat Dokter</span>
                     </div>
-                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                        <span>Konsentrasi Keahlian</span>
-                        <button onClick={() => setActiveTab('master')} className="text-indigo-600 font-semibold hover:underline">
-                            Cek Rombel ›
-                        </button>
+
+                    <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-center">
+                        <span className="text-[10px] uppercase font-bold text-sky-700">Izin</span>
+                        <div className="text-2xl font-bold font-mono text-sky-800 mt-0.5">{attendanceMetrics.izin}</div>
+                        <span className="text-[10px] text-sky-600">Disetujui Guru</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center">
+                        <span className="text-[10px] uppercase font-bold text-indigo-700">Dispensasi</span>
+                        <div className="text-2xl font-bold font-mono text-indigo-800 mt-0.5">{attendanceMetrics.dispensasi}</div>
+                        <span className="text-[10px] text-indigo-600">Lomba / Dinas</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center col-span-2 sm:col-span-1">
+                        <span className="text-[10px] uppercase font-bold text-rose-700">Alpa</span>
+                        <div className="text-2xl font-bold font-mono text-rose-800 mt-0.5">{attendanceMetrics.alpha}</div>
+                        <span className="text-[10px] text-rose-600">Tanpa Keterangan</span>
                     </div>
                 </div>
+            </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            Verifikasi Piket Siswa
-                        </span>
-                        <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                            <CheckCircle2 className="w-4 h-4" />
+            {/* TAB: PRESENSI SISWA REAL-TIME (LIVE CLASS ATTENDANCE MONITORING) */}
+            {activeTab === 'presensi_kelas' && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-base">Monitoring Presensi Siswa per Rombel</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Pantau daftar presensi live siswa sebelum dan sesudah diserahkan oleh Ketua Kelas
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 font-medium">Pilih Kelas:</span>
+                            <select
+                                value={selectedClassroomId}
+                                onChange={(e) => handleLookupClassChange(e.target.value)}
+                                className="h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                            >
+                                {classrooms.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name} ({c.department?.name || 'Kejuruan'})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
-                    <div className="my-2">
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold font-mono text-slate-900">{pendingPicketCount} Laporan</span>
-                            <span className={`text-xs font-semibold ${pendingPicketCount > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                {pendingPicketCount > 0 ? 'Menunggu Verifikasi' : 'Semua Bersih'}
+
+                    {selectedClassStudents.length === 0 ? (
+                        <div className="py-12 text-center text-xs text-slate-400">
+                            Tidak ada siswa terdaftar pada rombel ini.
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto rounded-xl border border-slate-200">
+                            <table className="w-full text-left text-xs border-collapse min-w-[650px]">
+                                <thead>
+                                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                                        <th className="py-3 px-3 w-12 text-center">No</th>
+                                        <th className="py-3 px-4">Nama Siswa & NISN</th>
+                                        <th className="py-3 px-4 text-center">Status Hari Ini</th>
+                                        <th className="py-3 px-4">Waktu Input & Petugas</th>
+                                        <th className="py-3 px-4">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {selectedClassStudents.map((st, idx) => {
+                                        const att = selectedClassAttendances.find((a) => a.user_id === st.id);
+                                        const status = att?.status || 'Belum Dicatat';
+
+                                        return (
+                                            <tr key={st.id} className="hover:bg-slate-50/60 transition-colors">
+                                                <td className="py-3 px-3 text-center font-mono text-slate-400">{idx + 1}</td>
+                                                <td className="py-3 px-4">
+                                                    <div className="font-bold text-slate-900">{st.name}</div>
+                                                    <div className="text-[11px] font-mono text-slate-400">NISN: {st.nisn || '-'}</div>
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
+                                                        status === 'hadir'
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                            : status === 'sakit'
+                                                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                            : status === 'izin'
+                                                            ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                                            : status === 'dispensasi'
+                                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                                            : status === 'alpha'
+                                                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                            : 'bg-slate-100 text-slate-500 border-slate-200'
+                                                    }`}>
+                                                        {status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    {att ? (
+                                                        <>
+                                                            <div className="font-mono text-slate-800">{att.submitted_time || 'Sebelum 13:00'}</div>
+                                                            <div className="text-[11px] text-slate-400">Ketua Kelas / Guru</div>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-slate-400 italic">Menunggu input Ketua Kelas</span>
+                                                    )}
+                                                </td>
+                                                <td className="py-3 px-4 text-slate-600">
+                                                    {att?.notes || '-'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* TAB: VERIFIKASI IZIN & SURAT SAKIT SISWA */}
+            {activeTab === 'perizinan_siswa' && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-base">Verifikasi Surat Izin / Sakit Siswa</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Setujui (ACC) atau tolak surat izin siswa. Persetujuan otomatis menyinkronkan status presensi kelas tanpa input manual.
+                            </p>
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                            {pendingStudentLeaves.length} Menunggu Persetujuan
+                        </span>
+                    </div>
+
+                    {studentLeaveRequests.length === 0 ? (
+                        <div className="py-12 text-center text-xs text-slate-400">
+                            Belum ada permohonan surat izin / sakit siswa yang diajukan.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {studentLeaveRequests.map((leave) => (
+                                <div
+                                    key={leave.id}
+                                    className="p-5 rounded-xl border border-slate-200 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs"
+                                >
+                                    <div className="space-y-1.5 max-w-xl">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-bold text-slate-900 text-sm">{leave.student?.name}</span>
+                                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                                {leave.classroom?.name || leave.student?.classroom?.name}
+                                            </span>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                                leave.type === 'sakit'
+                                                    ? 'bg-amber-100 text-amber-800'
+                                                    : leave.type === 'izin'
+                                                    ? 'bg-sky-100 text-sky-800'
+                                                    : 'bg-indigo-100 text-indigo-800'
+                                            }`}>
+                                                {leave.type}
+                                            </span>
+                                            <span className="text-slate-400 font-mono text-[11px]">
+                                                {leave.start_date} s/d {leave.end_date}
+                                            </span>
+                                        </div>
+
+                                        <p className="text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            "{leave.notes}"
+                                        </p>
+
+                                        {leave.proof_image_path && (
+                                            <div>
+                                                <button
+                                                    onClick={() => setSelectedProofModal(`/storage/${leave.proof_image_path}`)}
+                                                    className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 font-semibold hover:underline"
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <span>Lihat Bukti Foto Surat Dokter</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {leave.status === 'pending' ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleApproveLeave(leave.id)}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors"
+                                                >
+                                                    <Check className="w-4 h-4" />
+                                                    <span>Setujui (Auto-Sync)</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRejectLeave(leave.id)}
+                                                    className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                                >
+                                                    Tolak
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                                                leave.status === 'approved'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                                            }`}>
+                                                {leave.status === 'approved' ? 'Telah Disetujui (ACC)' : 'Ditolak'}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* TAB: DELEGASI TUGAS KBM & KETUA KELAS */}
+            {activeTab === 'tugas' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <ClipboardList className="w-5 h-5 text-indigo-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Delegasikan Tugas ke Ketua Kelas</h3>
+                                <p className="text-[11px] text-slate-500">Kirim tugas mandiri saat dinas luar / inval</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleTaskSubmit} className="space-y-3.5 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Rombongan Belajar (Kelas)</label>
+                                <select
+                                    value={taskData.classroom_id}
+                                    onChange={(e) => {
+                                        const cId = e.target.value;
+                                        setTaskData('classroom_id', cId);
+                                        const matchingLeader = classLeaders.find((cl) => String(cl.classroom_id) === String(cId));
+                                        if (matchingLeader) {
+                                            setTaskData('class_leader_id', matchingLeader.id);
+                                        }
+                                    }}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Dynamic Class Leader Dropdown */}
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">
+                                    Penerima Tugas: Ketua Kelas Terdaftar
+                                </label>
+                                <select
+                                    value={taskData.class_leader_id}
+                                    onChange={(e) => setTaskData('class_leader_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 font-medium"
+                                    required
+                                >
+                                    {filteredClassLeaders.length > 0 ? (
+                                        filteredClassLeaders.map((cl) => (
+                                            <option key={cl.id} value={cl.id}>
+                                                ⭐ {cl.name} ({cl.classroom?.name || 'Ketua Kelas'})
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="">Belum ada Ketua Kelas terdaftar di kelas ini</option>
+                                    )}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Mata Pelajaran</label>
+                                <select
+                                    value={taskData.subject_id}
+                                    onChange={(e) => setTaskData('subject_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {subjects.map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Awal)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={taskData.period_start}
+                                        onChange={(e) => setTaskData('period_start', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Akhir)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={taskData.period_end}
+                                        onChange={(e) => setTaskData('period_end', e.target.value)}
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Judul Tugas / Modul</label>
+                                <input
+                                    type="text"
+                                    value={taskData.title}
+                                    onChange={(e) => setTaskData('title', e.target.value)}
+                                    placeholder="Contoh: Praktikum CRUD Database & Refactor API"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Instruksi Lengkap Pengerjaan</label>
+                                <textarea
+                                    value={taskData.instructions}
+                                    onChange={(e) => setTaskData('instructions', e.target.value)}
+                                    rows={4}
+                                    placeholder="Tuliskan petunjuk pengerjaan tugas, target capaian praktikum, dan format pengumpulan..."
+                                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Tautan Lampiran / Google Drive (Opsional)</label>
+                                <input
+                                    type="url"
+                                    value={taskData.file_url}
+                                    onChange={(e) => setTaskData('file_url', e.target.value)}
+                                    placeholder="https://drive.google.com/..."
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={taskProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
+                            >
+                                <Send className="w-3.5 h-3.5" />
+                                <span>{taskProcessing ? 'Mendelegasikan...' : 'Kirim Tugas ke Ketua Kelas'}</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2 space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">Tugas yang Anda Delegasikan</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Diteruskan langsung ke portal Ketua Kelas & tercatat di Admin</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {myLearningTasks.length} Tugas Didelegasikan
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">Kebersihan Lab & Bengkel</p>
-                    </div>
-                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                        <span>Foto Siswa Terkini</span>
-                        <button onClick={() => setActiveTab('piket')} className="text-amber-600 font-semibold hover:underline">
-                            Periksa Foto ›
-                        </button>
+
+                        {myLearningTasks.length === 0 ? (
+                            <div className="text-center py-12 text-xs text-slate-400">
+                                <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                <p className="font-medium text-slate-600">Belum ada tugas yang didelegasikan</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myLearningTasks.map((t) => (
+                                    <div
+                                        key={t.id}
+                                        className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between gap-2"
+                                    >
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                                {t.classroom?.name} • {t.subject?.name}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                                    t.status === 'completed'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : t.status === 'in_progress'
+                                                        ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                }`}>
+                                                    {t.status === 'completed' ? 'Selesai' : t.status === 'in_progress' ? 'Dikerjakan' : 'Baru'}
+                                                </span>
+                                                <span className="text-slate-400 font-mono text-[11px]">
+                                                    Jam {t.period_start}-{t.period_end}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <h4 className="font-bold text-slate-900 text-sm">{t.title}</h4>
+                                        <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            {t.instructions}
+                                        </p>
+                                        {t.class_leader && (
+                                            <div className="text-[11px] text-slate-500">
+                                                Penerima: <strong>{t.class_leader.name}</strong> (Ketua Kelas)
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
+            )}
 
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            Disposisi Inval
-                        </span>
-                        <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <ArrowLeftRight className="w-4 h-4" />
+            {/* TAB: LAPOR SAMPAH & KEBERSIHAN KELAS */}
+            {activeTab === 'lapor_sampah' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                            <Trash2 className="w-5 h-5 text-rose-600" />
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-sm">Lapor Kebersihan & Sampah Kelas</h3>
+                                <p className="text-[11px] text-slate-500">Kirim laporan langsung ke Admin & Satgas</p>
+                            </div>
                         </div>
+
+                        <form onSubmit={handleTrashSubmit} className="space-y-3.5 text-xs">
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Ruang Kelas / Laboratorium</label>
+                                <select
+                                    value={trashData.classroom_id}
+                                    onChange={(e) => setTrashData('classroom_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    required
+                                >
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Jurusan / Departemen Terkait</label>
+                                <select
+                                    value={trashData.department_id}
+                                    onChange={(e) => setTrashData('department_id', e.target.value)}
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                >
+                                    <option value="">Semua Jurusan</option>
+                                    {departments.map((d) => (
+                                        <option key={d.id} value={d.id}>
+                                            {d.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Tag Lokasi Spesifik</label>
+                                <input
+                                    type="text"
+                                    value={trashData.location_tag}
+                                    onChange={(e) => setTrashData('location_tag', e.target.value)}
+                                    placeholder="Contoh: Depan Lab RPL 2 / Dekat Tangga Lantai 2"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Sesi Waktu / Jam Pelajaran</label>
+                                <input
+                                    type="text"
+                                    value={trashData.period_time}
+                                    onChange={(e) => setTrashData('period_time', e.target.value)}
+                                    placeholder="Contoh: Jam ke-4 setelah istirahat"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">Deskripsi Kondisi & Sampah</label>
+                                <textarea
+                                    value={trashData.quantity_description}
+                                    onChange={(e) => setTrashData('quantity_description', e.target.value)}
+                                    rows={3}
+                                    placeholder="Contoh: Banyak sampah plastik sisa makanan di bawah meja baris belakang, papan tulis belum dihapus..."
+                                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-rose-500"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1">
+                                    Unggah Multi-Foto Bukti Sampah
+                                </label>
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => setTrashData('photos', Array.from(e.target.files))}
+                                    className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 cursor-pointer"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={trashProcessing}
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>{trashProcessing ? 'Mengirimkan...' : 'Kirim Laporan Sampah'}</span>
+                            </button>
+                        </form>
                     </div>
-                    <div className="my-2">
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-bold font-mono text-slate-900">{invalRequests.length} Pengajuan</span>
-                            <span className="text-xs font-semibold text-slate-600">Semester Ini</span>
+
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2 space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base">Laporan Kebersihan yang Anda Kirim</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Diteruskan ke Wali Kelas dan Admin untuk penerbitan denda kebersihan</p>
+                            </div>
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+                                {myTrashReports.length} Laporan
+                            </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">Penggantian Jam Mengajar</p>
-                    </div>
-                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                        <span>Disetujui Kurikulum</span>
-                        <button onClick={() => setIsSwapModalOpen(true)} className="text-indigo-600 font-semibold hover:underline">
-                            + Ajukan Inval ›
-                        </button>
+
+                        {myTrashReports.length === 0 ? (
+                            <div className="text-center py-12 text-xs text-slate-400">
+                                <Trash2 className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
+                                <p className="font-medium text-slate-600">Belum ada laporan sampah yang dicatat</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {myTrashReports.map((r) => (
+                                    <div
+                                        key={r.id}
+                                        className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between gap-2 text-xs"
+                                    >
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-slate-900">{r.classroom?.name}</span>
+                                                {r.location_tag && (
+                                                    <span className="text-slate-500 font-medium">({r.location_tag})</span>
+                                                )}
+                                            </div>
+                                            <span className="text-[11px] font-mono text-slate-500">
+                                                {r.date} • {r.period_time}
+                                            </span>
+                                        </div>
+                                        <p className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                            {r.quantity_description}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* TAB SELECTOR */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 border-b border-slate-200">
-                <button
-                    onClick={() => setActiveTab('workspace')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'workspace'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Clock className="w-4 h-4" />
-                    <span>Ruang Kerja Hari Ini ({todaySchedules.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('personal')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'personal'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <CalendarDays className="w-4 h-4" />
-                    <span>Jadwal Mingguan ({personalSchedules.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('presensi')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'presensi'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Presensi Guru {todayAttendance ? `(${todayAttendance.status === 'hadir' ? 'Hadir' : 'Izin'})` : '(Belum)'}</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('tugas')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'tugas'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <ClipboardList className="w-4 h-4" />
-                    <span>Tugas KBM / Jamkos ({myLearningTasks.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('izin_dinas')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'izin_dinas'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Briefcase className="w-4 h-4" />
-                    <span>Izin Dinas ({myDutyLeaves.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('piket')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'piket'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Verifikasi Piket</span>
-                    {pendingPicketCount > 0 && (
-                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white font-bold">
-                            {pendingPicketCount}
-                        </span>
-                    )}
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('lapor_sampah')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'lapor_sampah'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Lapor Sampah ({myTrashReports.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('master')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'master'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <BookOpen className="w-4 h-4" />
-                    <span>Cek Rombel Lain</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('inval')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'inval'
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <ArrowLeftRight className="w-4 h-4" />
-                    <span>Inval ({invalRequests.length})</span>
-                </button>
-            </div>
-
-            {/* TAB 1: WORKSPACE HARI INI */}
+            {/* TAB: RUANG KERJA HARI INI */}
             {activeTab === 'workspace' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs lg:col-span-2">
                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                             <div>
-                                <h3 className="font-bold text-slate-900 text-base">Sesi Mengajar Hari Ini ({todayName})</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Daftar kelas yang dijadwalkan untuk Anda ampu hari ini</p>
+                                <h3 className="font-bold text-slate-900 text-base">Jadwal Mengajar Hari Ini ({todayName})</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Sesi KBM yang harus Anda hadiri di kelas/laboratorium</p>
                             </div>
-                            <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
-                                {todaySchedules.length} Sesi
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {todaySchedules.length} Sesi Terjadwal
                             </span>
                         </div>
 
                         {todaySchedules.length === 0 ? (
-                            <div className="text-center py-12 text-xs text-slate-400">
-                                Tidak ada jam mengajar yang dijadwalkan untuk hari ini.
+                            <div className="p-8 text-center text-xs text-slate-400">
+                                Tidak ada jadwal mengajar pada hari {todayName}.
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -527,7 +934,7 @@ export default function Dashboard({
                         )}
                     </div>
 
-                    {/* Duty Quick Card */}
+                    {/* Quick Access Card */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
                         <div>
                             <h3 className="font-bold text-slate-900 text-base mb-2">Tugas Akademik & Piket</h3>
@@ -541,16 +948,22 @@ export default function Dashboard({
                                     <span className="font-bold text-slate-900">{pendingPicketCount} Laporan</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-slate-600">Total Jam Mengajar Mingguan:</span>
-                                    <span className="font-bold text-indigo-700">{personalSchedules.length * 3} JP</span>
+                                    <span className="text-slate-600">Izin Siswa Menunggu:</span>
+                                    <span className="font-bold text-amber-700">{pendingStudentLeaves.length} Permohonan</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-slate-100">
+                        <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
+                            <button
+                                onClick={() => setActiveTab('perizinan_siswa')}
+                                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-xs"
+                            >
+                                Periksa Izin Siswa ({pendingStudentLeaves.length})
+                            </button>
                             <button
                                 onClick={() => setActiveTab('piket')}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-xs"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
                             >
                                 Periksa Laporan Piket Siswa
                             </button>
@@ -559,10 +972,10 @@ export default function Dashboard({
                 </div>
             )}
 
-            {/* TAB 2: JADWAL MINGGUAN PRIBADI */}
+            {/* TAB: JADWAL MINGGUAN PRIBADI */}
             {activeTab === 'personal' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div>
                             <h3 className="font-bold text-slate-900 text-base">Jadwal Mengajar Mingguan Lengkap</h3>
                             <p className="text-xs text-slate-500 mt-0.5">Alokasi seluruh jam mengajar Anda dari Senin sampai Jumat</p>
@@ -594,7 +1007,7 @@ export default function Dashboard({
                             {weeklyDaySchedules.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white shadow-xs transition-all flex flex-col justify-between"
+                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between"
                                 >
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
@@ -609,7 +1022,7 @@ export default function Dashboard({
                                         <p className="text-xs text-slate-700 font-semibold mt-1">{s.subject?.name}</p>
                                     </div>
 
-                                    <div className="mt-4 pt-2.5 border-t border-slate-200/70 text-xs text-slate-500 flex items-center justify-between">
+                                    <div className="mt-4 pt-2.5 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
                                         <div className="flex items-center gap-1">
                                             <MapPin className="w-3.5 h-3.5 text-slate-400" />
                                             <span>{s.room?.name || 'Ruang Teori'}</span>
@@ -622,122 +1035,6 @@ export default function Dashboard({
                 </div>
             )}
 
-            {/* TAB 3: VERIFIKASI PIKET SISWA */}
-            {activeTab === 'piket' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
-                        <div>
-                            <h3 className="font-bold text-slate-900 text-base">Verifikasi Laporan Kebersihan Siswa</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">Periksa catatan dan foto kondisi kelas sebelum menyetujui (ACC)</p>
-                        </div>
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
-                            {pendingPicketCount} Menunggu Verifikasi
-                        </span>
-                    </div>
-
-                    {picketReports.length === 0 ? (
-                        <div className="text-center py-12 text-xs text-slate-400">
-                            Belum ada laporan piket yang disetor siswa.
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {picketReports.map((p) => (
-                                <div
-                                    key={p.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4"
-                                >
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-slate-900 text-sm">{p.classroom?.name}</span>
-                                            <span className="text-slate-400 text-xs">•</span>
-                                            <span className="text-xs text-slate-600">Disetor oleh: <strong>{p.student?.name}</strong></span>
-                                            <span className="text-slate-400 text-xs font-mono text-[11px]">({p.date})</span>
-                                        </div>
-                                        <p className="text-xs text-slate-700 italic">"{p.notes}"</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
-                                            p.status === 'approved'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : p.status === 'rejected'
-                                                ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                                : 'bg-amber-50 text-amber-700 border-amber-200'
-                                        }`}>
-                                            {p.status === 'approved' ? 'Terverifikasi (ACC)' : p.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
-                                        </span>
-
-                                        {p.status === 'pending' && (
-                                            <div className="flex items-center gap-1.5 pl-2">
-                                                <button
-                                                    onClick={() => handleVerifyPicket(p.id, 'approved')}
-                                                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs"
-                                                >
-                                                    Setujui (ACC)
-                                                </button>
-                                                <button
-                                                    onClick={() => handleVerifyPicket(p.id, 'rejected')}
-                                                    className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
-                                                >
-                                                    Tolak
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* TAB 4: CEK JADWAL KELAS LAIN */}
-            {activeTab === 'master' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-                        <div>
-                            <h3 className="font-bold text-slate-900 text-base">Pengecekan Jadwal Kelas Lain (Koordinasi)</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">Lihat jadwal kelas untuk pertukaran jam mengajar</p>
-                        </div>
-
-                        <select
-                            value={selectedClassroomId}
-                            onChange={(e) => handleLookupClassChange(e.target.value)}
-                            className="h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
-                        >
-                            {classrooms.map((c) => (
-                                <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-xs text-left border-collapse min-w-[500px]">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
-                                    <th className="py-2.5 px-3">Hari</th>
-                                    <th className="py-2.5 px-3">Jam Ke</th>
-                                    <th className="py-2.5 px-3">Mata Pelajaran</th>
-                                    <th className="py-2.5 px-3">Pengajar</th>
-                                    <th className="py-2.5 px-3">Ruangan</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {masterClassSchedule.map((item) => (
-                                    <tr key={item.id} className="hover:bg-slate-50/50">
-                                        <td className="py-2.5 px-3 font-semibold text-slate-800">{item.day}</td>
-                                        <td className="py-2.5 px-3 font-mono">JP {item.period_start}-{item.period_end}</td>
-                                        <td className="py-2.5 px-3 font-bold text-indigo-950">{item.subject?.name}</td>
-                                        <td className="py-2.5 px-3 text-slate-800 font-medium">{item.teacher?.name}</td>
-                                        <td className="py-2.5 px-3 text-slate-500">{item.room?.name || 'Ruang Teori'}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
             {/* TAB: PRESENSI MANDIRI GURU */}
             {activeTab === 'presensi' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -745,8 +1042,8 @@ export default function Dashboard({
                         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
                             <ShieldCheck className="w-5 h-5 text-indigo-600" />
                             <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Formulir Presensi Harian</h3>
-                                <p className="text-[11px] text-slate-500">Pencatatan check-in mandiri kehadiran guru</p>
+                                <h3 className="font-bold text-slate-900 text-sm">Formulir Presensi Harian Guru</h3>
+                                <p className="text-[11px] text-slate-500">Pencatatan check-in mandiri kehadiran</p>
                             </div>
                         </div>
 
@@ -801,7 +1098,7 @@ export default function Dashboard({
                             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
                                 <div>
                                     <h3 className="font-bold text-slate-900 text-base">Status Kehadiran Hari Ini ({todayName})</h3>
-                                    <p className="text-xs text-slate-500 mt-0.5">Sinkronisasi otomatis ke buku induk presensi dan radar piket</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">Sinkronisasi otomatis ke dashboard admin kurikulum</p>
                                 </div>
                                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                                     todayAttendance?.status === 'hadir'
@@ -818,25 +1115,21 @@ export default function Dashboard({
 
                             {todayAttendance ? (
                                 <div className="space-y-4">
-                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                                        <div className="flex items-center justify-between text-xs">
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                                        <div className="flex items-center justify-between">
                                             <span className="text-slate-500">Waktu Check-In:</span>
                                             <span className="font-mono font-bold text-slate-900">{todayAttendance.check_in_time || '07:00'} WIB</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center justify-between">
                                             <span className="text-slate-500">Status Verifikasi:</span>
                                             <span className="text-emerald-700 font-semibold flex items-center gap-1">
                                                 <Check className="w-3.5 h-3.5" /> Terverifikasi Sistem
                                             </span>
                                         </div>
-                                        <div className="pt-2 border-t border-slate-200/60 text-xs">
+                                        <div className="pt-2 border-t border-slate-200/60">
                                             <span className="text-slate-500 block mb-0.5">Catatan Pengajar:</span>
                                             <p className="font-medium text-slate-800 italic">"{todayAttendance.notes || '-'}"</p>
                                         </div>
-                                    </div>
-
-                                    <div className="p-4 rounded-xl border border-indigo-100 bg-indigo-50/50 text-xs text-indigo-900 leading-relaxed">
-                                        💡 <strong>Informasi Ketertiban Guru:</strong> Presensi mandiri yang Anda simpan langsung dilaporkan ke akun Admin Kurikulum dan tampil di dashboard pemantauan pimpinan sekolah.
                                     </div>
                                 </div>
                             ) : (
@@ -847,178 +1140,6 @@ export default function Dashboard({
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {/* TAB: TUGAS KBM MANDIRI & JAMKOS */}
-            {activeTab === 'tugas' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                            <ClipboardList className="w-5 h-5 text-indigo-600" />
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Terbitkan Tugas Mandiri</h3>
-                                <p className="text-[11px] text-slate-500">Untuk kelas kosong / dinas luar</p>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleTaskSubmit} className="space-y-3.5 text-xs">
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Rombongan Belajar (Kelas)</label>
-                                <select
-                                    value={taskData.classroom_id}
-                                    onChange={(e) => setTaskData('classroom_id', e.target.value)}
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
-                                    required
-                                >
-                                    {classrooms.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Mata Pelajaran</label>
-                                <select
-                                    value={taskData.subject_id}
-                                    onChange={(e) => setTaskData('subject_id', e.target.value)}
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
-                                    required
-                                >
-                                    {subjects.map((s) => (
-                                        <option key={s.id} value={s.id}>{s.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Awal)</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="10"
-                                        value={taskData.period_start}
-                                        onChange={(e) => setTaskData('period_start', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="font-semibold text-slate-700 block mb-1">Jam Ke (Akhir)</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="10"
-                                        value={taskData.period_end}
-                                        onChange={(e) => setTaskData('period_end', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Judul Tugas / Modul</label>
-                                <input
-                                    type="text"
-                                    value={taskData.title}
-                                    onChange={(e) => setTaskData('title', e.target.value)}
-                                    placeholder="Contoh: Pembuatan CRUD Laravel API & Review ERD"
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Instruksi Lengkap Pengerjaan</label>
-                                <textarea
-                                    value={taskData.instructions}
-                                    onChange={(e) => setTaskData('instructions', e.target.value)}
-                                    rows={4}
-                                    placeholder="Tuliskan petunjuk pengerjaan tugas, target capaian praktikum, dan format pengumpulan..."
-                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Tautan Lampiran / Google Drive (Opsional)</label>
-                                <input
-                                    type="url"
-                                    value={taskData.file_url}
-                                    onChange={(e) => setTaskData('file_url', e.target.value)}
-                                    placeholder="https://drive.google.com/..."
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={taskProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
-                            >
-                                {taskProcessing ? 'Menerbitkan...' : 'Terbitkan Tugas ke Siswa'}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
-                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-base">Tugas Mandiri yang Anda Terbitkan</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Tampil langsung di dashboard siswa kelas terkait</p>
-                            </div>
-                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                {myLearningTasks.length} Tugas Terbit
-                            </span>
-                        </div>
-
-                        {myLearningTasks.length === 0 ? (
-                            <div className="text-center py-12 text-xs text-slate-400">
-                                <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
-                                <p className="font-medium text-slate-600">Belum ada tugas mandiri yang diterbitkan</p>
-                                <p className="text-[11px] mt-1">Gunakan form di samping jika Anda berhalangan hadir mengajar.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {myLearningTasks.map((t) => (
-                                    <div
-                                        key={t.id}
-                                        className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between gap-2"
-                                    >
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                                {t.classroom?.name} • {t.subject?.name}
-                                            </span>
-                                            <span className="text-slate-400 font-mono text-[11px]">
-                                                Jam ke-{t.period_start}-{t.period_end} • {t.date}
-                                            </span>
-                                        </div>
-
-                                        <h4 className="font-bold text-slate-900 text-sm">{t.title}</h4>
-                                        <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                                            {t.instructions}
-                                        </p>
-
-                                        {t.file_url && (
-                                            <div className="pt-2 flex justify-end">
-                                                <a
-                                                    href={t.file_url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="inline-flex items-center gap-1 text-[11px] text-indigo-600 font-semibold hover:underline"
-                                                >
-                                                    <ExternalLink className="w-3 h-3" />
-                                                    Tautan Bahan Ajar
-                                                </a>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
@@ -1076,7 +1197,7 @@ export default function Dashboard({
                                     type="text"
                                     value={dutyData.destination}
                                     onChange={(e) => setDutyData('destination', e.target.value)}
-                                    placeholder="Contoh: Balai Besar Pengembangan Penjaminan Mutu Pendidikan Vokasi (BBPPMPV)"
+                                    placeholder="Contoh: Balai Besar Pengembangan Penjaminan Mutu (BBPPMPV)"
                                     className="w-full h-9 px-3 rounded-xl border border-slate-200"
                                     required
                                 />
@@ -1100,7 +1221,7 @@ export default function Dashboard({
                                     onChange={(e) => setDutyData('purpose', e.target.value)}
                                     rows={3}
                                     placeholder="Contoh: Menghadiri Lokakarya Kurikulum Berbasis Industri dan Uji Kompetensi Keahlian..."
-                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
                                     required
                                 />
                             </div>
@@ -1115,11 +1236,11 @@ export default function Dashboard({
                         </form>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
-                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2 space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div>
                                 <h3 className="font-bold text-slate-900 text-base">Riwayat Permohonan Izin Dinas</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Diverifikasi oleh Tim Manajemen Kurikulum & Kepala Sekolah</p>
+                                <p className="text-xs text-slate-500 mt-0.5">Diverifikasi oleh Manajemen Kurikulum</p>
                             </div>
                             <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
                                 Total: {myDutyLeaves.length} Pengajuan
@@ -1153,7 +1274,7 @@ export default function Dashboard({
                                             </div>
                                             <p className="text-slate-600">{d.purpose}</p>
                                             <p className="text-slate-400 text-[11px]">
-                                                Tanggal: {d.date} • Pukul: {d.start_time} - {d.end_time} WIB {d.letter_number && `• No: ${d.letter_number}`}
+                                                Tanggal: {d.date} • Pukul: {d.start_time} - {d.end_time} WIB
                                             </p>
                                         </div>
                                     </div>
@@ -1164,161 +1285,144 @@ export default function Dashboard({
                 </div>
             )}
 
-            {/* TAB: LAPOR SAMPAH / KEBERSIHAN KELAS */}
-            {activeTab === 'lapor_sampah' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                            <Trash2 className="w-5 h-5 text-rose-600" />
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Laporkan Kondisi Kebersihan</h3>
-                                <p className="text-[11px] text-slate-500">Pemberitahuan ruang kelas / lab kotor</p>
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleTrashSubmit} className="space-y-3.5 text-xs">
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Ruang Kelas / Laboratorium</label>
-                                <select
-                                    value={trashData.classroom_id}
-                                    onChange={(e) => setTrashData('classroom_id', e.target.value)}
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
-                                    required
-                                >
-                                    {classrooms.map((c) => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Sesi Waktu / Jam Pelajaran</label>
-                                <input
-                                    type="text"
-                                    value={trashData.period_time}
-                                    onChange={(e) => setTrashData('period_time', e.target.value)}
-                                    placeholder="Contoh: Jam ke-4 setelah istirahat"
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Deskripsi Kondisi / Sampah</label>
-                                <textarea
-                                    value={trashData.quantity_description}
-                                    onChange={(e) => setTrashData('quantity_description', e.target.value)}
-                                    rows={4}
-                                    placeholder="Contoh: Sampah plastik dan kemasan sisa makanan berserakan di bawah meja pojok belakang, papan tulis belum dihapus..."
-                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={trashProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
-                            >
-                                {trashProcessing ? 'Mengirimkan...' : 'Kirim Laporan Kebersihan'}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2">
-                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-base">Laporan Kebersihan yang Anda Catat</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Diteruskan ke Wali Kelas dan Tim Satgas Ketertiban</p>
-                            </div>
-                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
-                                Total: {myTrashReports.length} Laporan
-                            </span>
-                        </div>
-
-                        {myTrashReports.length === 0 ? (
-                            <div className="text-center py-12 text-xs text-slate-400">
-                                <Trash2 className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
-                                <p className="font-medium text-slate-600">Belum ada laporan kebersihan yang dicatat</p>
-                                <p className="text-[11px] mt-1">Ruangan kelas dan laboratorium terjaga bersih.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {myTrashReports.map((r) => (
-                                    <div
-                                        key={r.id}
-                                        className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between gap-2 text-xs"
-                                    >
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="font-bold text-slate-900">
-                                                {r.classroom?.name}
-                                            </span>
-                                            <span className="text-[11px] font-mono text-slate-500">
-                                                {r.date} • {r.period_time}
-                                            </span>
-                                        </div>
-                                        <p className="text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                                            {r.quantity_description}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* TAB 5: PENGAJUAN INVAL */}
-            {activeTab === 'inval' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
+            {/* TAB: VERIFIKASI PIKET SISWA */}
+            {activeTab === 'piket' && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div>
-                            <h3 className="font-bold text-slate-900 text-base">Riwayat & Status Pengajuan Inval</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">Daftar permohonan delegasi jam mengajar ke Kurikulum</p>
+                            <h3 className="font-bold text-slate-900 text-base">Verifikasi Laporan Kebersihan Siswa</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">Periksa catatan dan foto kondisi kelas sebelum menyetujui (ACC)</p>
                         </div>
-                        <button
-                            onClick={() => setIsSwapModalOpen(true)}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>Ajukan Baru</span>
-                        </button>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                            {pendingPicketCount} Menunggu Verifikasi
+                        </span>
                     </div>
 
-                    {invalRequests.length === 0 ? (
+                    {picketReports.length === 0 ? (
                         <div className="text-center py-12 text-xs text-slate-400">
-                            Belum ada pengajuan substitusi jam mengajar.
+                            Belum ada laporan piket yang disetor siswa.
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {invalRequests.map((req) => (
+                            {picketReports.map((p) => (
                                 <div
-                                    key={req.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
+                                    key={p.id}
+                                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs"
                                 >
-                                    <div>
-                                        <div className="font-bold text-slate-900 text-sm">
-                                            {req.schedule?.classroom?.name} — {req.schedule?.subject?.name}
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-slate-900 text-sm">{p.classroom?.name}</span>
+                                            <span className="text-slate-400 text-xs">•</span>
+                                            <span className="text-slate-600">Disetor: <strong>{p.student?.name}</strong></span>
+                                            <span className="text-slate-400 font-mono text-[11px]">({p.date})</span>
                                         </div>
-                                        <div className="text-slate-600 text-xs mt-1">
-                                            Pengganti: <strong>{req.substitute?.name}</strong> • Tanggal: {req.date}
-                                        </div>
-                                        <p className="text-slate-500 text-[11px] mt-0.5 italic">"{req.reason}"</p>
+                                        <p className="text-slate-700 italic">"{p.notes}"</p>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider self-start md:self-center border ${
-                                        req.status === 'approved'
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                            : req.status === 'rejected'
-                                            ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                            : 'bg-amber-50 text-amber-700 border-amber-200'
-                                    }`}>
-                                        {req.status === 'approved' ? 'Disetujui' : req.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
-                                    </span>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
+                                            p.status === 'approved'
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                : p.status === 'rejected'
+                                                ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                                        }`}>
+                                            {p.status === 'approved' ? 'Terverifikasi (ACC)' : p.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
+                                        </span>
+
+                                        {p.status === 'pending' && (
+                                            <div className="flex items-center gap-1.5 pl-2">
+                                                <button
+                                                    onClick={() => handleVerifyPicket(p.id, 'approved')}
+                                                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs"
+                                                >
+                                                    Setujui (ACC)
+                                                </button>
+                                                <button
+                                                    onClick={() => handleVerifyPicket(p.id, 'rejected')}
+                                                    className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                                >
+                                                    Tolak
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* TAB: CEK JADWAL KELAS LAIN */}
+            {activeTab === 'master' && (
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-base">Pengecekan Jadwal Rombel Lain (Koordinasi)</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">Lihat jadwal kelas untuk pertukaran jam mengajar</p>
+                        </div>
+
+                        <select
+                            value={selectedClassroomId}
+                            onChange={(e) => handleLookupClassChange(e.target.value)}
+                            className="h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                        >
+                            {classrooms.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-xl border border-slate-200">
+                        <table className="w-full text-xs text-left border-collapse min-w-[500px]">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                                    <th className="py-2.5 px-3">Hari</th>
+                                    <th className="py-2.5 px-3">Jam Ke</th>
+                                    <th className="py-2.5 px-3">Mata Pelajaran</th>
+                                    <th className="py-2.5 px-3">Pengajar</th>
+                                    <th className="py-2.5 px-3">Ruangan</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {masterClassSchedule.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-50/50">
+                                        <td className="py-2.5 px-3 font-semibold text-slate-800">{item.day}</td>
+                                        <td className="py-2.5 px-3 font-mono">JP {item.period_start}-{item.period_end}</td>
+                                        <td className="py-2.5 px-3 font-bold text-indigo-950">{item.subject?.name}</td>
+                                        <td className="py-2.5 px-3 text-slate-800 font-medium">{item.teacher?.name}</td>
+                                        <td className="py-2.5 px-3 text-slate-500">{item.room?.name || 'Ruang Teori'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL: PRATINJAU BUKTI */}
+            {selectedProofModal && (
+                <Modal isOpen={Boolean(selectedProofModal)} onClose={() => setSelectedProofModal(null)} title="Pratinjau Bukti Dokumen">
+                    <div className="p-2 space-y-3">
+                        <img
+                            src={selectedProofModal}
+                            alt="Bukti Dokumen"
+                            className="max-h-[70vh] w-auto mx-auto rounded-xl border border-slate-200 shadow-sm"
+                        />
+                        <div className="flex justify-end pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedProofModal(null)}
+                                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
             )}
 
             {/* MODAL: AJUKAN TUKAR JAM */}
@@ -1328,9 +1432,9 @@ export default function Dashboard({
                 title="Pengajuan Tukar Jam Mengajar (Inval)"
                 description="Kirimkan permohonan delegasi jam mengajar ke Bagian Kurikulum"
             >
-                <form onSubmit={handleSwapSubmit} className="space-y-4">
+                <form onSubmit={handleSwapSubmit} className="space-y-4 text-xs">
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block font-semibold text-slate-700 mb-1">
                             Pilih Sesi Jadwal Anda
                         </label>
                         <select
@@ -1348,7 +1452,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block font-semibold text-slate-700 mb-1">
                             Guru Pengganti yang Disepakati
                         </label>
                         <select
@@ -1366,7 +1470,7 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">Tanggal Efektif</label>
+                        <label className="block font-semibold text-slate-700 mb-1">Tanggal Efektif</label>
                         <input
                             type="date"
                             value={swapData.date}
@@ -1377,13 +1481,13 @@ export default function Dashboard({
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        <label className="block font-semibold text-slate-700 mb-1">
                             Alasan Berhalangan Hadir
                         </label>
                         <textarea
                             value={swapData.reason}
                             onChange={(e) => setSwapData('reason', e.target.value)}
-                            placeholder="Contoh: Mengikuti Rapat Koordinasi Vokasi Provinsi di Dinas Pendidikan"
+                            placeholder="Contoh: Mengikuti Rapat Koordinasi Vokasi di Dinas Pendidikan"
                             className="w-full h-20 p-3 rounded-xl border border-slate-200 text-xs"
                             required
                         />

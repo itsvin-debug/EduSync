@@ -19,11 +19,14 @@ import {
     ShieldCheck,
     Menu,
     X,
+    Users,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
+import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 
 export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', teacher, activeTab, onTabChange }) {
     const { auth } = usePage().props;
+    const clock = useRealtimeClock();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const currentTeacher = teacher || auth?.user?.teacher || {
@@ -43,11 +46,13 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
     const navItems = [
         { id: 'workspace', label: 'Ruang Kerja Hari Ini', icon: Clock },
         { id: 'personal', label: 'Jadwal Mingguan Pribadi', icon: CalendarDays },
-        { id: 'presensi', label: 'Presensi Kehadiran Guru', icon: ShieldCheck },
-        { id: 'tugas', label: 'Tugas KBM / Jamkos', icon: ClipboardList },
+        { id: 'presensi_kelas', label: 'Presensi Siswa', icon: Users },
+        { id: 'perizinan_siswa', label: 'Verifikasi Izin & Sakit Siswa', icon: ShieldCheck },
+        { id: 'tugas', label: 'Delegasi Tugas (Ketua Kelas)', icon: ClipboardList },
+        { id: 'presensi', label: 'Presensi Mandiri Guru', icon: CheckCircle2 },
         { id: 'izin_dinas', label: 'Izin Keluar Dinas', icon: Briefcase },
-        { id: 'piket', label: 'Verifikasi Piket Siswa', icon: CheckCircle2 },
-        { id: 'lapor_sampah', label: 'Lapor Kebersihan Kelas', icon: Trash2 },
+        { id: 'piket', label: 'Verifikasi Piket Siswa', icon: CheckSquare },
+        { id: 'lapor_sampah', label: 'Lapor Sampah & Kebersihan', icon: Trash2 },
         { id: 'master', label: 'Cek Jadwal Rombel Lain', icon: BookOpen },
     ];
 
@@ -207,9 +212,12 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                     </div>
 
                     <div className="flex items-center gap-4 text-xs">
+                        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+                            {clock.semester} {clock.academicYear}
+                        </span>
                         <div className="hidden sm:flex items-center gap-2 text-slate-500">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>Koneksi Real-time Aktif</span>
+                            <span>Koneksi Terhubung</span>
                         </div>
                     </div>
                 </header>
@@ -219,7 +227,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <span>© 2026 EDUSYNC SMK Negeri — Sistem Manajemen Kehadiran & Aktivitas Kelas</span>
+                    <span>© {clock.year} EDUSYNC SMK Negeri — Sistem Manajemen Kehadiran & Aktivitas Kelas (TA {clock.academicYear})</span>
                     <span className="text-slate-400">Portal Guru Terintegrasi Dapodik</span>
                 </footer>
             </div>

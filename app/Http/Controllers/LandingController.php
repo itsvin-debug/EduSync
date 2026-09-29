@@ -31,6 +31,10 @@ class LandingController extends Controller
             ->take(12)
             ->get();
 
+        $month = (int) date('n');
+        $year = (int) date('Y');
+        $academicYear = $month >= 7 ? "{$year}/" . ($year + 1) . " Ganjil" : ($year - 1) . "/{$year} Genap";
+
         return Inertia::render('Landing/Index', [
             'departments' => $departments,
             'classrooms' => $classrooms,
@@ -40,7 +44,7 @@ class LandingController extends Controller
                 'total_schedules' => $totalSchedules,
                 'total_teachers' => $totalTeachers,
                 'total_classrooms' => $totalClassrooms,
-                'academic_year' => '2024/2025 Genap',
+                'academic_year' => $academicYear,
             ],
         ]);
     }

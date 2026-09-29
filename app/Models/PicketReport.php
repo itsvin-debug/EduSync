@@ -13,8 +13,12 @@ class PicketReport extends Model
     protected $fillable = [
         'student_id',
         'classroom_id',
+        'submitted_by_user_id',
         'date',
         'photo_url',
+        'photos',
+        'duty_students',
+        'area_location',
         'notes',
         'status',
         'validator_user_id',
@@ -25,11 +29,18 @@ class PicketReport extends Model
     protected $casts = [
         'verified_at' => 'datetime',
         'date' => 'date',
+        'photos' => 'array',
+        'duty_students' => 'array',
     ];
 
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function submittedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by_user_id');
     }
 
     public function classroom(): BelongsTo

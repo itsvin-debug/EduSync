@@ -26,6 +26,7 @@ class User extends Authenticatable
         'classroom_id',
         'department_id',
         'status',
+        'is_class_leader',
         'two_factor_enabled',
         'two_factor_code',
     ];
@@ -41,6 +42,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_class_leader' => 'boolean',
             'two_factor_enabled' => 'boolean',
         ];
     }
@@ -63,5 +65,10 @@ class User extends Authenticatable
     public function picketReports(): HasMany
     {
         return $this->hasMany(PicketReport::class, 'student_id');
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(StudentLeaveRequest::class, 'student_id');
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import Modal from '@/Components/Modal';
 import ConflictBanner from '@/Components/ConflictBanner';
 import ClassMonitoringGrid from '@/Components/ClassMonitoringGrid';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
@@ -21,6 +22,7 @@ import {
     UserX,
     FileSpreadsheet,
     Tv,
+    Edit3,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -36,6 +38,24 @@ export default function Dashboard({
     const { clock, engineState } = useScheduleEngine([]);
     const [attendanceTab, setAttendanceTab] = useState('siswa'); // siswa, guru
     const [statusFilter, setStatusFilter] = useState('all');
+    const [overrideModal, setOverrideModal] = useState(null);
+    const [overrideStatus, setOverrideStatus] = useState('hadir');
+    const [overrideNotes, setOverrideNotes] = useState('');
+
+    const handleOverrideSubmit = (e) => {
+        e.preventDefault();
+        if (!overrideModal) return;
+        router.post(`/admin/attendance/${overrideModal.id}/override`, {
+            status: overrideStatus,
+            notes: overrideNotes,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setOverrideModal(null);
+                setOverrideNotes('');
+            },
+        });
+    };
 
     const statCards = [
         {
@@ -335,12 +355,13 @@ export default function Dashboard({
                                         <th className="py-3 px-4 text-center">Status Kehadiran</th>
                                         <th className="py-3 px-4">Waktu & Petugas Input</th>
                                         <th className="py-3 px-4">Keterangan</th>
+                                        <th className="py-3 px-4 text-center">Aksi Override</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {filteredStudentAttendances.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="py-8 text-center text-slate-400">
+                                            <td colSpan={6} className="py-8 text-center text-slate-400">
                                                 Tidak ada data presensi siswa yang cocok dengan filter.
                                             </td>
                                         </tr>
@@ -364,10 +385,17 @@ export default function Dashboard({
                                                                 ? 'bg-amber-50 text-amber-700 border-amber-200'
                                                                 : item.status === 'izin'
                                                                     ? 'bg-sky-50 text-sky-700 border-sky-200'
-                                                                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                                                                    : item.status === 'dispensasi'
+                                                                        ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                                                        : 'bg-rose-50 text-rose-700 border-rose-200'
                                                     }`}>
                                                         {item.status}
                                                     </span>
+                                                    {item.overridden_by_admin && (
+                                                        <span className="block text-[9px] text-indigo-600 font-bold mt-0.5">
+                                                            (Override Admin)
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <div className="font-mono text-slate-800 font-medium">
@@ -379,6 +407,20 @@ export default function Dashboard({
                                                 </td>
                                                 <td className="py-3 px-4 text-slate-600 max-w-xs truncate">
                                                     {item.notes || '-'}
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setOverrideModal(item);
+                                                            setOverrideStatus(item.status);
+                                                            setOverrideNotes(item.notes || '');
+                                                        }}
+                                                        className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200 transition-colors flex items-center justify-center gap-1 mx-auto"
+                                                    >
+                                                        <Edit3 className="w-3 h-3" />
+                                                        <span>Override</span>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))
@@ -521,6 +563,80 @@ export default function Dashboard({
                     )}
                 </div>
             </div>
+
+            {/* MODAL: OVERRIDE PRESENSI SISWA */}
+            {overrideModal && (
+                <Modal isOpen={Boolean(overrideModal)} onClose={() => setOverrideModal(null)} title="Override Presensi Siswa (Hak Akses Admin)">
+                    <form onSubmit={handleOverrideSubmit} className="space-y-4 text-xs">
+                        <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1">
+                            <div className="font-bold text-sm text-indigo-950">
+                                {overrideModal.student?.name}
+                            </div>
+                            <div className="text-indigo-800 text-[11px]">
+                                Kelas: <strong>{overrideModal.classroom?.name}</strong> • NISN: {overrideModal.student?.nisn || '-'} • Tanggal: {overrideModal.date}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="font-semibold text-slate-700 block mb-1.5">
+                                Status Kehadiran Baru
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { val: 'hadir', label: 'Hadir', activeClass: 'bg-emerald-600 text-white' },
+                                    { val: 'sakit', label: 'Sakit', activeClass: 'bg-amber-600 text-white' },
+                                    { val: 'izin', label: 'Izin', activeClass: 'bg-sky-600 text-white' },
+                                    { val: 'dispensasi', label: 'Dispensasi', activeClass: 'bg-indigo-600 text-white' },
+                                    { val: 'alpha', label: 'Alpa', activeClass: 'bg-rose-600 text-white' },
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.val}
+                                        type="button"
+                                        onClick={() => setOverrideStatus(opt.val)}
+                                        className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all ${
+                                            overrideStatus === opt.val
+                                                ? `${opt.activeClass} border-transparent shadow-xs`
+                                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="font-semibold text-slate-700 block mb-1">
+                                Catatan / Justifikasi Override Admin
+                            </label>
+                            <textarea
+                                value={overrideNotes}
+                                onChange={(e) => setOverrideNotes(e.target.value)}
+                                rows={3}
+                                placeholder="Contoh: Perbaikan status sakit berdasar verifikasi surat dokter fisik via BK / Kurikulum."
+                                className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
+
+                        <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setOverrideModal(null)}
+                                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold shadow-xs"
+                            >
+                                Simpan Override Presensi
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            )}
         </AdminLayout>
     );
 }

@@ -14,6 +14,7 @@ Route::get('/', [LandingController::class, 'index'])->name('home');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.reset');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/quick-login/{role}', [AuthController::class, 'quickLogin'])->name('quick-login');
 
@@ -119,6 +120,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // User Account Verification (Siswa & Guru - Cegah orang luar buat akun)
     Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('admin.users.approve');
     Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('admin.users.reject');
+
+    // Master Attendance & Leave Management Overrides
+    Route::post('/attendance/{id}/override', [AdminController::class, 'overrideAttendance'])->name('admin.attendance.override');
+    Route::post('/student-leaves/{id}/approve', [AdminController::class, 'approveStudentLeave'])->name('admin.student-leaves.approve');
+    Route::post('/student-leaves/{id}/reject', [AdminController::class, 'rejectStudentLeave'])->name('admin.student-leaves.reject');
+
+    // Master Class Leader & Homeroom Teacher Registry
+    Route::post('/students/{id}/toggle-class-leader', [AdminController::class, 'toggleClassLeader'])->name('admin.students.toggle-class-leader');
+    Route::post('/classrooms/{id}/assign-leaders', [AdminController::class, 'assignClassroomLeaders'])->name('admin.classrooms.assign-leaders');
 });
 
 // 4. Teacher Portal (Screen 5 & Teacher Specification)
@@ -127,11 +137,15 @@ Route::prefix('guru')->middleware(['auth', 'role:guru,admin'])->group(function (
     Route::post('/swap-request', [TeacherController::class, 'swapRequest'])->name('guru.swap');
     Route::post('/picket/{id}/verify', [TeacherController::class, 'verifyPicket'])->name('guru.picket.verify');
 
-    // Guru Feature Expansions (Sync dengan Admin)
+    // Guru Feature Expansions (Sync dengan Admin & Siswa)
     Route::post('/attendance/check-in', [TeacherController::class, 'checkInAttendance'])->name('guru.attendance.checkin');
     Route::post('/learning-tasks', [TeacherController::class, 'storeLearningTask'])->name('guru.learning-tasks.store');
     Route::post('/duty-leaves', [TeacherController::class, 'storeDutyLeave'])->name('guru.duty-leaves.store');
     Route::post('/trash-reports', [TeacherController::class, 'storeTrashReport'])->name('guru.trash-reports.store');
+
+    // Student Leave & Sickness Verification by Homeroom/Subject Teacher
+    Route::post('/student-leaves/{id}/approve', [TeacherController::class, 'approveStudentLeave'])->name('guru.student-leaves.approve');
+    Route::post('/student-leaves/{id}/reject', [TeacherController::class, 'rejectStudentLeave'])->name('guru.student-leaves.reject');
 });
 
 // 5. Student Portal (Screen 6 & Student Mobile-First Specification)
@@ -141,4 +155,13 @@ Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function
 
     // Siswa Feature Expansions (Sync dengan Admin)
     Route::post('/fines/{id}/pay', [StudentController::class, 'submitFinePayment'])->name('siswa.fines.pay');
+
+    // Student Leave / Sick Application Submission (Regular + Ketua Kelas)
+    Route::post('/leave-request', [StudentController::class, 'submitLeaveRequest'])->name('siswa.leave-request.submit');
+
+    // Class Leader Special Privileges (Ketua Kelas Only)
+    Route::post('/attendance/batch', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch');
+    Route::post('/attendance/batch-store', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch-store');
+    Route::post('/duty-report', [StudentController::class, 'submitDutyReport'])->name('siswa.duty-report.submit');
+    Route::post('/learning-tasks/{id}/status', [StudentController::class, 'updateTaskStatus'])->name('siswa.learning-tasks.status');
 });

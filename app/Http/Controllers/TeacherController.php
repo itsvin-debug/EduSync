@@ -13,8 +13,13 @@ use App\Models\TeacherAttendance;
 use App\Models\LearningTask;
 use App\Models\OfficialDutyLeave;
 use App\Models\TrashReport;
+use App\Models\StudentAttendance;
+use App\Models\StudentLeaveRequest;
+use App\Models\User;
+use App\Models\Department;
 use App\Models\AuditLog;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class TeacherController extends Controller
 {
@@ -79,9 +84,9 @@ class TeacherController extends Controller
 
         // Sync with Admin features: Tugas KBM Mandiri
         $myLearningTasks = LearningTask::where('teacher_id', $teacher->id)
-            ->with(['classroom', 'subject'])
+            ->with(['classroom.department', 'subject', 'classLeader'])
             ->latest()
-            ->take(10)
+            ->take(15)
             ->get();
 
         // Sync with Admin features: Izin Keluar Dinas
@@ -92,12 +97,53 @@ class TeacherController extends Controller
 
         // Sync with Admin features: Laporan Sampah / Kebersihan
         $myTrashReports = TrashReport::where('teacher_id', $teacher->id)
-            ->with('classroom')
+            ->with(['classroom.department', 'department'])
             ->latest()
-            ->take(10)
+            ->take(15)
             ->get();
 
         $subjects = Subject::orderBy('name')->get();
+        $departments = Department::all();
+
+        // Registered Class Leaders across departments & classes for task delegation
+        $classLeaders = User::where('role', 'siswa')
+            ->where('is_class_leader', true)
+            ->with('classroom.department')
+            ->orderBy('name')
+            ->get();
+
+        // Student Leave & Sickness Applications
+        $studentLeaveRequests = StudentLeaveRequest::with(['student.classroom.department', 'classroom'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        // Aggregate class attendance metrics across this teacher's assigned classes
+        $myClassIds = $personalSchedules->pluck('classroom_id')->unique()->values();
+        $todayClassAttendances = StudentAttendance::where('date', now()->toDateString())
+            ->whereIn('classroom_id', $myClassIds)
+            ->with(['student', 'classroom'])
+            ->get();
+
+        $attendanceMetrics = [
+            'hadir' => $todayClassAttendances->where('status', 'hadir')->count(),
+            'sakit' => $todayClassAttendances->where('status', 'sakit')->count(),
+            'izin' => $todayClassAttendances->where('status', 'izin')->count(),
+            'dispensasi' => $todayClassAttendances->where('status', 'dispensasi')->count(),
+            'alpha' => $todayClassAttendances->where('status', 'alpha')->count(),
+            'total' => $todayClassAttendances->count(),
+        ];
+
+        // Live Class Attendance for selected lookup classroom
+        $selectedClassAttendances = StudentAttendance::where('date', now()->toDateString())
+            ->where('classroom_id', $selectedClassroomId)
+            ->with('student')
+            ->get();
+
+        $selectedClassStudents = User::where('classroom_id', $selectedClassroomId)
+            ->where('role', 'siswa')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('Teacher/Dashboard', [
             'teacher' => $teacher,
@@ -116,6 +162,12 @@ class TeacherController extends Controller
             'myDutyLeaves' => $myDutyLeaves,
             'myTrashReports' => $myTrashReports,
             'subjects' => $subjects,
+            'departments' => $departments,
+            'classLeaders' => $classLeaders,
+            'studentLeaveRequests' => $studentLeaveRequests,
+            'attendanceMetrics' => $attendanceMetrics,
+            'selectedClassAttendances' => $selectedClassAttendances,
+            'selectedClassStudents' => $selectedClassStudents,
         ]);
     }
 
@@ -156,6 +208,7 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
+            'class_leader_id' => 'nullable|exists:users,id',
             'subject_id' => 'required|exists:subjects,id',
             'period_start' => 'required|integer|min:1|max:10',
             'period_end' => 'required|integer|min:1|max:10',
@@ -166,9 +219,17 @@ class TeacherController extends Controller
 
         $teacher = $this->getTeacher();
 
+        // Dynamic auto-detect Class Leader if not chosen
+        $classLeaderId = $validated['class_leader_id'] ?? null;
+        if (!$classLeaderId) {
+            $classLeaderId = Classroom::find($validated['classroom_id'])?->class_leader_id
+                ?? User::where('classroom_id', $validated['classroom_id'])->where('is_class_leader', true)->value('id');
+        }
+
         $task = LearningTask::create([
             'teacher_id' => $teacher->id,
             'classroom_id' => $validated['classroom_id'],
+            'class_leader_id' => $classLeaderId,
             'subject_id' => $validated['subject_id'],
             'date' => now()->toDateString(),
             'period_start' => $validated['period_start'],
@@ -177,16 +238,18 @@ class TeacherController extends Controller
             'instructions' => $validated['instructions'],
             'file_url' => $validated['file_url'] ?? null,
             'is_verified' => true,
+            'status' => 'dispatched',
         ]);
 
+        $leaderName = $task->classLeader?->name ?? 'Ketua Kelas';
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'LEARNING_TASK_CREATED',
-            'description' => "Guru {$teacher->name} membuat tugas KBM mandiri '{$task->title}'",
+            'description' => "Guru {$teacher->name} membuat tugas KBM mandiri '{$task->title}' didelegasikan ke {$leaderName}",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Tugas KBM mandiri / jamkos terarah berhasil diterbitkan untuk siswa.');
+        return back()->with('success', "Tugas KBM mandiri / modul pengganti berhasil dikirimkan ke {$leaderName} dan tersinkronisasi ke Admin.");
     }
 
     public function storeDutyLeave(Request $request)
@@ -230,14 +293,22 @@ class TeacherController extends Controller
             'classroom_id' => 'required|exists:classrooms,id',
             'quantity_description' => 'required|string',
             'period_time' => 'nullable|string|max:100',
+            'location_tag' => 'nullable|string|max:255',
+            'department_id' => 'nullable|exists:departments,id',
+            'photos' => 'nullable|array',
+            'photos.*' => 'nullable|string',
         ]);
 
         $teacher = $this->getTeacher();
+        $classroom = Classroom::find($validated['classroom_id']);
 
         $trash = TrashReport::create([
             'classroom_id' => $validated['classroom_id'],
+            'department_id' => $validated['department_id'] ?? $classroom?->department_id,
             'teacher_id' => $teacher->id,
             'quantity_description' => $validated['quantity_description'],
+            'location_tag' => $validated['location_tag'] ?? ("Dekat " . ($classroom?->name ?? 'Ruang Kelas')),
+            'photos' => $validated['photos'] ?? null,
             'date' => now()->toDateString(),
             'period_time' => $validated['period_time'] ?? ('Jam ke-' . (now()->hour > 12 ? '7' : '3')),
             'status' => 'pending',
@@ -246,11 +317,80 @@ class TeacherController extends Controller
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'TRASH_REPORTED',
-            'description' => "Guru {$teacher->name} melaporkan kebersihan kelas {$trash->classroom->name}",
+            'description' => "Guru {$teacher->name} melaporkan kebersihan lokasi {$trash->location_tag}",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Laporan kebersihan ruang kelas berhasil dicatat untuk tindak lanjut Admin/Piket.');
+        return back()->with('success', 'Laporan kebersihan ruang kelas/area berhasil dicatat untuk verifikasi Admin & Kurikulum.');
+    }
+
+    public function approveStudentLeave(Request $request, $id)
+    {
+        $teacher = $this->getTeacher();
+        $leave = StudentLeaveRequest::with(['student', 'classroom'])->findOrFail($id);
+
+        $leave->update([
+            'status' => 'approved',
+            'reviewed_by_teacher_id' => $teacher->id,
+            'reviewed_by_user_id' => auth()->id(),
+            'reviewed_at' => now(),
+        ]);
+
+        // Auto-sync into student_attendances table for date range without manual intervention
+        $start = Carbon::parse($leave->start_date);
+        $end = Carbon::parse($leave->end_date);
+        $status = in_array($leave->type, ['sakit', 'izin', 'dispensasi']) ? $leave->type : 'izin';
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            if ($date->isWeekend()) continue;
+
+            StudentAttendance::updateOrCreate(
+                [
+                    'user_id' => $leave->student_id,
+                    'date' => $date->toDateString(),
+                ],
+                [
+                    'classroom_id' => $leave->classroom_id,
+                    'submitted_by_user_id' => auth()->id(),
+                    'status' => $status,
+                    'notes' => "Surat {$leave->type} diverifikasi oleh Wali Kelas/Guru ({$teacher->name})",
+                    'submitted_time' => now()->format('H:i') . ' WIB',
+                    'is_locked' => true,
+                ]
+            );
+        }
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'TEACHER_APPROVED_LEAVE',
+            'description' => "Guru {$teacher->name} menyetujui surat {$leave->type} siswa {$leave->student?->name} ({$leave->classroom?->name})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Permohonan {$leave->type} siswa {$leave->student?->name} berhasil disetujui dan data presensi kelas otomatis terisi.");
+    }
+
+    public function rejectStudentLeave(Request $request, $id)
+    {
+        $teacher = $this->getTeacher();
+        $leave = StudentLeaveRequest::with('student')->findOrFail($id);
+
+        $leave->update([
+            'status' => 'rejected',
+            'reviewed_by_teacher_id' => $teacher->id,
+            'reviewed_by_user_id' => auth()->id(),
+            'rejection_note' => $request->input('notes', 'Bukti surat izin tidak memenuhi kriteria.'),
+            'reviewed_at' => now(),
+        ]);
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'TEACHER_REJECTED_LEAVE',
+            'description' => "Guru {$teacher->name} menolak surat {$leave->type} siswa {$leave->student?->name}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Permohonan izin siswa telah ditolak.");
     }
 
     public function swapRequest(Request $request)

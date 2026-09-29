@@ -10,6 +10,7 @@ class LearningTask extends Model
     protected $fillable = [
         'teacher_id',
         'classroom_id',
+        'class_leader_id',
         'subject_id',
         'date',
         'period_start',
@@ -18,6 +19,7 @@ class LearningTask extends Model
         'instructions',
         'file_url',
         'is_verified',
+        'status',
     ];
 
     protected $casts = [
@@ -32,6 +34,11 @@ class LearningTask extends Model
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function classLeader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'class_leader_id');
     }
 
     public function subject(): BelongsTo

@@ -14,19 +14,14 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    public function showLogin(Request $request)
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($user->status !== 'active') {
-                Auth::logout();
-                request()->session()->invalidate();
-                request()->session()->regenerateToken();
-                return redirect()->route('login')->withErrors(['email' => 'Akun Anda tidak aktif atau sedang menunggu verifikasi oleh Admin Kurikulum.']);
-            }
-            if ($user->role === 'admin') return redirect()->route('admin.dashboard');
-            if ($user->role === 'guru') return redirect()->route('guru.dashboard');
-            return redirect()->route('siswa.dashboard');
+        $currentUser = Auth::user();
+        if ($currentUser && $currentUser->status !== 'active') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            $currentUser = null;
         }
 
         $classrooms = Classroom::with('department')->orderBy('grade')->orderBy('name')->get();
@@ -35,6 +30,7 @@ class AuthController extends Controller
         return Inertia::render('Auth/Login', [
             'classrooms' => $classrooms,
             'departments' => $departments,
+            'currentUser' => $currentUser,
         ]);
     }
 
@@ -114,16 +110,19 @@ class AuthController extends Controller
                 'nisn' => 'required|string|max:20|unique:users,nisn',
                 'classroom_id' => 'required|exists:classrooms,id',
                 'phone' => 'nullable|string|max:20',
+                'student_role' => 'nullable|string|in:ketua_kelas,siswa_biasa',
             ]);
 
             $classroom = Classroom::findOrFail($validated['classroom_id']);
+            $isClassLeader = ($validated['student_role'] ?? 'siswa_biasa') === 'ketua_kelas';
 
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'siswa',
-                'sub_role' => 'Siswa',
+                'sub_role' => $isClassLeader ? 'Ketua Kelas' : 'Siswa',
+                'is_class_leader' => $isClassLeader,
                 'nisn' => $validated['nisn'],
                 'phone' => $validated['phone'] ?? null,
                 'classroom_id' => $classroom->id,
@@ -134,11 +133,11 @@ class AuthController extends Controller
             AuditLog::create([
                 'user_id' => $user->id,
                 'action' => 'STUDENT_REGISTERED',
-                'description' => "Pendaftaran akun siswa baru oleh {$user->name} ({$classroom->name}), menunggu verifikasi.",
+                'description' => "Pendaftaran akun " . ($isClassLeader ? 'Ketua Kelas' : 'Siswa Biasa') . " baru oleh {$user->name} ({$classroom->name}), menunggu verifikasi.",
                 'ip_address' => $request->ip(),
             ]);
 
-            return back()->with('success', 'Pendaftaran akun siswa berhasil diajukan! Akun Anda sedang menunggu verifikasi oleh Admin Kurikulum untuk mencegah akun tidak sah.');
+            return back()->with('success', 'Pendaftaran akun ' . ($isClassLeader ? 'Ketua Kelas' : 'Siswa') . ' berhasil diajukan! Akun Anda sedang menunggu verifikasi oleh Admin Kurikulum untuk mencegah akun tidak sah.');
         }
 
         if ($role === 'guru') {
@@ -214,7 +213,8 @@ class AuthController extends Controller
             'admin' => User::where('role', 'admin')->where('status', 'active')->first(),
             'guru' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', '!=', 'Wali Kelas')->first() ?? User::where('role', 'guru')->where('status', 'active')->first(),
             'wali' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', 'Wali Kelas')->first() ?? User::where('role', 'guru')->where('status', 'active')->first(),
-            'siswa' => User::where('role', 'siswa')->where('status', 'active')->first(),
+            'siswa', 'ketua-kelas' => User::where('role', 'siswa')->where('is_class_leader', true)->where('status', 'active')->first() ?? User::where('email', 'siswa@edusync.sch.id')->first(),
+            'siswa-biasa' => User::where('role', 'siswa')->where('is_class_leader', false)->where('status', 'active')->first() ?? User::where('email', 'siswabiasa@edusync.sch.id')->first(),
             default => null,
         };
 
@@ -239,6 +239,33 @@ class AuthController extends Controller
         }
 
         return redirect()->route('login')->with('error', 'Akun demo peran tersebut belum terdaftar.');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.exists' => 'Alamat email tersebut tidak terdaftar di sistem EDUSYNC.',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        if ($user) {
+            $user->update([
+                'password' => Hash::make('password'),
+            ]);
+
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'PASSWORD_RESET_REQUESTED',
+                'description' => "Permintaan reset kata sandi mandiri oleh {$user->name} ({$user->email})",
+                'ip_address' => $request->ip(),
+            ]);
+
+            return back()->with('success', "Kata sandi untuk akun {$user->name} ({$user->email}) berhasil diatur ulang menjadi 'password'. Silakan masuk dengan kata sandi tersebut.");
+        }
+
+        return back()->withErrors(['email' => 'Email tidak terdaftar di sistem.']);
     }
 
     public function logout(Request $request)

@@ -10,9 +10,12 @@ use App\Models\PicketReport;
 use App\Models\ClassFine;
 use App\Models\LearningTask;
 use App\Models\StudentAttendance;
+use App\Models\StudentLeaveRequest;
 use App\Models\SchoolOrganization;
+use App\Models\User;
 use App\Models\AuditLog;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class StudentController extends Controller
 {
@@ -20,8 +23,9 @@ class StudentController extends Controller
     {
         $user = auth()->user();
         $classroom = $user->classroom ?? Classroom::where('code', 'XI_PPLG_1')->first() ?? Classroom::first();
+        $isClassLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas');
 
-        // Get all schedules for the student's class
+        // All schedules for student's classroom
         $classSchedules = Schedule::where('classroom_id', $classroom->id)
             ->with(['subject', 'teacher', 'room'])
             ->orderBy('period_start')
@@ -42,91 +46,298 @@ class StudentController extends Controller
         // Teachers teaching in this class
         $teacherIds = $classSchedules->pluck('teacher_id')->unique();
         $teachers = Teacher::whereIn('id', $teacherIds)->get();
+        $allTeachers = Teacher::orderBy('name')->get();
 
-        // Student's picket history
-        $picketHistory = PicketReport::where('classroom_id', $classroom->id)
-            ->with('student')
-            ->latest()
-            ->take(10)
+        // Class students roster (for Class Leader attendance management)
+        $classStudents = User::where('classroom_id', $classroom->id)
+            ->where('role', 'siswa')
+            ->orderBy('name')
             ->get();
 
-        // Sync with Admin: Denda Kebersihan Kelas (Class Fines)
+        // Today's attendance records for the class
+        $todayAttendances = StudentAttendance::where('classroom_id', $classroom->id)
+            ->whereDate('date', now()->toDateString())
+            ->with('student')
+            ->get();
+
+        // Auto-lock status at 13:00 (1:00 PM)
+        $isAttendanceLocked = now()->hour >= 13;
+
+        // Class statistics
+        $attendanceStats = [
+            'total' => $classStudents->count(),
+            'hadir' => $todayAttendances->where('status', 'hadir')->count(),
+            'sakit' => $todayAttendances->where('status', 'sakit')->count(),
+            'izin' => $todayAttendances->where('status', 'izin')->count(),
+            'dispensasi' => $todayAttendances->where('status', 'dispensasi')->count(),
+            'alpha' => $todayAttendances->where('status', 'alpha')->count(),
+        ];
+
+        // Personal attendance for logged-in student
+        $myAttendances = StudentAttendance::where('user_id', $user->id)
+            ->latest('date')
+            ->take(30)
+            ->get();
+
+        $myAttendanceStats = [
+            'hadir' => $myAttendances->where('status', 'hadir')->count(),
+            'sakit' => $myAttendances->where('status', 'sakit')->count(),
+            'izin' => $myAttendances->where('status', 'izin')->count(),
+            'dispensasi' => $myAttendances->where('status', 'dispensasi')->count(),
+            'alpha' => $myAttendances->where('status', 'alpha')->count(),
+        ];
+
+        // Student's own leave requests
+        $myLeaveRequests = StudentLeaveRequest::where('student_id', $user->id)
+            ->with(['homeroomTeacher', 'reviewedByTeacher'])
+            ->latest()
+            ->take(15)
+            ->get();
+
+        // Class picket and cleanliness history
+        $picketHistory = PicketReport::where('classroom_id', $classroom->id)
+            ->with(['student', 'submittedBy'])
+            ->latest()
+            ->take(15)
+            ->get();
+
+        // Class Fines
         $classFines = ClassFine::where('classroom_id', $classroom->id)
             ->latest()
             ->get();
 
-        // Sync with Admin: Tugas KBM Mandiri Hari Ini (Learning Tasks)
+        // Substitute teacher tasks / Learning tasks
         $learningTasks = LearningTask::where('classroom_id', $classroom->id)
-            ->with(['subject', 'teacher'])
-            ->whereDate('date', now()->toDateString())
+            ->with(['subject', 'teacher', 'classLeader'])
             ->latest()
+            ->take(15)
             ->get();
 
-        // Sync with Admin: Presensi Kelas Hari Ini
-        $todayAttendances = StudentAttendance::where('classroom_id', $classroom->id)
-            ->whereDate('date', now()->toDateString())
-            ->with('user')
-            ->get();
-
-        // Sync with Admin: Organisasi & Ekstrakurikuler
+        // School Organizations & Extracurriculars
         $organizations = SchoolOrganization::where('status', 'active')
             ->with('supervisorTeacher')
             ->get();
 
         return Inertia::render('Student/Dashboard', [
             'student' => $user,
-            'classroom' => $classroom->load(['department', 'homeroomTeacher', 'room']),
+            'isClassLeader' => $isClassLeader,
+            'classroom' => $classroom->load(['department', 'homeroomTeacher', 'room', 'classLeader']),
             'classSchedules' => $classSchedules,
             'todayTimeline' => $todayTimeline,
             'activeLesson' => $activeLesson,
             'todayName' => $todayName,
             'teachers' => $teachers,
+            'allTeachers' => $allTeachers,
+            'classStudents' => $classStudents,
+            'todayAttendances' => $todayAttendances,
+            'attendanceStats' => $attendanceStats,
+            'isAttendanceLocked' => $isAttendanceLocked,
+            'myAttendances' => $myAttendances,
+            'myAttendanceStats' => $myAttendanceStats,
+            'myLeaveRequests' => $myLeaveRequests,
             'picketHistory' => $picketHistory,
             'classFines' => $classFines,
             'learningTasks' => $learningTasks,
-            'todayAttendances' => $todayAttendances,
             'organizations' => $organizations,
         ]);
     }
 
-    public function submitPicket(Request $request)
+    public function submitLeaveRequest(Request $request)
     {
         $validated = $request->validate([
+            'type' => 'required|in:sakit,izin,dispensasi',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
             'notes' => 'required|string|min:5',
             'photo' => 'nullable|image|max:5120',
         ]);
 
         $user = auth()->user();
-        $classroomId = $user->classroom_id ?? Classroom::first()?->id;
+        $classroom = $user->classroom ?? Classroom::first();
 
-        if (!$classroomId) {
-            return back()->with('error', 'Data kelas Anda tidak ditemukan di sistem.');
-        }
-
-        $photoUrl = '/images/piket_demo.jpg';
+        $proofImage = null;
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('pickets', 'public');
-            $photoUrl = '/storage/' . $path;
+            $path = $request->file('photo')->store('leave_proofs', 'public');
+            $proofImage = '/storage/' . $path;
         }
 
-        $report = PicketReport::create([
+        $leave = StudentLeaveRequest::create([
             'student_id' => $user->id,
-            'classroom_id' => $classroomId,
-            'date' => now()->toDateString(),
-            'photo_url' => $photoUrl,
+            'classroom_id' => $classroom->id,
+            'homeroom_teacher_id' => $validated['homeroom_teacher_id'] ?? $classroom->homeroom_teacher_id,
+            'type' => $validated['type'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'proof_image' => $proofImage,
             'notes' => $validated['notes'],
             'status' => 'pending',
         ]);
 
         AuditLog::create([
             'user_id' => $user->id,
-            'action' => 'PICKET_SUBMITTED',
-            'description' => "Pengajuan bukti piket diajukan oleh {$user->name}",
-            'details' => $report->toArray(),
+            'action' => 'STUDENT_LEAVE_SUBMITTED',
+            'description' => "Pengajuan surat {$leave->type} oleh {$user->name} ({$classroom->name})",
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', 'Laporan piket kelas berhasil dikirimkan ke Wali Kelas. Menunggu verifikasi.');
+        return back()->with('success', "Permohonan {$leave->type} berhasil dikirimkan ke Wali Kelas. Menunggu verifikasi.");
+    }
+
+    public function batchStoreAttendance(Request $request)
+    {
+        $user = auth()->user();
+        $isLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas' || $user->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas yang memiliki hak akses untuk mencatat presensi harian rombel.');
+        }
+
+        // 13:00 Auto-lock Check for non-admin
+        if (now()->hour >= 13 && $user->role !== 'admin') {
+            return back()->with('error', 'Presensi kelas hari ini telah terkunci otomatis pada pukul 13:00 WIB. Hubungi Admin Kurikulum jika ada perbaikan data.');
+        }
+
+        $validated = $request->validate([
+            'attendances' => 'required|array',
+            'attendances.*.user_id' => 'required|exists:users,id',
+            'attendances.*.status' => 'required|in:hadir,sakit,izin,dispensasi,alpha',
+            'attendances.*.notes' => 'nullable|string|max:255',
+        ]);
+
+        $classroom = $user->classroom ?? Classroom::first();
+        $today = now()->toDateString();
+        $now = now();
+        $submittedTime = $now->format('H:i:s \W\I\B');
+
+        foreach ($validated['attendances'] as $att) {
+            // Check if existing attendance was already approved via leave permit (overridden by admin/teacher)
+            $existing = StudentAttendance::where('user_id', $att['user_id'])
+                ->where('date', $today)
+                ->first();
+
+            if ($existing && $existing->overridden_by_admin && $user->role !== 'admin') {
+                // Keep the approved leave record intact without manual overwrite
+                continue;
+            }
+
+            StudentAttendance::updateOrCreate(
+                [
+                    'user_id' => $att['user_id'],
+                    'date' => $today,
+                ],
+                [
+                    'classroom_id' => $classroom->id,
+                    'submitted_by_user_id' => $user->id,
+                    'status' => $att['status'],
+                    'notes' => $att['notes'] ?? null,
+                    'submitted_time' => $submittedTime,
+                    'is_locked' => false,
+                ]
+            );
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'CLASS_ATTENDANCE_BATCH_STORED',
+            'description' => "Ketua Kelas {$user->name} menyimpan presensi harian kelas {$classroom->name} pada {$submittedTime}",
+            'details' => [
+                'day' => $now->locale('id')->isoFormat('dddd'),
+                'date' => $now->day,
+                'month' => $now->locale('id')->isoFormat('MMMM'),
+                'year' => $now->year,
+                'timestamp' => $submittedTime,
+            ],
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Presensi kelas {$classroom->name} hari ini berhasil disimpan & tersinkronisasi ke portal Guru dan Admin!");
+    }
+
+    public function submitDutyReport(Request $request)
+    {
+        $user = auth()->user();
+        $isLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas' || $user->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas yang berhak mengirimkan laporan verifikasi piket kelas harian.');
+        }
+
+        $validated = $request->validate([
+            'notes' => 'required|string|min:5',
+            'area_location' => 'nullable|string|max:255',
+            'duty_students' => 'nullable|array',
+            'photos' => 'nullable|array',
+            'photo' => 'nullable|image|max:5120',
+        ]);
+
+        $classroom = $user->classroom ?? Classroom::first();
+
+        $photoUrls = [];
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('pickets', 'public');
+            $photoUrls[] = '/storage/' . $path;
+        }
+
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $f) {
+                $path = $f->store('pickets', 'public');
+                $photoUrls[] = '/storage/' . $path;
+            }
+        }
+
+        // Support direct array of photo urls if passed as demo/strings
+        if (!empty($validated['photos']) && is_array($validated['photos'])) {
+            foreach ($validated['photos'] as $p) {
+                if (is_string($p) && !in_array($p, $photoUrls)) {
+                    $photoUrls[] = $p;
+                }
+            }
+        }
+
+        if (empty($photoUrls)) {
+            $photoUrls = ['/images/piket_demo_clean.jpg'];
+        }
+
+        $report = PicketReport::create([
+            'student_id' => $user->id,
+            'submitted_by_user_id' => $user->id,
+            'classroom_id' => $classroom->id,
+            'date' => now()->toDateString(),
+            'photo_url' => $photoUrls[0] ?? null,
+            'photos' => $photoUrls,
+            'duty_students' => $validated['duty_students'] ?? null,
+            'area_location' => $validated['area_location'] ?? "Ruang Kelas {$classroom->name} & Selasar",
+            'delivery_time' => now()->format('H:i') . ' WIB',
+            'notes' => $validated['notes'],
+            'status' => 'pending',
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'DUTY_REPORT_SUBMITTED',
+            'description' => "Ketua Kelas {$user->name} melaporkan verifikasi kebersihan piket {$classroom->name}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Laporan piket kebersihan akhir hari berhasil dikirimkan ke Wali Kelas, Kaprog, dan Admin Kurikulum!');
+    }
+
+    public function submitPicket(Request $request)
+    {
+        return $this->submitDutyReport($request);
+    }
+
+    public function updateTaskStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:dispatched,in_progress,completed',
+        ]);
+
+        $task = LearningTask::findOrFail($id);
+        $task->update(['status' => $validated['status']]);
+
+        return back()->with('success', "Status pengerjaan tugas diperbarui menjadi: " . ucfirst(str_replace('_', ' ', $validated['status'])));
     }
 
     public function submitFinePayment(Request $request, $id)
@@ -138,17 +349,14 @@ class StudentController extends Controller
         $fine = ClassFine::findOrFail($id);
         $user = auth()->user();
 
-        // 1. Authorization: Only students in the same class or admin can confirm
         if ($user->role !== 'admin' && $user->classroom_id && $user->classroom_id !== $fine->classroom_id) {
             return back()->with('error', 'Anda tidak memiliki hak untuk mengonfirmasi denda kelas lain.');
         }
 
-        // 2. Prevent re-submission if already paid
         if ($fine->payment_status === 'lunas') {
             return back()->with('error', 'Denda kebersihan kelas ini sudah berstatus lunas.');
         }
 
-        // 3. Prevent duplicate submission if already waiting confirmation
         if ($fine->payment_status === 'menunggu_konfirmasi') {
             return back()->with('info', 'Konfirmasi pelunasan sudah diajukan sebelumnya dan sedang menunggu verifikasi.');
         }

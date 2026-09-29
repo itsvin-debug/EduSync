@@ -28,6 +28,16 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        $month = (int) date('n'); // 1 to 12
+        $year = (int) date('Y');
+        if ($month >= 7) {
+            $academicYear = "{$year}/" . ($year + 1);
+            $semester = 'Ganjil';
+        } else {
+            $academicYear = ($year - 1) . "/{$year}";
+            $semester = 'Genap';
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -38,11 +48,14 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'warning' => fn () => $request->session()->get('warning'),
             ],
+            'academic_year' => $academicYear,
+            'semester' => $semester,
             'app' => [
                 'name' => config('app.name', 'EDUSYNC'),
-                'academic_year' => '2024/2025',
-                'semester' => 'Genap',
-                'version' => 'v3.4.2',
+                'academic_year' => $academicYear,
+                'semester' => $semester,
+                'academic_year_full' => "{$academicYear} Semester {$semester}",
+                'version' => 'v3.5.0',
             ],
         ];
     }

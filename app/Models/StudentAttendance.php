@@ -15,6 +15,14 @@ class StudentAttendance extends Model
         'status',
         'notes',
         'submitted_time',
+        'is_locked',
+        'overridden_by_admin',
+    ];
+
+    protected $casts = [
+        'is_locked' => 'boolean',
+        'overridden_by_admin' => 'boolean',
+        'date' => 'date',
     ];
 
     public function student(): BelongsTo

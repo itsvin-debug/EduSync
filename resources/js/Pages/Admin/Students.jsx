@@ -116,6 +116,12 @@ export default function Students({ students = [], classrooms = [], departments =
         }
     };
 
+    const handleToggleClassLeader = (id, name) => {
+        if (confirm(`Ubah penugasan Ketua Kelas untuk siswa "${name}"? Perubahan akan langsung disinkronkan ke portal Guru dan Siswa.`)) {
+            router.post(`/admin/students/${id}/toggle-class-leader`, {}, { preserveScroll: true });
+        }
+    };
+
     return (
         <AdminLayout title="Manajemen Akun Siswa">
             <Head title="Kelola Akun Siswa - EDUSYNC" />
@@ -238,15 +244,25 @@ export default function Students({ students = [], classrooms = [], departments =
                                             )}
                                         </td>
                                         <td className="py-3 px-4">
-                                            <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${
-                                                s.sub_role === 'Ketua Kelas'
-                                                    ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                                    : s.sub_role === 'Sekretaris'
-                                                        ? 'bg-sky-50 text-sky-700 border-sky-200'
-                                                        : 'bg-slate-100 text-slate-700 border-slate-200'
-                                            }`}>
-                                                {s.sub_role || 'Siswa'}
-                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleClassLeader(s.id, s.name)}
+                                                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
+                                                    s.is_class_leader || s.sub_role === 'Ketua Kelas'
+                                                        ? 'bg-amber-100 text-amber-900 border-amber-300 font-bold shadow-2xs hover:bg-amber-200'
+                                                        : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                                                }`}
+                                                title="Klik untuk mengubah status Ketua Kelas"
+                                            >
+                                                {s.is_class_leader || s.sub_role === 'Ketua Kelas' ? (
+                                                    <>
+                                                        <span>⭐</span>
+                                                        <span>Ketua Kelas</span>
+                                                    </>
+                                                ) : (
+                                                    <span>Siswa Biasa</span>
+                                                )}
+                                            </button>
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-2">
