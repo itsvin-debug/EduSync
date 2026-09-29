@@ -14,6 +14,7 @@ use App\Models\StudentLeaveRequest;
 use App\Models\SchoolOrganization;
 use App\Models\User;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -375,5 +376,58 @@ class StudentController extends Controller
         ]);
 
         return back()->with('success', 'Konfirmasi penyelesaian denda kelas berhasil diajukan! Menunggu verifikasi Pembina/Admin.');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'STUDENT_PROFILE_UPDATED',
+            'description' => "Siswa {$user->name} memperbarui data profil akun.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Profil akun siswa berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Kata sandi saat ini tidak sesuai.',
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'STUDENT_PASSWORD_UPDATED',
+            'description' => "Siswa {$user->name} berhasil mengubah kata sandi akun.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Kata sandi akun siswa berhasil diperbarui.');
     }
 }

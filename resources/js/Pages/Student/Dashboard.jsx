@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import StudentLayout from '@/Layouts/StudentLayout';
 import Modal from '@/Components/Modal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
@@ -31,6 +31,10 @@ import {
     Send,
     CheckSquare,
     Eye,
+    User,
+    KeyRound,
+    Settings,
+    Mail,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -57,12 +61,56 @@ export default function Dashboard({
 }) {
     const clock = useRealtimeClock();
     const isLocked = Boolean(isAttendanceLocked || (clock.hours >= 13 && clock.hours < 24));
+    const { errors } = usePage().props;
 
-    // Tabs: today, weekly, absensi (Ketua Kelas), absensi-pribadi (Siswa Biasa), izin, tugas, piket, denda, ekskul, guru
-    const [activeTab, setActiveTab] = useState(isClassLeader ? 'today' : 'today');
+    // Tabs: today, weekly, absensi (Ketua Kelas), izin, tugas, piket, denda, ekskul, guru, settings
+    const [activeTab, setActiveTab] = useState('today');
     const [selectedWeeklyDay, setSelectedWeeklyDay] = useState('Senin');
     const [selectedFine, setSelectedFine] = useState(null);
     const [selectedProofModal, setSelectedProofModal] = useState(null);
+
+    // Student Account Settings State
+    const [profileData, setProfileData] = useState({
+        name: student?.name || '',
+        email: student?.email || '',
+        phone: student?.phone || '',
+    });
+
+    const [passwordData, setPasswordData] = useState({
+        current_password: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    const [profileSaving, setProfileSaving] = useState(false);
+    const [passwordSaving, setPasswordSaving] = useState(false);
+
+    const handleProfileUpdate = (e) => {
+        e.preventDefault();
+        setProfileSaving(true);
+        router.post('/siswa/settings/profile', profileData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setProfileSaving(false);
+                alert('Profil akun siswa berhasil diperbarui!');
+            },
+            onError: () => setProfileSaving(false),
+        });
+    };
+
+    const handlePasswordUpdate = (e) => {
+        e.preventDefault();
+        setPasswordSaving(true);
+        router.post('/siswa/settings/password', passwordData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setPasswordSaving(false);
+                alert('Kata sandi akun siswa berhasil diperbarui!');
+                setPasswordData({ current_password: '', password: '', password_confirmation: '' });
+            },
+            onError: () => setPasswordSaving(false),
+        });
+    };
 
     // 1. Attendance Matrix State for Class Leader
     const [attendanceMatrix, setAttendanceMatrix] = useState({});
@@ -241,8 +289,10 @@ export default function Dashboard({
         >
             <Head title={`Ruang Belajar ${classroom?.name || 'Siswa'} - EDUSYNC`} />
 
-            {/* 1. HERO BANNER WITH SIGNATURE NAVY CARD & LIVE SCHEDULE ENGINE WIDGET */}
-            <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+            {/* 1. HERO BANNER & METRICS (ONLY VISIBLE ON DASHBOARD & JADWAL HARI INI) */}
+            {activeTab === 'today' && (
+                <>
+                    <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
                 <div className="flex flex-col space-y-2 max-w-2xl min-w-0">
                     <div className="flex items-center gap-2.5 flex-wrap">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-indigo-300 text-[11px] font-semibold uppercase tracking-wider">
@@ -577,102 +627,8 @@ export default function Dashboard({
                     </div>
                 </div>
             </div>
-
-            {/* 3. MAIN NAVIGATION TABS BAR */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-6 border-b border-slate-200">
-                <button
-                    onClick={() => setActiveTab('today')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'today' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Clock className="w-4 h-4" />
-                    <span>Linimasa Hari Ini ({todayTimeline.length} Sesi)</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('weekly')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'weekly' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <CalendarDays className="w-4 h-4" />
-                    <span>Jadwal Mingguan Lengkap</span>
-                </button>
-
-                {isClassLeader && (
-                    <button
-                        onClick={() => setActiveTab('absensi')}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                            activeTab === 'absensi' ? 'bg-indigo-600 text-white shadow-xs' : 'text-indigo-700 bg-indigo-50 hover:bg-indigo-100'
-                        }`}
-                    >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Presensi Harian Kelas (Ketua Kelas)</span>
-                        {isLocked && <Lock className="w-3 h-3 text-amber-300" />}
-                    </button>
-                )}
-
-                <button
-                    onClick={() => setActiveTab('izin')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'izin' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Calendar className="w-4 h-4" />
-                    <span>Pengajuan Izin / Sakit ({myLeaveRequests.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('tugas')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'tugas' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <FileText className="w-4 h-4" />
-                    <span>{isClassLeader ? 'Penerima Tugas Guru Pengganti' : 'Tugas KBM / Jamkos'} ({learningTasks.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('piket')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'piket' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <CheckSquare className="w-4 h-4" />
-                    <span>{isClassLeader ? 'Verifikasi Piket Pulang Sekolah' : 'Piket & Kebersihan'} ({picketHistory.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('denda')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'denda' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <AlertCircle className="w-4 h-4" />
-                    <span>Denda Kebersihan ({classFines.filter((f) => f.payment_status !== 'lunas').length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('ekskul')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'ekskul' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Users className="w-4 h-4" />
-                    <span>Organisasi & Ekskul ({organizations.length})</span>
-                </button>
-
-                <button
-                    onClick={() => setActiveTab('guru')}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        activeTab === 'guru' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                >
-                    <Phone className="w-4 h-4" />
-                    <span>Kontak Guru & Wali Kelas ({teachers.length})</span>
-                </button>
-            </div>
+                </>
+            )}
 
             {/* TAB: PRESENSI HARIAN KELAS (KETUA KELAS SPECIAL PRIVILEGE) */}
             {activeTab === 'absensi' && isClassLeader && (
@@ -1938,6 +1894,197 @@ export default function Dashboard({
                         </div>
                     </form>
                 </Modal>
+            )}
+            {/* TAB: PENGATURAN PROFIL & SANDI AKUN SISWA */}
+            {activeTab === 'settings' && (
+                <div className="space-y-6 max-w-4xl">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <Settings className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                                    Pengaturan Profil & Keamanan Akun Siswa
+                                </h2>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Perbarui informasi kontak pribadi dan kelola kata sandi akun portal Anda secara berkala.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 1: Informasi Profil Siswa */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <User className="w-4 h-4 text-indigo-600" />
+                                Data Profil Siswa
+                            </h3>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {isClassLeader ? 'Ketua Kelas Aktif' : 'Siswa Reguler'}
+                            </span>
+                        </div>
+
+                        <form onSubmit={handleProfileUpdate} className="mt-5 space-y-4 text-xs">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nama Lengkap Siswa *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={profileData.name}
+                                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Alamat Email *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={profileData.email}
+                                        onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.email && <p className="text-xs text-rose-600 mt-1">{errors.email}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nomor Telepon / WhatsApp
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="081234567890"
+                                        value={profileData.phone}
+                                        onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.phone && <p className="text-xs text-rose-600 mt-1">{errors.phone}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nomor Induk Siswa Nasional (NISN)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        disabled
+                                        value={student?.nisn || '-'}
+                                        className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs cursor-not-allowed"
+                                    />
+                                    <span className="text-[10px] text-slate-400 mt-0.5 block">NISN sinkron otomatis dengan Dapodik pusat</span>
+                                </div>
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600">
+                                <div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Rombongan Belajar (Kelas)</span>
+                                    <span className="font-semibold text-slate-800 text-xs">{classroom?.name || 'XI PPLG 1'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Kompetensi Keahlian (Jurusan)</span>
+                                    <span className="font-semibold text-slate-800 text-xs">{classroom?.department?.name || 'Rekayasa Perangkat Lunak'}</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={profileSaving}
+                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                >
+                                    <Check className="w-4 h-4" />
+                                    <span>{profileSaving ? 'Menyimpan...' : 'Simpan Perubahan Profil'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Section 2: Ganti Password */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <Lock className="w-4 h-4 text-amber-600" />
+                                Ganti Kata Sandi Akun Siswa
+                            </h3>
+                            <span className="text-[11px] text-slate-400">Minimal 8 karakter</span>
+                        </div>
+
+                        <form onSubmit={handlePasswordUpdate} className="mt-5 space-y-4 text-xs">
+                            <div>
+                                <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                    Kata Sandi Saat Ini *
+                                </label>
+                                <input
+                                    type="password"
+                                    required
+                                    placeholder="Masukkan kata sandi lama Anda"
+                                    value={passwordData.current_password}
+                                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                                    className="w-full md:w-2/3 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                />
+                                {errors.current_password && (
+                                    <p className="text-xs text-rose-600 mt-1 font-semibold flex items-center gap-1">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        {errors.current_password}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Kata Sandi Baru *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="Minimal 8 karakter"
+                                        value={passwordData.password}
+                                        onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.password && <p className="text-xs text-rose-600 mt-1">{errors.password}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Konfirmasi Kata Sandi Baru *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="Ketik ulang kata sandi baru"
+                                        value={passwordData.password_confirmation}
+                                        onChange={(e) => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={passwordSaving}
+                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                >
+                                    <KeyRound className="w-4 h-4" />
+                                    <span>{passwordSaving ? 'Memproses...' : 'Perbarui Kata Sandi'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </StudentLayout>
     );

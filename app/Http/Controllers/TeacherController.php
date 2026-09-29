@@ -18,6 +18,7 @@ use App\Models\StudentLeaveRequest;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
@@ -506,5 +507,72 @@ class TeacherController extends Controller
         ]);
 
         return back()->with('success', $validated['status'] === 'approved' ? 'Bukti piket siswa berhasil disetujui (ACC).' : 'Laporan piket ditolak untuk revisi.');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'nip' => 'nullable|string|max:30',
+            'title' => 'nullable|string|max:100',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'nip' => $validated['nip'] ?? $user->nip,
+            'sub_role' => $validated['title'] ?? $user->sub_role,
+        ]);
+
+        if ($user->teacher) {
+            $user->teacher->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'nip' => $validated['nip'] ?? $user->teacher->nip,
+                'title' => $validated['title'] ?? $user->teacher->title,
+            ]);
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'TEACHER_PROFILE_UPDATED',
+            'description' => "Guru {$user->name} memperbarui data profil akun.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Profil guru berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Kata sandi saat ini tidak sesuai.',
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'TEACHER_PASSWORD_UPDATED',
+            'description' => "Guru {$user->name} berhasil mengubah kata sandi akun.",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', 'Kata sandi akun guru berhasil diperbarui.');
     }
 }

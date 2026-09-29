@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import TeacherLayout from '@/Layouts/TeacherLayout';
 import Modal from '@/Components/Modal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
@@ -31,6 +31,11 @@ import {
     Send,
     UserCheck,
     UserX,
+    User,
+    KeyRound,
+    Settings,
+    Mail,
+    Lock,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -57,11 +62,58 @@ export default function Dashboard({
     selectedClassAttendances = [],
     selectedClassStudents = [],
 }) {
-    // Tabs: workspace, personal, presensi_kelas, perizinan_siswa, tugas, presensi, izin_dinas, picket, lapor_sampah, master, inval
+    // Tabs: workspace, personal, presensi_kelas, perizinan_siswa, tugas, presensi, izin_dinas, picket, lapor_sampah, master, settings
     const [activeTab, setActiveTab] = useState('workspace');
     const [selectedWeeklyDay, setSelectedWeeklyDay] = useState('Senin');
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
     const [selectedProofModal, setSelectedProofModal] = useState(null);
+
+    const { errors } = usePage().props;
+
+    // Teacher Profile & Password Form States
+    const [profileData, setProfileData] = useState({
+        name: teacher?.name || '',
+        title: teacher?.title || '',
+        nip: teacher?.nip || '',
+        email: teacher?.email || '',
+        phone: teacher?.phone || '',
+    });
+
+    const [passwordData, setPasswordData] = useState({
+        current_password: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    const [profileSaving, setProfileSaving] = useState(false);
+    const [passwordSaving, setPasswordSaving] = useState(false);
+
+    const handleProfileUpdate = (e) => {
+        e.preventDefault();
+        setProfileSaving(true);
+        router.post('/guru/settings/profile', profileData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setProfileSaving(false);
+                alert('Profil guru berhasil diperbarui!');
+            },
+            onError: () => setProfileSaving(false),
+        });
+    };
+
+    const handlePasswordUpdate = (e) => {
+        e.preventDefault();
+        setPasswordSaving(true);
+        router.post('/guru/settings/password', passwordData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setPasswordSaving(false);
+                alert('Kata sandi guru berhasil diperbarui!');
+                setPasswordData({ current_password: '', password: '', password_confirmation: '' });
+            },
+            onError: () => setPasswordSaving(false),
+        });
+    };
 
     // Inval swap form
     const { data: swapData, setData: setSwapData, post: postSwap, reset: resetSwap, processing: swapProcessing, errors: swapErrors } = useForm({
@@ -218,8 +270,10 @@ export default function Dashboard({
         <TeacherLayout teacher={teacher} title="Ruang Kerja & Jadwal Mengajar" activeTab={activeTab} onTabChange={setActiveTab}>
             <Head title={`Ruang Kerja Guru - ${teacher?.name || 'Guru'} - EDUSYNC`} />
 
-            {/* TOP ACTIVE CLASS HERO BANNER WITH REAL-TIME CLOCK */}
-            <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
+            {/* TOP ACTIVE CLASS HERO BANNER & AGGREGATE METRICS (ONLY ON RUANG KERJA HARI INI) */}
+            {activeTab === 'workspace' && (
+                <>
+                    <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div className="space-y-3">
                         <div className="flex items-center gap-2.5 flex-wrap">
@@ -331,6 +385,8 @@ export default function Dashboard({
                     </div>
                 </div>
             </div>
+                </>
+            )}
 
             {/* TAB: PRESENSI SISWA REAL-TIME (LIVE CLASS ATTENDANCE MONITORING) */}
             {activeTab === 'presensi_kelas' && (
@@ -1511,6 +1567,200 @@ export default function Dashboard({
                     </div>
                 </form>
             </Modal>
+            {/* TAB: PENGATURAN PROFIL & SANDI GURU */}
+            {activeTab === 'settings' && (
+                <div className="space-y-6 max-w-4xl">
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <Settings className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                                    Pengaturan Profil & Keamanan Akun Tenaga Pendidik
+                                </h2>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Perbarui biodata resmi pengajar, kontak WhatsApp, dan kata sandi akun sistem secara berkala.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 1: Profil Guru */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <User className="w-4 h-4 text-indigo-600" />
+                                Informasi Biodata Guru Pengampu
+                            </h3>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Tenaga Pendidik Aktif
+                            </span>
+                        </div>
+
+                        <form onSubmit={handleProfileUpdate} className="mt-5 space-y-4 text-xs">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nama Lengkap & Gelar Akademik *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={profileData.name}
+                                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Jabatan / Gelar Kependidikan (Title)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Contoh: Guru Produktif PPLG / Wali Kelas"
+                                        value={profileData.title}
+                                        onChange={(e) => setProfileData({ ...profileData, title: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.title && <p className="text-xs text-rose-600 mt-1">{errors.title}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nomor Induk Pegawai (NIP)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={profileData.nip}
+                                        onChange={(e) => setProfileData({ ...profileData, nip: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.nip && <p className="text-xs text-rose-600 mt-1">{errors.nip}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Alamat Email Resmi *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={profileData.email}
+                                        onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.email && <p className="text-xs text-rose-600 mt-1">{errors.email}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Nomor Kontak / WhatsApp
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="081234567890"
+                                        value={profileData.phone}
+                                        onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.phone && <p className="text-xs text-rose-600 mt-1">{errors.phone}</p>}
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={profileSaving}
+                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                >
+                                    <Check className="w-4 h-4" />
+                                    <span>{profileSaving ? 'Menyimpan...' : 'Simpan Perubahan Data'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Section 2: Ganti Password */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <Lock className="w-4 h-4 text-amber-600" />
+                                Ganti Kata Sandi Akun Pengajar
+                            </h3>
+                            <span className="text-[11px] text-slate-400">Minimal 8 karakter</span>
+                        </div>
+
+                        <form onSubmit={handlePasswordUpdate} className="mt-5 space-y-4 text-xs">
+                            <div>
+                                <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                    Kata Sandi Saat Ini *
+                                </label>
+                                <input
+                                    type="password"
+                                    required
+                                    placeholder="Masukkan kata sandi lama Anda"
+                                    value={passwordData.current_password}
+                                    onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                                    className="w-full md:w-2/3 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                />
+                                {errors.current_password && (
+                                    <p className="text-xs text-rose-600 mt-1 font-semibold flex items-center gap-1">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        {errors.current_password}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Kata Sandi Baru *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="Minimal 8 karakter"
+                                        value={passwordData.password}
+                                        onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                    />
+                                    {errors.password && <p className="text-xs text-rose-600 mt-1">{errors.password}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
+                                        Konfirmasi Kata Sandi Baru *
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        placeholder="Ketik ulang kata sandi baru"
+                                        value={passwordData.password_confirmation}
+                                        onChange={(e) => setPasswordData({ ...passwordData, password_confirmation: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={passwordSaving}
+                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                >
+                                    <KeyRound className="w-4 h-4" />
+                                    <span>{passwordSaving ? 'Memproses...' : 'Perbarui Kata Sandi'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </TeacherLayout>
     );
 }

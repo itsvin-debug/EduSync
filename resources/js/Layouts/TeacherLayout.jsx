@@ -20,6 +20,7 @@ import {
     Menu,
     X,
     Users,
+    Settings,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
@@ -54,6 +55,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
         { id: 'piket', label: 'Verifikasi Piket Siswa', icon: CheckSquare },
         { id: 'lapor_sampah', label: 'Lapor Sampah & Kebersihan', icon: Trash2 },
         { id: 'master', label: 'Cek Jadwal Rombel Lain', icon: BookOpen },
+        { id: 'settings', label: 'Pengaturan Profil & Sandi', icon: Settings },
     ];
 
     const handleItemClick = (id) => {
@@ -160,28 +162,6 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                                 })}
                             </ul>
                         </div>
-
-                        <div>
-                            <div className="px-3 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                Beralih Portal (Demo)
-                            </div>
-                            <div className="space-y-1">
-                                <a
-                                    href="/quick-login/admin"
-                                    className="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
-                                >
-                                    <span>Portal Admin</span>
-                                    <ExternalLink className="w-3 h-3 text-slate-500" />
-                                </a>
-                                <a
-                                    href="/quick-login/siswa"
-                                    className="flex items-center justify-between px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors"
-                                >
-                                    <span>Portal Siswa</span>
-                                    <ExternalLink className="w-3 h-3 text-slate-500" />
-                                </a>
-                            </div>
-                        </div>
                     </nav>
 
                     {/* Logout */}
@@ -211,7 +191,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-3 sm:gap-4 text-xs">
                         <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
                             {clock.semester} {clock.academicYear}
                         </span>
@@ -219,6 +199,19 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>Koneksi Terhubung</span>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => onTabChange && onTabChange('settings')}
+                            className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                            title="Pengaturan Profil & Sandi"
+                        >
+                            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px]">
+                                {initials}
+                            </div>
+                            <span className="font-semibold text-xs hidden md:inline truncate max-w-[130px]">
+                                {currentTeacher.name}
+                            </span>
+                        </button>
                     </div>
                 </header>
 

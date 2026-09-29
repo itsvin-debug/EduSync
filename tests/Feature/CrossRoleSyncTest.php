@@ -249,5 +249,61 @@ class CrossRoleSyncTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page->component('Teacher/Dashboard'));
     }
+
+    /**
+     * Test: Teacher can update profile and change password.
+     */
+    public function test_teacher_can_update_profile_and_password(): void
+    {
+        $teacherUser = User::where('role', 'guru')->where('status', 'active')->first();
+
+        // 1. Update Profile
+        $updatedName = 'Guru Terupdate ' . uniqid();
+        $respProfile = $this->actingAs($teacherUser)->post('/guru/settings/profile', [
+            'name' => $updatedName,
+            'title' => 'Guru Kejuruan Vokasi',
+            'nip' => '199201012020121099',
+            'email' => $teacherUser->email,
+            'phone' => '089912345678',
+        ]);
+        $respProfile->assertSessionHasNoErrors();
+        $this->assertEquals($updatedName, $teacherUser->fresh()->name);
+
+        // 2. Update Password
+        $respPass = $this->actingAs($teacherUser)->post('/guru/settings/password', [
+            'current_password' => 'password',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+        $respPass->assertSessionHasNoErrors();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('newpassword123', $teacherUser->fresh()->password));
+    }
+
+    /**
+     * Test: Student can update profile and change password.
+     */
+    public function test_student_can_update_profile_and_password(): void
+    {
+        $studentUser = User::where('role', 'siswa')->where('status', 'active')->first();
+
+        // 1. Update Profile
+        $updatedName = 'Siswa Terupdate ' . uniqid();
+        $respProfile = $this->actingAs($studentUser)->post('/siswa/settings/profile', [
+            'name' => $updatedName,
+            'email' => $studentUser->email,
+            'phone' => '081233445566',
+        ]);
+        $respProfile->assertSessionHasNoErrors();
+        $this->assertEquals($updatedName, $studentUser->fresh()->name);
+
+        // 2. Update Password
+        $respPass = $this->actingAs($studentUser)->post('/siswa/settings/password', [
+            'current_password' => 'password',
+            'password' => 'studentscret123',
+            'password_confirmation' => 'studentscret123',
+        ]);
+        $respPass->assertSessionHasNoErrors();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('studentscret123', $studentUser->fresh()->password));
+    }
 }
 

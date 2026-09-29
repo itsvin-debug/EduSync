@@ -146,6 +146,10 @@ Route::prefix('guru')->middleware(['auth', 'role:guru,admin'])->group(function (
     // Student Leave & Sickness Verification by Homeroom/Subject Teacher
     Route::post('/student-leaves/{id}/approve', [TeacherController::class, 'approveStudentLeave'])->name('guru.student-leaves.approve');
     Route::post('/student-leaves/{id}/reject', [TeacherController::class, 'rejectStudentLeave'])->name('guru.student-leaves.reject');
+
+    // Teacher Account Settings
+    Route::post('/settings/profile', [TeacherController::class, 'updateProfile'])->name('guru.settings.profile');
+    Route::post('/settings/password', [TeacherController::class, 'updatePassword'])->name('guru.settings.password');
 });
 
 // 5. Student Portal (Screen 6 & Student Mobile-First Specification)
@@ -164,4 +168,8 @@ Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function
     Route::post('/attendance/batch-store', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch-store');
     Route::post('/duty-report', [StudentController::class, 'submitDutyReport'])->name('siswa.duty-report.submit');
     Route::post('/learning-tasks/{id}/status', [StudentController::class, 'updateTaskStatus'])->name('siswa.learning-tasks.status');
+
+    // Student Account Settings
+    Route::post('/settings/profile', [StudentController::class, 'updateProfile'])->name('siswa.settings.profile');
+    Route::post('/settings/password', [StudentController::class, 'updatePassword'])->name('siswa.settings.password');
 });
