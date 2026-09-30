@@ -24,7 +24,39 @@ class Schedule extends Model
         'notes',
     ];
 
-    protected $appends = ['start_time', 'end_time'];
+    protected $appends = ['start_time', 'end_time', 'status'];
+
+    public function getStatusAttribute(): string
+    {
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+        $currentDay = match ($now->dayOfWeekIso) {
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            default => null,
+        };
+
+        if ($this->day !== $currentDay) {
+            return 'UPCOMING';
+        }
+
+        $startTime = \Carbon\Carbon::createFromTimeString($this->start_time, 'Asia/Jakarta')->setDate($now->year, $now->month, $now->day);
+        $endTime = \Carbon\Carbon::createFromTimeString($this->end_time, 'Asia/Jakarta')->setDate($now->year, $now->month, $now->day);
+
+        // 'COMPLETED' / 'SELESAI': Exactly when now() >= end_time
+        if ($now->greaterThanOrEqualTo($endTime)) {
+            return 'COMPLETED';
+        }
+
+        // 'ONGOING' / 'BERLANGSUNG': If now() >= start_time AND now() < end_time
+        if ($now->greaterThanOrEqualTo($startTime) && $now->lessThan($endTime)) {
+            return 'ONGOING';
+        }
+
+        return 'UPCOMING';
+    }
 
     public function getStartTimeAttribute(): string
     {

@@ -41,18 +41,21 @@ class StudentController extends Controller
             default => 'Senin',
         };
 
+        $nowJakarta = Carbon::now('Asia/Jakarta');
         $todayTimeline = $classSchedules->where('day', $todayName)->values();
-        $activeLesson = $todayTimeline->first();
+        $activeLesson = $todayTimeline->first(fn ($s) => $s->status === 'ONGOING')
+            ?? $todayTimeline->first(fn ($s) => $s->status === 'UPCOMING')
+            ?? $todayTimeline->last();
 
         // Teachers teaching in this class
         $teacherIds = $classSchedules->pluck('teacher_id')->unique();
         $teachers = Teacher::whereIn('id', $teacherIds)->get();
         $allTeachers = Teacher::orderBy('name')->get();
 
-        // Class students roster (for Class Leader attendance management)
+        // Class students roster (for Class Leader attendance management) ordered by attendance number
         $classStudents = User::where('classroom_id', $classroom->id)
             ->where('role', 'siswa')
-            ->orderBy('name')
+            ->orderByRaw('CAST(attendance_number AS UNSIGNED) ASC, name ASC')
             ->get();
 
         // Today's attendance records for the class
@@ -152,6 +155,7 @@ class StudentController extends Controller
             'homeroom_teacher_id' => 'nullable|exists:teachers,id',
             'notes' => 'required|string|min:5',
             'photo' => 'nullable|image|max:5120',
+            'proof_image' => 'nullable|image|max:5120',
         ]);
 
         $user = auth()->user();
@@ -160,6 +164,9 @@ class StudentController extends Controller
         $proofImage = null;
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('leave_proofs', 'public');
+            $proofImage = '/storage/' . $path;
+        } elseif ($request->hasFile('proof_image')) {
+            $path = $request->file('proof_image')->store('leave_proofs', 'public');
             $proofImage = '/storage/' . $path;
         }
 
@@ -269,7 +276,10 @@ class StudentController extends Controller
             'area_location' => 'nullable|string|max:255',
             'duty_students' => 'nullable|array',
             'photos' => 'nullable|array',
-            'photo' => 'nullable|image|max:5120',
+            'photos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,mov,avi,webm|max:20480',
+            'media_files' => 'nullable|array',
+            'media_files.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,mov,avi,webm|max:20480',
+            'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,mov,avi,webm|max:20480',
         ]);
 
         $classroom = $user->classroom ?? Classroom::first();
@@ -282,22 +292,29 @@ class StudentController extends Controller
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $f) {
-                $path = $f->store('pickets', 'public');
-                $photoUrls[] = '/storage/' . $path;
+                if ($f instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $f->store('pickets', 'public');
+                    $photoUrls[] = '/storage/' . $path;
+                }
             }
         }
 
-        // Support direct array of photo urls if passed as demo/strings
+        if ($request->hasFile('media_files')) {
+            foreach ($request->file('media_files') as $f) {
+                if ($f instanceof \Illuminate\Http\UploadedFile) {
+                    $path = $f->store('pickets', 'public');
+                    $photoUrls[] = '/storage/' . $path;
+                }
+            }
+        }
+
+        // Support direct array of photo urls if already stored string paths
         if (!empty($validated['photos']) && is_array($validated['photos'])) {
             foreach ($validated['photos'] as $p) {
                 if (is_string($p) && !in_array($p, $photoUrls)) {
                     $photoUrls[] = $p;
                 }
             }
-        }
-
-        if (empty($photoUrls)) {
-            $photoUrls = ['/images/piket_demo_clean.jpg'];
         }
 
         $report = PicketReport::create([
@@ -378,6 +395,149 @@ class StudentController extends Controller
         return back()->with('success', 'Konfirmasi penyelesaian denda kelas berhasil diajukan! Menunggu verifikasi Pembina/Admin.');
     }
 
+    public function storeStudent(Request $request)
+    {
+        $currentUser = auth()->user();
+        $isLeader = (bool) ($currentUser->is_class_leader || $currentUser->sub_role === 'Ketua Kelas' || $currentUser->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas atau Admin yang berhak menambahkan siswa ke dalam rombel.');
+        }
+
+        $validated = $request->validate([
+            'attendance_number' => 'required|numeric|min:1|max:60',
+            'name' => 'required|string|max:255',
+            'nisn' => 'required|string|size:10|unique:users,nisn',
+        ]);
+
+        $classroom = $currentUser->classroom ?? Classroom::first();
+
+        // Generate student email
+        $cleanName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $validated['name']));
+        $email = $cleanName . '.' . $validated['nisn'] . '@edusync.sch.id';
+        $i = 1;
+        while (User::where('email', $email)->exists()) {
+            $email = $cleanName . $i . '.' . $validated['nisn'] . '@edusync.sch.id';
+            $i++;
+        }
+
+        $student = User::create([
+            'name' => $validated['name'],
+            'attendance_number' => $validated['attendance_number'],
+            'nisn' => $validated['nisn'],
+            'email' => $email,
+            'password' => Hash::make($validated['nisn']),
+            'role' => 'siswa',
+            'sub_role' => 'Siswa',
+            'classroom_id' => $classroom->id,
+            'status' => 'active',
+        ]);
+
+        AuditLog::create([
+            'user_id' => $currentUser->id,
+            'action' => 'STUDENT_FAST_INPUT_CREATED',
+            'description' => "Ketua Kelas {$currentUser->name} menambahkan siswa baru: No {$validated['attendance_number']} - {$validated['name']} (NISN: {$validated['nisn']})",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Siswa {$student->name} (No. Absen {$student->attendance_number}) berhasil didaftarkan ke kelas {$classroom->name}!");
+    }
+
+    public function sendAttendanceReport(Request $request)
+    {
+        $user = auth()->user();
+        $isLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas' || $user->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas yang berhak mengirimkan laporan presensi harian.');
+        }
+
+        $classroom = $user->classroom ?? Classroom::first();
+        $today = now()->toDateString();
+        $now = Carbon::now('Asia/Jakarta');
+
+        $attendances = StudentAttendance::where('classroom_id', $classroom->id)
+            ->whereDate('date', $today)
+            ->get();
+
+        $stats = [
+            'total' => User::where('classroom_id', $classroom->id)->where('role', 'siswa')->count(),
+            'hadir' => $attendances->where('status', 'hadir')->count(),
+            'sakit' => $attendances->where('status', 'sakit')->count(),
+            'izin' => $attendances->where('status', 'izin')->count(),
+            'dispensasi' => $attendances->where('status', 'dispensasi')->count(),
+            'alpha' => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'ATTENDANCE_REPORT_DISPATCHED_TO_TEACHERS',
+            'description' => "Ketua Kelas {$user->name} mengirimkan laporan presensi resmi kelas {$classroom->name} kepada Wali Kelas ({$classroom->homeroomTeacher?->name}) dan Guru Kejuruan.",
+            'details' => [
+                'classroom' => $classroom->name,
+                'stats' => $stats,
+                'dispatched_at' => $now->toDateTimeString(),
+            ],
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Laporan presensi harian kelas {$classroom->name} berhasil dikirimkan ke Wali Kelas & Guru Kejuruan via notifikasi sistem!");
+    }
+
+    public function downloadAttendancePdf(Request $request)
+    {
+        $user = auth()->user();
+        $classroom = $user->classroom ?? Classroom::first();
+        $today = now()->toDateString();
+        $now = Carbon::now('Asia/Jakarta');
+
+        $students = User::where('classroom_id', $classroom->id)
+            ->where('role', 'siswa')
+            ->orderByRaw('CAST(attendance_number AS UNSIGNED) ASC, name ASC')
+            ->get();
+
+        $attendances = StudentAttendance::where('classroom_id', $classroom->id)
+            ->whereDate('date', $today)
+            ->get();
+
+        $stats = [
+            'total' => $students->count(),
+            'hadir' => $attendances->where('status', 'hadir')->count(),
+            'sakit' => $attendances->where('status', 'sakit')->count(),
+            'izin' => $attendances->where('status', 'izin')->count(),
+            'dispensasi' => $attendances->where('status', 'dispensasi')->count(),
+            'alpha' => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        $dayName = match($now->dayOfWeekIso) {
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            default => 'Senin',
+        };
+
+        $classLeader = User::where('classroom_id', $classroom->id)
+            ->where(function($q) {
+                $q->where('is_class_leader', true)->orWhere('sub_role', 'Ketua Kelas');
+            })->first() ?? $user;
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.class_attendance', [
+            'classroom' => $classroom->load(['department', 'homeroomTeacher']),
+            'students' => $students,
+            'attendances' => $attendances,
+            'stats' => $stats,
+            'dayName' => $dayName,
+            'dateFormatted' => $now->locale('id')->isoFormat('D MMMM YYYY'),
+            'student' => $user,
+            'classLeader' => $classLeader,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'Rekap_Presensi_' . str_replace(' ', '_', $classroom->name) . '_' . $today . '.pdf';
+        return $pdf->download($filename);
+    }
+
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
@@ -385,18 +545,26 @@ class StudentController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
-        $user->update([
+        $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
-        ]);
+        ];
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $updateData['avatar'] = '/storage/' . $path;
+        }
+
+        $user->update($updateData);
 
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'STUDENT_PROFILE_UPDATED',
-            'description' => "Siswa {$user->name} memperbarui data profil akun.",
+            'description' => "Siswa {$user->name} memperbarui data profil akun & foto avatar.",
             'ip_address' => $request->ip(),
         ]);
 

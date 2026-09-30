@@ -87,18 +87,26 @@ export default function StudentLayout({
                     </div>
 
                     {/* Student Quick Identity Card */}
-                    <div className="mx-3 mt-3.5 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-3 shrink-0">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-inner">
-                            {initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-white truncate leading-tight">
+                    <div className="mx-3 mt-3.5 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-3 shrink-0 overflow-hidden">
+                        {currentStudent.avatar ? (
+                            <img
+                                src={currentStudent.avatar}
+                                alt={currentStudent.name}
+                                className="w-9 h-9 rounded-full object-cover shrink-0 border border-indigo-400/50 shadow-inner"
+                            />
+                        ) : (
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-semibold text-xs shrink-0 shadow-inner">
+                                {initials}
+                            </div>
+                        )}
+                        <div className="min-w-0 flex-1 overflow-hidden">
+                            <p className="text-xs font-semibold text-white truncate leading-tight" title={currentStudent.name}>
                                 {currentStudent.name}
                             </p>
                             <p className="text-[11px] text-indigo-300 font-mono mt-0.5 truncate">
                                 NISN: {currentStudent.nisn || '006841289'}
                             </p>
-                            <span className="inline-block text-[10px] text-slate-400 uppercase tracking-wider truncate">
+                            <span className="block text-[10px] text-slate-400 uppercase tracking-wider truncate w-full" title={`${currentClass.name} • ${currentClass.department?.name || 'Rekayasa PL'}`}>
                                 {currentClass.name} • {currentClass.department?.name || 'Rekayasa PL'}
                             </span>
                         </div>
@@ -249,20 +257,6 @@ export default function StudentLayout({
                                 <li>
                                     <button
                                         type="button"
-                                        onClick={() => onTabChange && onTabChange('ekskul')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                            activeTab === 'ekskul'
-                                                ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
-                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                                        }`}
-                                    >
-                                        <Users className="w-4 h-4 shrink-0" />
-                                        <span>Organisasi & Ekskul</span>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button
-                                        type="button"
                                         onClick={() => onTabChange && onTabChange('guru')}
                                         className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                                             activeTab === 'guru'
@@ -359,17 +353,25 @@ export default function StudentLayout({
                         <button
                             type="button"
                             onClick={() => onTabChange && onTabChange('settings')}
-                            className="flex items-center gap-2.5 pl-2 border-l border-slate-200 hover:opacity-85 transition-opacity cursor-pointer text-left"
+                            className="flex items-center gap-2.5 pl-2 border-l border-slate-200 hover:opacity-85 transition-opacity cursor-pointer text-left overflow-hidden"
                             title="Buka Pengaturan Akun"
                         >
-                            <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-                                {initials}
-                            </div>
-                            <div className="hidden md:flex flex-col text-left">
-                                <span className="font-bold text-xs text-slate-900 leading-tight">
+                            {currentStudent.avatar ? (
+                                <img
+                                    src={currentStudent.avatar}
+                                    alt={currentStudent.name}
+                                    className="w-8 h-8 rounded-full object-cover shadow-xs border border-indigo-200 shrink-0"
+                                />
+                            ) : (
+                                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
+                                    {initials}
+                                </div>
+                            )}
+                            <div className="hidden md:flex flex-col text-left max-w-[140px] overflow-hidden">
+                                <span className="font-bold text-xs text-slate-900 leading-tight truncate">
                                     {currentStudent.name}
                                 </span>
-                                <span className="text-[10px] text-slate-500 font-mono">
+                                <span className="text-[10px] text-slate-500 font-mono truncate">
                                     {currentClass.name} {isClassLeader && '• Ketua Kelas'}
                                 </span>
                             </div>

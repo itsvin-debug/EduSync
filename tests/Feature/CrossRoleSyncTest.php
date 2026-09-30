@@ -256,6 +256,7 @@ class CrossRoleSyncTest extends TestCase
     public function test_teacher_can_update_profile_and_password(): void
     {
         $teacherUser = User::where('role', 'guru')->where('status', 'active')->first();
+        $teacherUser->update(['password' => \Illuminate\Support\Facades\Hash::make('password')]);
 
         // 1. Update Profile
         $updatedName = 'Guru Terupdate ' . uniqid();
@@ -285,6 +286,7 @@ class CrossRoleSyncTest extends TestCase
     public function test_student_can_update_profile_and_password(): void
     {
         $studentUser = User::where('role', 'siswa')->where('status', 'active')->first();
+        $studentUser->update(['password' => \Illuminate\Support\Facades\Hash::make('password')]);
 
         // 1. Update Profile
         $updatedName = 'Siswa Terupdate ' . uniqid();
@@ -304,6 +306,82 @@ class CrossRoleSyncTest extends TestCase
         ]);
         $respPass->assertSessionHasNoErrors();
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('studentscret123', $studentUser->fresh()->password));
+    }
+
+    /**
+     * Test: Class Leader can fast-input add a new student with attendance_number, name, and nisn.
+     */
+    public function test_class_leader_can_fast_input_new_student(): void
+    {
+        $classLeader = User::where('role', 'siswa')
+            ->where('status', 'active')
+            ->where(function($q) {
+                $q->where('is_class_leader', true)->orWhere('sub_role', 'Ketua Kelas');
+            })->first();
+
+        if (!$classLeader) {
+            $classLeader = User::where('role', 'siswa')->first();
+            $classLeader->update(['is_class_leader' => true, 'sub_role' => 'Ketua Kelas']);
+        }
+
+        $randomNisn = '99' . str_pad((string) rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
+        $studentName = 'Siswa Baru ' . uniqid();
+
+        $response = $this->actingAs($classLeader)->post('/siswa/students', [
+            'attendance_number' => 35,
+            'name' => $studentName,
+            'nisn' => $randomNisn,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('users', [
+            'name' => $studentName,
+            'nisn' => $randomNisn,
+            'attendance_number' => 35,
+            'role' => 'siswa',
+        ]);
+    }
+
+    /**
+     * Test: Class Leader can dispatch attendance report to teachers and download official PDF.
+     */
+    public function test_class_leader_can_dispatch_attendance_report_and_download_pdf(): void
+    {
+        $classLeader = User::where('role', 'siswa')
+            ->where('status', 'active')
+            ->where(function($q) {
+                $q->where('is_class_leader', true)->orWhere('sub_role', 'Ketua Kelas');
+            })->first();
+
+        if (!$classLeader) {
+            $classLeader = User::where('role', 'siswa')->first();
+            $classLeader->update(['is_class_leader' => true, 'sub_role' => 'Ketua Kelas']);
+        }
+
+        // 1. Dispatch Attendance Report
+        $respReport = $this->actingAs($classLeader)->post('/siswa/attendance/send-report');
+        $respReport->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('audit_logs', [
+            'user_id' => $classLeader->id,
+            'action' => 'ATTENDANCE_REPORT_DISPATCHED_TO_TEACHERS',
+        ]);
+
+        // 2. Download Official PDF Attendance Sheet
+        $respPdf = $this->actingAs($classLeader)->get('/siswa/attendance/export-pdf');
+        $respPdf->assertStatus(200);
+        $respPdf->assertHeader('content-type', 'application/pdf');
+    }
+
+    /**
+     * Test: Midnight duty reset artisan command execution.
+     */
+    public function test_daily_duty_reset_scheduled_command(): void
+    {
+        $exitCode = $this->artisan('edusync:reset-duty')->run();
+        $this->assertEquals(0, $exitCode);
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'DUTY_CHECKLIST_MIDNIGHT_RESET',
+        ]);
     }
 }
 

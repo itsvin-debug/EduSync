@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role', // admin, guru, siswa
         'sub_role',
         'nisn',
+        'attendance_number',
         'nip',
         'phone',
         'avatar',

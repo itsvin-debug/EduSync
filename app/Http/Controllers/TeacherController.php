@@ -54,8 +54,11 @@ class TeacherController extends Controller
             default => 'Senin',
         };
 
+        $nowJakarta = Carbon::now('Asia/Jakarta');
         $todaySchedules = $personalSchedules->where('day', $todayName)->values();
-        $activeSchedule = $todaySchedules->first();
+        $activeSchedule = $todaySchedules->first(fn ($s) => $s->status === 'ONGOING')
+            ?? $todaySchedules->first(fn ($s) => $s->status === 'UPCOMING')
+            ?? $todaySchedules->last();
 
         // Master class schedule lookup
         $classrooms = Classroom::with(['department', 'room'])->orderBy('grade')->orderBy('name')->get();
@@ -518,15 +521,23 @@ class TeacherController extends Controller
             'phone' => 'nullable|string|max:20',
             'nip' => 'nullable|string|max:30',
             'title' => 'nullable|string|max:100',
+            'avatar' => 'nullable|image|max:5120',
         ]);
 
-        $user->update([
+        $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'nip' => $validated['nip'] ?? $user->nip,
             'sub_role' => $validated['title'] ?? $user->sub_role,
-        ]);
+        ];
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $userData['avatar'] = '/storage/' . $path;
+        }
+
+        $user->update($userData);
 
         if ($user->teacher) {
             $user->teacher->update([

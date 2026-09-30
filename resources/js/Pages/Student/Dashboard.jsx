@@ -1,9 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import StudentLayout from '@/Layouts/StudentLayout';
 import Modal from '@/Components/Modal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import { useScheduleEngine } from '@/hooks/useScheduleEngine';
+import {
+    Chart as ChartJS,
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Doughnut, Bar } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
 import {
     Clock,
     Building2,
@@ -35,6 +48,14 @@ import {
     KeyRound,
     Settings,
     Mail,
+    Download,
+    UserPlus,
+    FileSpreadsheet,
+    PieChart,
+    BarChart3,
+    Image as ImageIcon,
+    Video,
+    Trash2,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -84,15 +105,34 @@ export default function Dashboard({
 
     const [profileSaving, setProfileSaving] = useState(false);
     const [passwordSaving, setPasswordSaving] = useState(false);
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(student?.avatar || null);
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleProfileUpdate = (e) => {
         e.preventDefault();
         setProfileSaving(true);
-        router.post('/siswa/settings/profile', profileData, {
+        const formData = new FormData();
+        formData.append('name', profileData.name);
+        formData.append('email', profileData.email);
+        formData.append('phone', profileData.phone || '');
+        if (avatarFile) {
+            formData.append('avatar', avatarFile);
+        }
+
+        router.post('/siswa/settings/profile', formData, {
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 setProfileSaving(false);
-                alert('Profil akun siswa berhasil diperbarui!');
+                alert('Profil akun siswa dan foto avatar berhasil diperbarui!');
             },
             onError: () => setProfileSaving(false),
         });
@@ -111,6 +151,55 @@ export default function Dashboard({
             onError: () => setPasswordSaving(false),
         });
     };
+
+    // Fast-Input Add Student Modal State for Class Leader
+    const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+    const [newStudentData, setNewStudentData] = useState({
+        attendance_number: classStudents.length + 1,
+        name: '',
+        nisn: '',
+    });
+    const [savingStudent, setSavingStudent] = useState(false);
+
+    const handleStoreStudent = (e) => {
+        e.preventDefault();
+        setSavingStudent(true);
+        router.post('/siswa/students', newStudentData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSavingStudent(false);
+                setShowAddStudentModal(false);
+                setNewStudentData({
+                    attendance_number: classStudents.length + 2,
+                    name: '',
+                    nisn: '',
+                });
+                alert('Siswa baru berhasil didaftarkan ke kelas!');
+            },
+            onError: () => setSavingStudent(false),
+        });
+    };
+
+    // Send Attendance Report to Homeroom & Department Teacher
+    const [sendingReport, setSendingReport] = useState(false);
+    const handleSendAttendanceReport = () => {
+        if (!confirm('Kirimkan rekapitulasi presensi harian kelas resmi ke Wali Kelas dan Guru Kejuruan?')) return;
+        setSendingReport(true);
+        router.post('/siswa/attendance/send-report', {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setSendingReport(false);
+                alert('Laporan presensi harian berhasil dikirimkan ke Wali Kelas & Guru Kejuruan via notifikasi!');
+            },
+            onError: () => setSendingReport(false),
+        });
+    };
+
+    // Class Duty Active Day Selection (Senin - Jumat)
+    const [activeDutyDay, setActiveDutyDay] = useState(
+        ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].includes(clock.dayName) ? clock.dayName : 'Senin'
+    );
+    const [dutyMediaPreviews, setDutyMediaPreviews] = useState([]);
 
     // 1. Attendance Matrix State for Class Leader
     const [attendanceMatrix, setAttendanceMatrix] = useState({});
@@ -160,6 +249,9 @@ export default function Dashboard({
     };
 
     // 2. Student Leave Request Form
+    const leaveFileInputRef = useRef(null);
+    const [leavePhotoPreview, setLeavePhotoPreview] = useState(null);
+
     const {
         data: leaveData,
         setData: setLeaveData,
@@ -176,17 +268,42 @@ export default function Dashboard({
         proof_image: null,
     });
 
+    const handleLeaveFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLeaveData('proof_image', file);
+            setLeavePhotoPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleRemoveLeaveFile = () => {
+        setLeaveData('proof_image', null);
+        if (leavePhotoPreview) {
+            URL.revokeObjectURL(leavePhotoPreview);
+        }
+        setLeavePhotoPreview(null);
+        if (leaveFileInputRef.current) {
+            leaveFileInputRef.current.value = '';
+        }
+    };
+
     const handleLeaveSubmit = (e) => {
         e.preventDefault();
         postLeave('/siswa/leave-requests', {
+            preserveScroll: true,
             onSuccess: () => {
                 resetLeave();
+                setLeavePhotoPreview(null);
+                if (leaveFileInputRef.current) leaveFileInputRef.current.value = '';
                 alert('Pengajuan izin / sakit berhasil dikirimkan ke Wali Kelas.');
             },
         });
     };
 
     // 3. End-of-Day Duty & Cleanliness Verification Form for Class Leader
+    const dutyFileInputRef = useRef(null);
+    const [showAllDutyStudents, setShowAllDutyStudents] = useState(false);
+
     const {
         data: dutyData,
         setData: setDutyData,
@@ -201,6 +318,34 @@ export default function Dashboard({
         photos: [],
     });
 
+    const handleDutyMediaChange = (files) => {
+        const fileList = Array.from(files);
+        if (!fileList.length) return;
+        const newFiles = [...(dutyData.photos || []), ...fileList];
+        setDutyData('photos', newFiles);
+
+        const newPreviews = fileList.map((file) => ({
+            name: file.name,
+            type: file.type.startsWith('video') ? 'video' : 'image',
+            url: URL.createObjectURL(file),
+            size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+        }));
+        setDutyMediaPreviews((prev) => [...prev, ...newPreviews]);
+    };
+
+    const handleRemoveDutyMedia = (index) => {
+        const updatedFiles = [...(dutyData.photos || [])];
+        updatedFiles.splice(index, 1);
+        setDutyData('photos', updatedFiles);
+
+        const updatedPreviews = [...dutyMediaPreviews];
+        if (updatedPreviews[index]?.url) {
+            URL.revokeObjectURL(updatedPreviews[index].url);
+        }
+        updatedPreviews.splice(index, 1);
+        setDutyMediaPreviews(updatedPreviews);
+    };
+
     const handleDutyStudentToggle = (studentName) => {
         setDutyData((prev) => {
             const exists = prev.duty_students.includes(studentName);
@@ -213,11 +358,26 @@ export default function Dashboard({
         });
     };
 
+    const handleSelectAllDutyDayStudents = (studentsList) => {
+        const names = studentsList.map((s) => s.name);
+        setDutyData((prev) => {
+            const merged = Array.from(new Set([...prev.duty_students, ...names]));
+            return { ...prev, duty_students: merged };
+        });
+    };
+
+    const handleClearAllDutyStudents = () => {
+        setDutyData((prev) => ({ ...prev, duty_students: [] }));
+    };
+
     const handleDutySubmit = (e) => {
         e.preventDefault();
         postDuty('/siswa/duty-report', {
+            preserveScroll: true,
             onSuccess: () => {
                 resetDuty();
+                setDutyMediaPreviews([]);
+                if (dutyFileInputRef.current) dutyFileInputRef.current.value = '';
                 alert('Laporan piket & kebersihan kelas harian berhasil disetor ke Wali Kelas, Kaprog, dan Admin.');
             },
         });
@@ -248,6 +408,116 @@ export default function Dashboard({
     // 5. Update Task Status (Class Leader Action)
     const handleTaskStatusChange = (taskId, newStatus) => {
         router.patch(`/siswa/tasks/${taskId}/status`, { status: newStatus }, { preserveScroll: true });
+    };
+
+    // Personal Attendance Calculations & Chart.js Configs (INDIVIDUAL TRACKING)
+    const totalPersonalRecords =
+        (myAttendanceStats.hadir || 0) +
+        (myAttendanceStats.sakit || 0) +
+        (myAttendanceStats.izin || 0) +
+        (myAttendanceStats.dispensasi || 0) +
+        (myAttendanceStats.alpha || 0);
+
+    const personalAttendanceRate = totalPersonalRecords > 0
+        ? Math.round(((myAttendanceStats.hadir || 0) / totalPersonalRecords) * 100)
+        : 100;
+
+    const personalDoughnutData = useMemo(() => ({
+        labels: ['Hadir', 'Sakit', 'Izin', 'Dispensasi', 'Alpa'],
+        datasets: [
+            {
+                data: [
+                    myAttendanceStats.hadir || 0,
+                    myAttendanceStats.sakit || 0,
+                    myAttendanceStats.izin || 0,
+                    myAttendanceStats.dispensasi || 0,
+                    myAttendanceStats.alpha || 0,
+                ],
+                backgroundColor: [
+                    '#10B981', // emerald-500
+                    '#F59E0B', // amber-500
+                    '#0EA5E9', // sky-500
+                    '#6366F1', // indigo-500
+                    '#EF4444', // rose-500
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 6,
+            },
+        ],
+    }), [myAttendanceStats]);
+
+    const personalDoughnutOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    boxWidth: 12,
+                    font: { size: 11, weight: '600' },
+                    padding: 12,
+                },
+            },
+            tooltip: {
+                callbacks: {
+                    label: (context) => ` ${context.label}: ${context.raw} Hari (${totalPersonalRecords > 0 ? Math.round((context.raw / totalPersonalRecords) * 100) : 0}%)`,
+                },
+            },
+        },
+        cutout: '70%',
+    };
+
+    const personalBarData = useMemo(() => ({
+        labels: ['Hadir', 'Sakit', 'Izin', 'Disp.', 'Alpa'],
+        datasets: [
+            {
+                label: 'Jumlah Hari',
+                data: [
+                    myAttendanceStats.hadir || 0,
+                    myAttendanceStats.sakit || 0,
+                    myAttendanceStats.izin || 0,
+                    myAttendanceStats.dispensasi || 0,
+                    myAttendanceStats.alpha || 0,
+                ],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.85)',
+                    'rgba(245, 158, 11, 0.85)',
+                    'rgba(14, 165, 233, 0.85)',
+                    'rgba(99, 102, 241, 0.85)',
+                    'rgba(239, 68, 68, 0.85)',
+                ],
+                borderRadius: 8,
+                borderSkipped: false,
+            },
+        ],
+    }), [myAttendanceStats]);
+
+    const personalBarOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (context) => ` ${context.raw} Hari Tercatat`,
+                },
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0,
+                    font: { size: 10 },
+                },
+                grid: { color: 'rgba(226, 232, 240, 0.6)' },
+            },
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 11, weight: '600' } },
+            },
+        },
     };
 
     // Timetable standard school periods
@@ -448,126 +718,66 @@ export default function Dashboard({
 
             {/* 2. STATS & METRICS GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                {isClassLeader ? (
-                    <>
-                        {/* Class Leader Metric 1: Kehadiran Kelas Hari Ini */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                    Presensi Kelas ({classroom?.name})
-                                </span>
-                                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <Users className="w-4 h-4" />
-                                </div>
-                            </div>
-                            <div className="my-2">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900">
-                                        {attendanceStats.hadir} / {attendanceStats.total}
-                                    </span>
-                                    <span className="text-xs font-semibold text-emerald-600">Siswa Hadir</span>
-                                </div>
-                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
-                                    <div
-                                        className="bg-emerald-500 h-full rounded-full transition-all"
-                                        style={{ width: `${attendanceStats.total ? (attendanceStats.hadir / attendanceStats.total) * 100 : 0}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                            <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                                <span>{attendanceStats.sakit} Sakit • {attendanceStats.izin} Izin</span>
-                                <span className="font-semibold text-rose-600">{attendanceStats.alpha} Alpa</span>
-                            </div>
+                {/* Individual Metric 1: Kehadiran Pribadi Siswa */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            Kehadiran Saya (30 Hari)
+                        </span>
+                        <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <ShieldCheck className="w-4 h-4" />
                         </div>
+                    </div>
+                    <div className="my-2">
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-bold font-mono text-slate-900">
+                                {myAttendanceStats.hadir || 0} Hari
+                            </span>
+                            <span className="text-xs font-semibold text-emerald-600">
+                                {personalAttendanceRate}% Kehadiran
+                            </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+                            <div
+                                className="bg-emerald-500 h-full rounded-full transition-all"
+                                style={{ width: `${personalAttendanceRate}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
+                        <span>{myAttendanceStats.sakit || 0} Sakit • {myAttendanceStats.izin || 0} Izin</span>
+                        <span className="font-semibold text-rose-600">{myAttendanceStats.alpha || 0} Alpa</span>
+                    </div>
+                </div>
 
-                        {/* Class Leader Metric 2: Status Kunci Presensi */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                    Batas Kunci Presensi
-                                </span>
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isLocked ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                                    {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                                </div>
-                            </div>
-                            <div className="my-2">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900">13:00 WIB</span>
-                                    <span className={`text-xs font-semibold ${isLocked ? 'text-rose-600' : 'text-emerald-600'}`}>
-                                        {isLocked ? 'Terkunci Otomatis' : 'Input Dibuka'}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-600 mt-1 truncate">
-                                    {isLocked ? 'Kunci sistem aktif setelah jam 13:00.' : 'Segera tuntaskan pengisian presensi.'}
-                                </p>
-                            </div>
-                            <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                                <span>Hak: Input & Simpan</span>
-                                <button onClick={() => setActiveTab('absensi')} className="text-indigo-600 font-semibold hover:underline">
-                                    Buka Matriks ›
-                                </button>
-                            </div>
+                {/* Individual Metric 2: Surat Izin / Sakit Saya */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            Pengajuan Izin / Sakit
+                        </span>
+                        <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                            <Calendar className="w-4 h-4" />
                         </div>
-                    </>
-                ) : (
-                    <>
-                        {/* Regular Student Metric 1: Kehadiran Pribadi */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                    Kehadiran Saya (30 Hari)
-                                </span>
-                                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <ShieldCheck className="w-4 h-4" />
-                                </div>
-                            </div>
-                            <div className="my-2">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900">{myAttendanceStats.hadir} Hari</span>
-                                    <span className="text-xs font-semibold text-emerald-600">Hadir Tepat Waktu</span>
-                                </div>
-                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
-                                    <div
-                                        className="bg-emerald-500 h-full rounded-full"
-                                        style={{ width: `${(myAttendanceStats.hadir / Math.max(1, (myAttendanceStats.hadir + myAttendanceStats.sakit + myAttendanceStats.izin + myAttendanceStats.alpha))) * 100}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                            <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                                <span>{myAttendanceStats.sakit} Sakit • {myAttendanceStats.izin} Izin</span>
-                                <span className="font-semibold text-rose-600">{myAttendanceStats.alpha} Alpa</span>
-                            </div>
+                    </div>
+                    <div className="my-2">
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl font-bold font-mono text-slate-900">
+                                {myLeaveRequests.length} Pengajuan
+                            </span>
+                            <span className="text-xs font-medium text-slate-500">Personal</span>
                         </div>
-
-                        {/* Regular Student Metric 2: Surat Izin Aktif */}
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                    Pengajuan Izin / Sakit
-                                </span>
-                                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                                    <Calendar className="w-4 h-4" />
-                                </div>
-                            </div>
-                            <div className="my-2">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900">
-                                        {myLeaveRequests.length} Pengajuan
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-600 mt-1 truncate">
-                                    {myLeaveRequests[0] ? `Terakhir: ${myLeaveRequests[0].type.toUpperCase()} (${myLeaveRequests[0].status})` : 'Belum ada pengajuan izin'}
-                                </p>
-                            </div>
-                            <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
-                                <span>Ditinjau Wali Kelas</span>
-                                <button onClick={() => setActiveTab('izin')} className="text-sky-600 font-semibold hover:underline">
-                                    + Ajukan Izin ›
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                )}
+                        <p className="text-xs text-slate-600 mt-1 truncate">
+                            {myLeaveRequests[0] ? `Terakhir: ${myLeaveRequests[0].type.toUpperCase()} (${myLeaveRequests[0].status})` : 'Belum ada surat izin/sakit'}
+                        </p>
+                    </div>
+                    <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
+                        <span>Ditinjau Wali Kelas</span>
+                        <button onClick={() => setActiveTab('izin')} className="text-sky-600 font-semibold hover:underline">
+                            + Ajukan Izin ›
+                        </button>
+                    </div>
+                </div>
 
                 {/* Shared Metric 3: Sesi Belajar Hari Ini */}
                 <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-xs flex flex-col justify-between">
@@ -616,7 +826,7 @@ export default function Dashboard({
                             <span className="text-xs font-semibold text-indigo-600">Aktif</span>
                         </div>
                         <p className="text-xs text-slate-600 mt-1 truncate">
-                            {learningTasks[0] ? learningTasks[0].title : 'Tidak ada jam kosong hari ini'}
+                            {learningTasks[0] ? learningTasks[0].title : 'Tidak ada tugas jam kosong'}
                         </p>
                     </div>
                     <div className="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
@@ -627,41 +837,149 @@ export default function Dashboard({
                     </div>
                 </div>
             </div>
+
+            {/* 3. INDIVIDUAL ATTENDANCE ANALYTICS SECTION (INTERACTIVE DONUT & BAR CHARTS) */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <PieChart className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-base">
+                                Statistik & Analisis Presensi Kehadiran Pribadi ({student?.name})
+                            </h3>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Visualisasi interaktif catatan kehadiran personal Anda (Hadir, Sakit, Izin, Dispensasi, Alpa)
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                            Tingkat Kehadiran: {personalAttendanceRate}%
+                        </span>
+                        <span className="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-mono">
+                            Total Rekap: {totalPersonalRecords} Hari
+                        </span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-5 items-center">
+                    {/* Donut Chart with Center Rate */}
+                    <div className="lg:col-span-5 flex flex-col items-center">
+                        <div className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider text-center flex items-center gap-1.5">
+                            <PieChart className="w-3.5 h-3.5 text-indigo-500" />
+                            <span>Proporsi Kehadiran Pribadi</span>
+                        </div>
+                        <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+                            <Doughnut data={personalDoughnutData} options={personalDoughnutOptions} />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-7">
+                                <span className="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900">
+                                    {personalAttendanceRate}%
+                                </span>
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                    Kehadiran
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bar Chart Breakdown */}
+                    <div className="lg:col-span-7">
+                        <div className="text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                            <BarChart3 className="w-3.5 h-3.5 text-indigo-500" />
+                            <span>Komparasi Jumlah Hari Presensi Personal</span>
+                        </div>
+                        <div className="h-52 sm:h-56 w-full">
+                            <Bar data={personalBarData} options={personalBarOptions} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quick Metric Pills */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-4 mt-2 border-t border-slate-100">
+                    <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-center">
+                        <span className="text-[10px] uppercase font-bold text-emerald-700 block">Hadir</span>
+                        <span className="text-lg font-bold font-mono text-emerald-800">{myAttendanceStats.hadir || 0} Hari</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-center">
+                        <span className="text-[10px] uppercase font-bold text-amber-700 block">Sakit</span>
+                        <span className="text-lg font-bold font-mono text-amber-800">{myAttendanceStats.sakit || 0} Hari</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-sky-50/70 border border-sky-200/80 text-center">
+                        <span className="text-[10px] uppercase font-bold text-sky-700 block">Izin</span>
+                        <span className="text-lg font-bold font-mono text-sky-800">{myAttendanceStats.izin || 0} Hari</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/80 text-center">
+                        <span className="text-[10px] uppercase font-bold text-indigo-700 block">Dispensasi</span>
+                        <span className="text-lg font-bold font-mono text-indigo-800">{myAttendanceStats.dispensasi || 0} Hari</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-rose-50/70 border border-rose-200/80 text-center col-span-2 sm:col-span-1">
+                        <span className="text-[10px] uppercase font-bold text-rose-700 block">Alpa</span>
+                        <span className="text-lg font-bold font-mono text-rose-800">{myAttendanceStats.alpha || 0} Hari</span>
+                    </div>
+                </div>
+            </div>
                 </>
             )}
 
             {/* TAB: PRESENSI HARIAN KELAS (KETUA KELAS SPECIAL PRIVILEGE) */}
             {activeTab === 'absensi' && isClassLeader && (
                 <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                                    <ShieldCheck className="w-4 h-4" />
-                                </span>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 text-base">
-                                        Matriks Presensi Harian Siswa — {classroom?.name}
-                                    </h3>
-                                    <p className="text-xs text-slate-500 mt-0.5">
-                                        Pencatatan resmi kehadiran kelas oleh Ketua Kelas • Sinkron otomatis ke Guru Pengampu & Admin Kurikulum
-                                    </p>
-                                </div>
+                    {/* Header with Title and Action Buttons */}
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                                <ShieldCheck className="w-5 h-5" />
+                            </span>
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-base leading-tight">
+                                    Lembar Presensi Harian Siswa — {classroom?.name}
+                                </h3>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Pencatatan resmi kehadiran kelas oleh Ketua Kelas • Sinkron real-time ke Guru Pengampu & Admin
+                                </p>
                             </div>
                         </div>
 
-                        {/* Lock / Auto-lock Status Pill */}
-                        <div className="flex items-center gap-3">
-                            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold ${
+                        {/* Top Action Buttons: Fast-Input Modal, Send Report, and PDF Export */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                onClick={() => setShowAddStudentModal(true)}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 shadow-2xs transition-colors"
+                            >
+                                <UserPlus className="w-3.5 h-3.5" />
+                                <span>+ Tambah Siswa Baru</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleSendAttendanceReport}
+                                disabled={sendingReport}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
+                            >
+                                <Send className="w-3.5 h-3.5" />
+                                <span>{sendingReport ? 'Mengirim...' : 'Kirim Laporan ke Guru'}</span>
+                            </button>
+
+                            <a
+                                href="/siswa/attendance/export-pdf"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors"
+                            >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Unduh PDF Resmi</span>
+                            </a>
+
+                            <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold ${
                                 isLocked ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             }`}>
-                                {isLocked ? <Lock className="w-4 h-4 text-rose-600" /> : <Unlock className="w-4 h-4 text-emerald-600" />}
-                                <span>{isLocked ? 'Terkunci Otomatis (13:00 WIB)' : 'Input Dibuka (s/d 13:00 WIB)'}</span>
+                                {isLocked ? <Lock className="w-3.5 h-3.5 text-rose-600" /> : <Unlock className="w-3.5 h-3.5 text-emerald-600" />}
+                                <span>{isLocked ? 'Terkunci (13:00)' : 'Dibuka s/d 13:00'}</span>
                             </div>
-
-                            <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-                                {clock.dateFormatted}
-                            </span>
                         </div>
                     </div>
 
@@ -689,55 +1007,69 @@ export default function Dashboard({
                         </div>
                     )}
 
-                    {/* Quick Attendance Summary Pills */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-slate-400">Total Siswa</span>
-                            <div className="text-xl font-bold font-mono text-slate-900">{classStudents.length}</div>
+                    {/* Class-wide Real-Time Attendance Statistics */}
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                Statistik Kehadiran Rombel Kelas ({classroom?.name})
+                            </span>
+                            <span className="text-xs font-semibold text-slate-700">
+                                {attendanceStats.total > 0 ? Math.round((Object.values(attendanceMatrix).filter((a) => a.status === 'hadir').length / attendanceStats.total) * 100) : 0}% Kehadiran Rombel
+                            </span>
                         </div>
-                        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-emerald-700">Hadir</span>
-                            <div className="text-xl font-bold font-mono text-emerald-800">
-                                {Object.values(attendanceMatrix).filter((a) => a.status === 'hadir').length}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Siswa</span>
+                                <div className="text-xl font-bold font-mono text-slate-900">{classStudents.length}</div>
                             </div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-amber-700">Sakit</span>
-                            <div className="text-xl font-bold font-mono text-amber-800">
-                                {Object.values(attendanceMatrix).filter((a) => a.status === 'sakit').length}
+                            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-emerald-700 block">Hadir (Present)</span>
+                                <div className="text-xl font-bold font-mono text-emerald-800">
+                                    {Object.values(attendanceMatrix).filter((a) => a.status === 'hadir').length}
+                                </div>
                             </div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-sky-700">Izin</span>
-                            <div className="text-xl font-bold font-mono text-sky-800">
-                                {Object.values(attendanceMatrix).filter((a) => a.status === 'izin').length}
+                            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-amber-700 block">Sakit (Sick)</span>
+                                <div className="text-xl font-bold font-mono text-amber-800">
+                                    {Object.values(attendanceMatrix).filter((a) => a.status === 'sakit').length}
+                                </div>
                             </div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-indigo-700">Dispensasi</span>
-                            <div className="text-xl font-bold font-mono text-indigo-800">
-                                {Object.values(attendanceMatrix).filter((a) => a.status === 'dispensasi').length}
+                            <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-sky-700 block">Izin (Permit)</span>
+                                <div className="text-xl font-bold font-mono text-sky-800">
+                                    {Object.values(attendanceMatrix).filter((a) => a.status === 'izin').length}
+                                </div>
                             </div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center">
-                            <span className="text-[10px] uppercase font-bold text-rose-700">Alpa</span>
-                            <div className="text-xl font-bold font-mono text-rose-800">
-                                {Object.values(attendanceMatrix).filter((a) => a.status === 'alpha').length}
+                            <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-indigo-700 block">Dispensasi</span>
+                                <div className="text-xl font-bold font-mono text-indigo-800">
+                                    {Object.values(attendanceMatrix).filter((a) => a.status === 'dispensasi').length}
+                                </div>
+                            </div>
+                            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center">
+                                <span className="text-[10px] uppercase font-bold text-rose-700 block">Alpa (Absent)</span>
+                                <div className="text-xl font-bold font-mono text-rose-800">
+                                    {Object.values(attendanceMatrix).filter((a) => a.status === 'alpha').length}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Attendance Matrix Table */}
+                    {/* Class Attendance Form Table strictly with requested columns: [ No | Full Name | NISN | Present | Sick | Permission/Dispensation | Absent ] */}
                     <form onSubmit={handleBatchAttendanceSubmit}>
                         <div className="overflow-x-auto rounded-xl border border-slate-200">
-                            <table className="w-full text-left text-xs border-collapse min-w-[700px]">
+                            <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                                 <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
                                         <th className="py-3 px-3 w-12 text-center">No</th>
-                                        <th className="py-3 px-4">Nama Siswa & NISN</th>
-                                        <th className="py-3 px-4 text-center">Status Kehadiran</th>
-                                        <th className="py-3 px-4">Catatan Keterangan</th>
-                                        <th className="py-3 px-4 text-center">Validasi</th>
+                                        <th className="py-3 px-4 min-w-[200px]">Full Name</th>
+                                        <th className="py-3 px-3 w-28 text-center font-mono">NISN</th>
+                                        <th className="py-3 px-2 w-20 text-center text-emerald-700 bg-emerald-50/50">Present</th>
+                                        <th className="py-3 px-2 w-20 text-center text-amber-700 bg-amber-50/50">Sick</th>
+                                        <th className="py-3 px-2 w-32 text-center text-sky-700 bg-sky-50/50">Permission / Disp.</th>
+                                        <th className="py-3 px-2 w-20 text-center text-rose-700 bg-rose-50/50">Absent</th>
+                                        <th className="py-3 px-3 min-w-[150px]">Catatan / Remarks</th>
+                                        <th className="py-3 px-3 w-28 text-center">Validasi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -747,67 +1079,126 @@ export default function Dashboard({
 
                                         return (
                                             <tr key={st.id} className="hover:bg-slate-50/70 transition-colors">
-                                                <td className="py-3 px-3 text-center font-mono text-slate-400">
-                                                    {idx + 1}
+                                                {/* 1. No / Absen Number */}
+                                                <td className="py-3 px-3 text-center font-mono font-semibold text-slate-700">
+                                                    {st.attendance_number || (idx + 1)}
                                                 </td>
+
+                                                {/* 2. Full Name */}
                                                 <td className="py-3 px-4">
-                                                    <div className="font-bold text-slate-900">{st.name}</div>
-                                                    <div className="text-[11px] font-mono text-slate-400">
-                                                        NISN: {st.nisn || '-'}
+                                                    <div className="font-bold text-slate-900 leading-tight">{st.name}</div>
+                                                    <div className="text-[10px] text-slate-400 mt-0.5">
+                                                        No. Absen: #{st.attendance_number || (idx + 1)}
                                                     </div>
                                                 </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                                                        {[
-                                                            { val: 'hadir', label: 'Hadir', color: 'peer-checked:bg-emerald-600 peer-checked:text-white' },
-                                                            { val: 'sakit', label: 'Sakit', color: 'peer-checked:bg-amber-600 peer-checked:text-white' },
-                                                            { val: 'izin', label: 'Izin', color: 'peer-checked:bg-sky-600 peer-checked:text-white' },
-                                                            { val: 'dispensasi', label: 'Disp.', color: 'peer-checked:bg-indigo-600 peer-checked:text-white' },
-                                                            { val: 'alpha', label: 'Alpa', color: 'peer-checked:bg-rose-600 peer-checked:text-white' },
-                                                        ].map((opt) => (
-                                                            <label
-                                                                key={opt.val}
-                                                                className={`cursor-pointer text-[11px] font-semibold select-none ${isLocked || isAutoSynced ? 'opacity-70 cursor-not-allowed' : ''}`}
-                                                            >
-                                                                <input
-                                                                    type="radio"
-                                                                    name={`status_${st.id}`}
-                                                                    value={opt.val}
-                                                                    checked={record.status === opt.val}
-                                                                    disabled={isLocked || isAutoSynced}
-                                                                    onChange={() => handleAttendanceChange(st.id, 'status', opt.val)}
-                                                                    className="peer sr-only"
-                                                                />
-                                                                <span className={`px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 ${opt.color} transition-all inline-block`}>
-                                                                    {opt.label}
-                                                                </span>
-                                                            </label>
-                                                        ))}
+
+                                                {/* 3. NISN */}
+                                                <td className="py-3 px-3 text-center font-mono text-slate-600">
+                                                    {st.nisn || '-'}
+                                                </td>
+
+                                                {/* 4. Present (Hadir) */}
+                                                <td className="py-3 px-2 text-center bg-emerald-50/20">
+                                                    <label className={`inline-flex items-center justify-center cursor-pointer p-1 rounded-lg ${isLocked || isAutoSynced ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`status_${st.id}`}
+                                                            value="hadir"
+                                                            checked={record.status === 'hadir'}
+                                                            disabled={isLocked || isAutoSynced}
+                                                            onChange={() => handleAttendanceChange(st.id, 'status', 'hadir')}
+                                                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                                        />
+                                                    </label>
+                                                </td>
+
+                                                {/* 5. Sick (Sakit) */}
+                                                <td className="py-3 px-2 text-center bg-amber-50/20">
+                                                    <label className={`inline-flex items-center justify-center cursor-pointer p-1 rounded-lg ${isLocked || isAutoSynced ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`status_${st.id}`}
+                                                            value="sakit"
+                                                            checked={record.status === 'sakit'}
+                                                            disabled={isLocked || isAutoSynced}
+                                                            onChange={() => handleAttendanceChange(st.id, 'status', 'sakit')}
+                                                            className="w-4 h-4 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                                                        />
+                                                    </label>
+                                                </td>
+
+                                                {/* 6. Permission / Dispensation (Izin / Dispensasi) */}
+                                                <td className="py-3 px-2 text-center bg-sky-50/20">
+                                                    <div className="flex items-center justify-center gap-1.5">
+                                                        <label title="Izin Biasa" className={`inline-flex items-center gap-1 text-[11px] font-semibold cursor-pointer ${isLocked || isAutoSynced ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`status_${st.id}`}
+                                                                value="izin"
+                                                                checked={record.status === 'izin'}
+                                                                disabled={isLocked || isAutoSynced}
+                                                                onChange={() => handleAttendanceChange(st.id, 'status', 'izin')}
+                                                                className="w-4 h-4 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                                                            />
+                                                            <span className="text-sky-700">Izin</span>
+                                                        </label>
+                                                        <span className="text-slate-300">/</span>
+                                                        <label title="Dispensasi Resmi" className={`inline-flex items-center gap-1 text-[11px] font-semibold cursor-pointer ${isLocked || isAutoSynced ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                                            <input
+                                                                type="radio"
+                                                                name={`status_${st.id}`}
+                                                                value="dispensasi"
+                                                                checked={record.status === 'dispensasi'}
+                                                                disabled={isLocked || isAutoSynced}
+                                                                onChange={() => handleAttendanceChange(st.id, 'status', 'dispensasi')}
+                                                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                                            />
+                                                            <span className="text-indigo-700">Disp.</span>
+                                                        </label>
                                                     </div>
                                                 </td>
-                                                <td className="py-3 px-4">
+
+                                                {/* 7. Absent (Alpa) */}
+                                                <td className="py-3 px-2 text-center bg-rose-50/20">
+                                                    <label className={`inline-flex items-center justify-center cursor-pointer p-1 rounded-lg ${isLocked || isAutoSynced ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                                        <input
+                                                            type="radio"
+                                                            name={`status_${st.id}`}
+                                                            value="alpha"
+                                                            checked={record.status === 'alpha'}
+                                                            disabled={isLocked || isAutoSynced}
+                                                            onChange={() => handleAttendanceChange(st.id, 'status', 'alpha')}
+                                                            className="w-4 h-4 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                                                        />
+                                                    </label>
+                                                </td>
+
+                                                {/* 8. Catatan Keterangan */}
+                                                <td className="py-3 px-3">
                                                     <input
                                                         type="text"
                                                         value={record.notes}
                                                         disabled={isLocked || isAutoSynced}
                                                         onChange={(e) => handleAttendanceChange(st.id, 'notes', e.target.value)}
-                                                        placeholder={isAutoSynced ? 'Izin disetujui Guru' : 'Keterangan tambahan (opsional)...'}
+                                                        placeholder={isAutoSynced ? 'Izin disetujui Guru' : 'Keterangan opsional...'}
                                                         className="w-full text-xs p-1.5 px-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 disabled:opacity-60"
                                                     />
                                                 </td>
-                                                <td className="py-3 px-4 text-center">
+
+                                                {/* 9. Validasi Status */}
+                                                <td className="py-3 px-3 text-center">
                                                     {isAutoSynced ? (
                                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 whitespace-nowrap">
                                                             <Sparkles className="w-3 h-3 text-indigo-500" />
-                                                            Auto-Sync Guru
+                                                            Auto-Sync
                                                         </span>
                                                     ) : isLocked ? (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">
                                                             <Lock className="w-3 h-3" />
                                                             Terkunci
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
                                                             <Check className="w-3 h-3" />
                                                             Siap Simpan
                                                         </span>
@@ -824,10 +1215,10 @@ export default function Dashboard({
                         <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="text-xs text-slate-500 space-y-0.5">
                                 <div>
-                                    Pencatat: <strong>{student?.name}</strong> (Ketua Kelas {classroom?.name})
+                                    Pencatat Resmi: <strong>{student?.name}</strong> (Ketua Kelas {classroom?.name})
                                 </div>
                                 <div className="font-mono text-[11px] text-slate-400">
-                                    Log: {clock.dayName}, {clock.dateFormatted} • {clock.timeString}
+                                    Waktu Input: {clock.dayName}, {clock.dateFormatted} • {clock.timeString}
                                 </div>
                             </div>
 
@@ -941,9 +1332,88 @@ export default function Dashboard({
                             </div>
                         </div>
 
-                        <form onSubmit={handleLeaveSubmit} className="space-y-3.5 text-xs">
+                        <form onSubmit={handleLeaveSubmit} className="space-y-4 text-xs">
+                            {/* 1. Custom Dropzone / Upload Box at the VERY TOP (MARKI App Specs) */}
                             <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Jenis Perizinan</label>
+                                <label className="font-semibold text-slate-700 block mb-1.5 flex items-center justify-between">
+                                    <span>Unggah Bukti Foto / Surat Dokter</span>
+                                    <span className="text-[10px] text-sky-600 font-bold uppercase tracking-wider">Aplikasi MARKI</span>
+                                </label>
+
+                                {!leavePhotoPreview ? (
+                                    <div
+                                        onClick={() => leaveFileInputRef.current?.click()}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            const file = e.dataTransfer?.files?.[0];
+                                            if (file) {
+                                                setLeaveData('proof_image', file);
+                                                setLeavePhotoPreview(URL.createObjectURL(file));
+                                            }
+                                        }}
+                                        className="border-2 border-dashed border-sky-300 hover:border-sky-500 rounded-2xl p-4 bg-sky-50/40 hover:bg-sky-50/70 transition-all cursor-pointer flex flex-col items-center justify-center text-center group"
+                                    >
+                                        <div className="w-11 h-11 rounded-xl bg-sky-100 group-hover:bg-sky-200 text-sky-600 flex items-center justify-center mb-2 transition-colors">
+                                            <Camera className="w-5 h-5" />
+                                        </div>
+                                        <p className="font-bold text-slate-800 text-xs">
+                                            Klik atau Tarik Foto Bukti ke Sini
+                                        </p>
+                                        <p className="text-[11px] text-slate-500 mt-0.5">
+                                            JPG, PNG, atau WEBP (Maksimal 5MB)
+                                        </p>
+
+                                        {/* Embedded MARKI Guideline */}
+                                        <div className="mt-3 w-full p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/90 text-[11px] text-amber-900 leading-snug flex items-start gap-2 text-left">
+                                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                            <div>
+                                                <strong className="text-amber-950 font-bold">SYARAT MARKI:</strong> Foto surat atau kondisi sakit <strong>WAJIB diambil melalui aplikasi MARKI</strong> dengan watermark tanggal, jam real-time, dan koordinat lokasi.
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="relative rounded-2xl border border-sky-200 bg-sky-50/50 p-3 flex items-center gap-3">
+                                        <img
+                                            src={leavePhotoPreview}
+                                            alt="Bukti MARKI"
+                                            className="w-14 h-14 rounded-xl object-cover border border-sky-300 shrink-0 shadow-2xs"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs truncate">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                                <span className="truncate">{leaveData.proof_image?.name || 'Foto Bukti MARKI'}</span>
+                                            </div>
+                                            <p className="text-[11px] text-emerald-700 font-semibold mt-0.5">
+                                                ✓ Terverifikasi format MARKI
+                                            </p>
+                                            <span className="text-[10px] text-slate-400 font-mono">
+                                                {leaveData.proof_image?.size ? (leaveData.proof_image.size / 1024).toFixed(1) + ' KB' : ''}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveLeaveFile}
+                                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                                            title="Hapus atau Ganti Foto"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+
+                                <input
+                                    ref={leaveFileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleLeaveFileChange}
+                                    className="hidden"
+                                />
+                            </div>
+
+                            {/* 2. Jenis Perizinan (Symmetrical segmented pills) */}
+                            <div>
+                                <label className="font-semibold text-slate-700 block mb-1.5">Jenis Perizinan</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {[
                                         { val: 'sakit', label: 'Sakit' },
@@ -966,14 +1436,15 @@ export default function Dashboard({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
+                            {/* 3. Tanggal Mulai & Tanggal Selesai (2 Symmetrical Columns) */}
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="font-semibold text-slate-700 block mb-1">Tanggal Mulai</label>
                                     <input
                                         type="date"
                                         value={leaveData.start_date}
                                         onChange={(e) => setLeaveData('start_date', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
                                         required
                                     />
                                 </div>
@@ -983,18 +1454,19 @@ export default function Dashboard({
                                         type="date"
                                         value={leaveData.end_date}
                                         onChange={(e) => setLeaveData('end_date', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                        className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
                                         required
                                     />
                                 </div>
                             </div>
 
+                            {/* 4. Wali Kelas / Guru Penguji */}
                             <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Wali Kelas / Guru Penguji</label>
+                                <label className="font-semibold text-slate-700 block mb-1">Wali Kelas / Guru Penilai</label>
                                 <select
                                     value={leaveData.homeroom_teacher_id}
                                     onChange={(e) => setLeaveData('homeroom_teacher_id', e.target.value)}
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50"
+                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:bg-white focus:ring-1 focus:ring-sky-500"
                                     required
                                 >
                                     {allTeachers.map((t) => (
@@ -1005,27 +1477,16 @@ export default function Dashboard({
                                 </select>
                             </div>
 
+                            {/* 5. Alasan / Keterangan Sakit/Izin */}
                             <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Alasan / Keterangan Sakit/Izin</label>
+                                <label className="font-semibold text-slate-700 block mb-1">Alasan & Keterangan Dokter</label>
                                 <textarea
                                     value={leaveData.notes}
                                     onChange={(e) => setLeaveData('notes', e.target.value)}
                                     rows={3}
-                                    placeholder="Contoh: Mengalami demam dan flu, disarankan istirahat oleh dokter klinik..."
+                                    placeholder="Contoh: Mengalami demam dan radang, disarankan istirahat oleh dokter klinik..."
                                     className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
                                     required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">
-                                    Unggah Bukti Foto / Surat Keterangan Dokter
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setLeaveData('proof_image', e.target.files[0])}
-                                    className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 cursor-pointer"
                                 />
                             </div>
 
@@ -1223,19 +1684,237 @@ export default function Dashboard({
                     {/* Class Leader Verification Submission Form */}
                     {isClassLeader && (
                         <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-                            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                                <Camera className="w-5 h-5 text-amber-600" />
-                                <div>
-                                    <h3 className="font-bold text-slate-900 text-base">
-                                        Verifikasi Piket & Kebersihan Akhir KBM (Sebelum Pulang)
-                                    </h3>
-                                    <p className="text-xs text-slate-500 mt-0.5">
-                                        Unggah foto bukti ruang kelas / koridor, checklist siswa yang piket, dan kirimkan ke Wali Kelas, Kaprog, & Admin
-                                    </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+                                        <Camera className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-900 text-base">
+                                            Verifikasi Piket & Kebersihan Akhir KBM
+                                        </h3>
+                                        <p className="text-xs text-slate-500 mt-0.5">
+                                            Checklist siswa piket per hari aktif, unggah dokumentasi foto/video MARKI, dan kirim ke Wali Kelas & Admin
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span>Auto-Reset 00:00 WIB</span>
+                                    </span>
                                 </div>
                             </div>
 
-                            <form onSubmit={handleDutySubmit} className="space-y-4 text-xs">
+                            <form onSubmit={handleDutySubmit} className="mt-5 space-y-5 text-xs">
+                                {/* 1. Active Day Selector Tabs (Senin s/d Jumat) */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">
+                                            Pilih Hari Piket Aktif
+                                        </label>
+                                        <span className="text-slate-400 text-[11px]">
+                                            Hari ini: <strong className="text-slate-700 font-semibold">{clock.dayName}</strong>
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map((day) => {
+                                            const isToday = clock.dayName === day;
+                                            const isSelected = activeDutyDay === day;
+                                            return (
+                                                <button
+                                                    key={day}
+                                                    type="button"
+                                                    onClick={() => setActiveDutyDay(day)}
+                                                    className={`py-2 px-3 rounded-xl border font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
+                                                        isSelected
+                                                            ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    <span>{day}</span>
+                                                    {isToday && (
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* 2. Duty Checklist corresponding to active day */}
+                                <div>
+                                    {(() => {
+                                        const dutyDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                                        const dayIdx = Math.max(0, dutyDays.indexOf(activeDutyDay));
+                                        const scheduledRoster = classStudents.filter((_, idx) => idx % 5 === dayIdx);
+                                        const displayedRoster = showAllDutyStudents ? classStudents : scheduledRoster;
+
+                                        return (
+                                            <div>
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                                    <div>
+                                                        <span className="font-bold text-slate-700 uppercase tracking-wider text-[11px]">
+                                                            Petugas Piket Hari {activeDutyDay} ({displayedRoster.length} Siswa)
+                                                        </span>
+                                                        <p className="text-[11px] text-slate-400">
+                                                            Centang nama siswa yang hadir dan melaksanakan tugas kebersihan hari ini.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleSelectAllDutyDayStudents(displayedRoster)}
+                                                            className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] border border-emerald-200 transition-colors"
+                                                        >
+                                                            Pilih Semua ({activeDutyDay})
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={handleClearAllDutyStudents}
+                                                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-[11px] transition-colors"
+                                                        >
+                                                            Bersihkan
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowAllDutyStudents(!showAllDutyStudents)}
+                                                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors"
+                                                        >
+                                                            {showAllDutyStudents ? 'Roster Hari Saja' : 'Semua Siswa'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 max-h-56 overflow-y-auto">
+                                                    {displayedRoster.map((st, idx) => {
+                                                        const isChecked = dutyData.duty_students.includes(st.name);
+                                                        return (
+                                                            <label
+                                                                key={st.id}
+                                                                className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer select-none transition-all ${
+                                                                    isChecked
+                                                                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold shadow-2xs'
+                                                                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                                                                }`}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={() => handleDutyStudentToggle(st.name)}
+                                                                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                                                                />
+                                                                <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                                                                    #{st.attendance_number || (idx + 1)}
+                                                                </span>
+                                                                <span className="truncate flex-1">{st.name}</span>
+                                                                {isChecked && (
+                                                                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                                                )}
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+
+                                {/* 3. Custom Dropzone / Upload Box for Photos & Videos (MARKI App Specs) */}
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1.5 flex items-center justify-between">
+                                        <span>Unggah Dokumentasi Kebersihan (Foto & Video)</span>
+                                        <span className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">Aplikasi MARKI</span>
+                                    </label>
+
+                                    <div
+                                        onClick={() => dutyFileInputRef.current?.click()}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            if (e.dataTransfer?.files?.length) {
+                                                handleDutyMediaChange(e.dataTransfer.files);
+                                            }
+                                        }}
+                                        className="border-2 border-dashed border-amber-300 hover:border-amber-500 rounded-2xl p-5 bg-amber-50/40 hover:bg-amber-50/70 transition-all cursor-pointer flex flex-col items-center justify-center text-center group"
+                                    >
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors">
+                                                <Camera className="w-5 h-5" />
+                                            </div>
+                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors">
+                                                <Video className="w-5 h-5" />
+                                            </div>
+                                        </div>
+
+                                        <p className="font-bold text-slate-800 text-xs">
+                                            Klik atau Tarik File Foto / Video ke Sini
+                                        </p>
+                                        <p className="text-[11px] text-slate-500 mt-0.5">
+                                            Mendukung Foto (JPG, PNG, WEBP) & Video Dokumentasi (MP4, MOV maks 20MB)
+                                        </p>
+
+                                        {/* Embedded MARKI Guideline */}
+                                        <div className="mt-3 w-full p-2.5 rounded-xl bg-white border border-amber-200/90 text-[11px] text-amber-900 leading-snug flex items-start gap-2 text-left">
+                                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                            <div>
+                                                <strong className="text-amber-950 font-bold">STANDAR DOKUMENTASI MARKI:</strong> Seluruh foto atau video kebersihan akhir KBM <strong>WAJIB diambil via aplikasi MARKI</strong> dengan watermark jam, tanggal, dan koordinat GPS ruang kelas.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input
+                                        ref={dutyFileInputRef}
+                                        type="file"
+                                        multiple
+                                        accept="image/*,video/*"
+                                        onChange={(e) => handleDutyMediaChange(e.target.files)}
+                                        className="hidden"
+                                    />
+
+                                    {/* Uploaded Media Gallery Previews */}
+                                    {dutyMediaPreviews.length > 0 && (
+                                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            {dutyMediaPreviews.map((media, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="relative rounded-xl border border-slate-200 bg-white overflow-hidden p-2 group shadow-2xs"
+                                                >
+                                                    {media.type === 'video' ? (
+                                                        <div className="aspect-video bg-slate-900 rounded-lg flex flex-col items-center justify-center text-white">
+                                                            <Video className="w-6 h-6 text-amber-400 mb-1" />
+                                                            <span className="text-[9px] uppercase font-bold tracking-wider text-amber-300">Video MARKI</span>
+                                                        </div>
+                                                    ) : (
+                                                        <img
+                                                            src={media.url}
+                                                            alt={media.name}
+                                                            className="aspect-video w-full object-cover rounded-lg"
+                                                        />
+                                                    )}
+                                                    <div className="mt-1.5 flex items-center justify-between text-[10px]">
+                                                        <span className="truncate max-w-[100px] text-slate-700 font-medium">
+                                                            {media.name}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveDutyMedia(idx)}
+                                                            className="text-rose-500 hover:text-rose-700 p-0.5"
+                                                            title="Hapus media"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 4. Area & Cleanliness Notes */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="font-semibold text-slate-700 block mb-1">
@@ -1245,78 +1924,48 @@ export default function Dashboard({
                                             type="text"
                                             value={dutyData.area_location}
                                             onChange={(e) => setDutyData('area_location', e.target.value)}
-                                            placeholder="Contoh: Ruang Kelas XI PPLG 1 & Selasar Depan Lab Komputer"
-                                            className="w-full h-9 px-3 rounded-xl border border-slate-200"
+                                            placeholder="Contoh: Ruang Kelas XI PPLG 1 & Selasar Depan"
+                                            className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs"
                                             required
                                         />
                                     </div>
 
                                     <div>
                                         <label className="font-semibold text-slate-700 block mb-1">
-                                            Unggah Multi-Foto Bukti Kebersihan (Bisa Pilih Banyak Foto)
+                                            Status Pembersihan Fasilitas
                                         </label>
-                                        <input
-                                            type="file"
-                                            multiple
-                                            accept="image/*"
-                                            onChange={(e) => setDutyData('photos', Array.from(e.target.files))}
-                                            className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-800 cursor-pointer"
-                                            required
-                                        />
+                                        <div className="h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 flex items-center gap-2 text-xs">
+                                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                            <span>Papan tulis, TPS, jendela, proyektor, dan AC dimatikan</span>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div>
-                                    <label className="font-semibold text-slate-700 block mb-1.5">
-                                        Checklist Petugas Siswa yang Melaksanakan Piket Hari Ini
-                                    </label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-3 rounded-xl border border-slate-200 bg-slate-50/50">
-                                        {classStudents.map((st) => {
-                                            const isChecked = dutyData.duty_students.includes(st.name);
-                                            return (
-                                                <label
-                                                    key={st.id}
-                                                    className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer select-none transition-all ${
-                                                        isChecked
-                                                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold'
-                                                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                                                    }`}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isChecked}
-                                                        onChange={() => handleDutyStudentToggle(st.name)}
-                                                        className="rounded text-emerald-600 focus:ring-emerald-500"
-                                                    />
-                                                    <span className="truncate">{st.name}</span>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                    <p className="text-[11px] text-slate-400 mt-1">
-                                        Centang siswa yang hadir melaksanakan piket. Siswa yang tidak dicentang otomatis tercatat mangkir piket.
-                                    </p>
                                 </div>
 
                                 <div>
                                     <label className="font-semibold text-slate-700 block mb-1">
-                                        Catatan Kebersihan & Fasilitas Kelas
+                                        Catatan Kebersihan & Keterangan Fasilitas Kelas
                                     </label>
                                     <textarea
                                         value={dutyData.notes}
                                         onChange={(e) => setDutyData('notes', e.target.value)}
                                         rows={3}
-                                        placeholder="Contoh: Papan tulis telah bersih, sampah dibuang ke TPS, jendela & pintu telah dikunci, AC & proyektor telah dimatikan."
+                                        placeholder="Contoh: Papan tulis telah bersih, sampah dibuang ke TPS belakang, jendela & pintu telah dikunci rapat, AC & proyektor telah dimatikan."
                                         className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-amber-500"
                                         required
                                     />
                                 </div>
 
-                                <div className="pt-2 flex items-center justify-end">
+                                {/* 5. Scheduled Cron Notice & Submit */}
+                                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 flex items-center justify-between flex-wrap gap-2">
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock className="w-4 h-4 text-slate-400" />
+                                        <span>Status checklist harian otomatis di-reset oleh sistem setiap pukul <strong>00:00 WIB (Tengah Malam)</strong>.</span>
+                                    </div>
+
                                     <button
                                         type="submit"
                                         disabled={dutyProcessing}
-                                        className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs flex items-center gap-1.5"
+                                        className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs flex items-center gap-1.5 disabled:opacity-50"
                                     >
                                         <Send className="w-3.5 h-3.5 text-amber-300" />
                                         <span>{dutyProcessing ? 'Mengirim Verifikasi...' : 'Setor Laporan Piket Pulang'}</span>
@@ -1824,15 +2473,24 @@ export default function Dashboard({
                 </div>
             )}
 
-            {/* MODAL: BUKTI FOTO ZOOM */}
+            {/* MODAL: BUKTI FOTO & VIDEO ZOOM */}
             {selectedProofModal && (
-                <Modal isOpen={Boolean(selectedProofModal)} onClose={() => setSelectedProofModal(null)} title="Pratinjau Bukti Dokumen / Foto">
+                <Modal isOpen={Boolean(selectedProofModal)} onClose={() => setSelectedProofModal(null)} title="Pratinjau Bukti Dokumentasi (Foto / Video)">
                     <div className="p-2 space-y-3">
-                        <img
-                            src={selectedProofModal}
-                            alt="Bukti Foto"
-                            className="max-h-[70vh] w-auto mx-auto rounded-xl border border-slate-200 shadow-sm"
-                        />
+                        {typeof selectedProofModal === 'string' && (selectedProofModal.match(/\.(mp4|mov|webm|avi)(\?.*)?$/i) || selectedProofModal.includes('video')) ? (
+                            <video
+                                src={selectedProofModal}
+                                controls
+                                autoPlay
+                                className="max-h-[70vh] w-full rounded-xl border border-slate-200 bg-black shadow-sm"
+                            />
+                        ) : (
+                            <img
+                                src={selectedProofModal}
+                                alt="Bukti Foto"
+                                className="max-h-[70vh] w-auto mx-auto rounded-xl border border-slate-200 shadow-sm"
+                            />
+                        )}
                         <div className="flex justify-end pt-2">
                             <button
                                 type="button"
@@ -1927,6 +2585,46 @@ export default function Dashboard({
                         </div>
 
                         <form onSubmit={handleProfileUpdate} className="mt-5 space-y-4 text-xs">
+                            {/* Avatar Upload Card */}
+                            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
+                                <div className="relative shrink-0">
+                                    {avatarPreview ? (
+                                        <img
+                                            src={avatarPreview}
+                                            alt="Avatar"
+                                            className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 shadow-xs"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-bold text-lg shadow-xs">
+                                            {student?.name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || 'SW'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 text-center sm:text-left min-w-0">
+                                    <h4 className="font-semibold text-slate-800 text-xs">Foto Profil / Avatar Pengguna</h4>
+                                    <p className="text-[11px] text-slate-400 mt-0.5">
+                                        Dukung format JPG, PNG, atau WEBP maks 5MB. Foto profil akan muncul di header & sidebar navigasi.
+                                    </p>
+                                    <div className="mt-2.5 flex items-center justify-center sm:justify-start gap-2">
+                                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors">
+                                            <Camera className="w-3.5 h-3.5" />
+                                            <span>Pilih Foto Baru</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleAvatarChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        {avatarFile && (
+                                            <span className="text-[11px] text-emerald-600 font-semibold truncate max-w-[150px]">
+                                                ✓ {avatarFile.name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
@@ -2085,6 +2783,88 @@ export default function Dashboard({
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* MODAL: FAST-INPUT ADD STUDENT FOR CLASS LEADER */}
+            {showAddStudentModal && (
+                <Modal
+                    isOpen={showAddStudentModal}
+                    onClose={() => setShowAddStudentModal(false)}
+                    title={`Tambah Siswa Baru ke Kelas ${classroom?.name || ''}`}
+                    description="Pendaftaran cepat siswa rombel oleh Ketua Kelas dengan Nomor Absen, Nama Lengkap, dan NISN."
+                    maxWidth="max-w-md"
+                >
+                    <form onSubmit={handleStoreStudent} className="space-y-4 text-xs">
+                        <div>
+                            <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1 text-[11px]">
+                                Nomor Urut Absen *
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                required
+                                value={newStudentData.attendance_number}
+                                onChange={(e) => setNewStudentData({ ...newStudentData, attendance_number: parseInt(e.target.value) || 1 })}
+                                className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs font-mono focus:ring-1 focus:ring-indigo-500"
+                                placeholder="Contoh: 1"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1 text-[11px]">
+                                Nama Lengkap Siswa *
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={newStudentData.name}
+                                onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+                                className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                placeholder="Contoh: Muhammad Bintang Pratama"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block font-semibold text-slate-700 uppercase tracking-wider mb-1 text-[11px]">
+                                Nomor Induk Siswa Nasional (NISN 10 Digit) *
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                maxLength={10}
+                                value={newStudentData.nisn}
+                                onChange={(e) => setNewStudentData({ ...newStudentData, nisn: e.target.value })}
+                                className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs font-mono focus:ring-1 focus:ring-indigo-500"
+                                placeholder="Contoh: 0081234567"
+                            />
+                            <span className="text-[10px] text-slate-400 mt-1 block">
+                                NISN akan digunakan sebagai kata sandi login awal siswa.
+                            </span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-900 text-[11px] leading-relaxed">
+                            Akun siswa otomatis terdaftar aktif dengan email format <strong>nama.nisn@edusync.sch.id</strong> pada rombel <strong>{classroom?.name}</strong>.
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setShowAddStudentModal(false)}
+                                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={savingStudent}
+                                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                            >
+                                <UserPlus className="w-3.5 h-3.5" />
+                                <span>{savingStudent ? 'Mendaftarkan...' : 'Daftarkan Siswa'}</span>
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
             )}
         </StudentLayout>
     );

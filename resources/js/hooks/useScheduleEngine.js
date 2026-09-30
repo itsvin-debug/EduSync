@@ -33,22 +33,29 @@ export const SCHOOL_PERIODS = {
     ],
 };
 
-function parseTimeToMinutes(timeStr) {
+function parseTimeToSeconds(timeStr) {
     if (!timeStr) return 0;
     const [h, m] = timeStr.split(':').map(Number);
-    return h * 60 + m;
+    return (h || 0) * 3600 + (m || 0) * 60;
+}
+
+function parseTimeToMinutes(timeStr) {
+    return Math.floor(parseTimeToSeconds(timeStr) / 60);
 }
 
 /**
- * useScheduleEngine: Evaluates real-time schedule state every second.
+ * useScheduleEngine: Evaluates real-time schedule state every second with seconds-precision.
+ * Boundary intervals:
+ * - 'ONGOING' / 'berlangsung': currentTotalSeconds >= startSec && currentTotalSeconds < endSec
+ * - 'COMPLETED' / 'selesai': Exactly when currentTotalSeconds >= endSec
  */
 export function useScheduleEngine(schedules = [], options = {}) {
     const clock = useRealtimeClock();
     const effectiveDay = options.dayOverride || clock.dayName;
 
-    // Use current time in minutes
-    const currentMinutes = clock.hours * 60 + clock.minutes;
-    const currentSecondsIntoMinute = clock.seconds;
+    // Use current time in exact total seconds since midnight
+    const currentTotalSeconds = clock.hours * 3600 + clock.minutes * 60 + clock.seconds;
+    const currentMinutes = Math.floor(currentTotalSeconds / 60);
 
     const isJumat = effectiveDay === 'Jumat';
     const periodDefinitions = isJumat ? SCHOOL_PERIODS.jumat : SCHOOL_PERIODS.regular;
@@ -74,12 +81,12 @@ export function useScheduleEngine(schedules = [], options = {}) {
             };
         }
 
-        const schoolOpenMinutes = parseTimeToMinutes('06:30');
-        const schoolCloseMinutes = parseTimeToMinutes('15:00');
+        const schoolOpenSec = parseTimeToSeconds('06:30');
+        const schoolCloseSec = parseTimeToSeconds('15:00');
 
-        // 2. Before School
-        if (currentMinutes < schoolOpenMinutes && !options.dayOverride) {
-            const diffSeconds = (schoolOpenMinutes - currentMinutes) * 60 - currentSecondsIntoMinute;
+        // 2. Before School (strictly currentTotalSeconds < schoolOpenSec)
+        if (currentTotalSeconds < schoolOpenSec && !options.dayOverride) {
+            const diffSeconds = schoolOpenSec - currentTotalSeconds;
             const h = Math.floor(diffSeconds / 3600);
             const m = Math.floor((diffSeconds % 3600) / 60);
             const s = diffSeconds % 60;
@@ -98,8 +105,8 @@ export function useScheduleEngine(schedules = [], options = {}) {
             };
         }
 
-        // 3. After School Dismissal
-        if (currentMinutes >= schoolCloseMinutes && !options.dayOverride) {
+        // 3. After School Dismissal (strictly currentTotalSeconds >= schoolCloseSec)
+        if (currentTotalSeconds >= schoolCloseSec && !options.dayOverride) {
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
                 label: 'Jam Sekolah Selesai',
@@ -113,19 +120,18 @@ export function useScheduleEngine(schedules = [], options = {}) {
             };
         }
 
-        // 4. Find active interval in period definitions
+        // 4. Find active interval in period definitions strictly: now >= start && now < end
         let currentInterval = null;
         for (const item of periodDefinitions) {
-            const startM = parseTimeToMinutes(item.start);
-            const endM = parseTimeToMinutes(item.end);
-            if (currentMinutes >= startM && currentMinutes < endM) {
+            const startSec = parseTimeToSeconds(item.start);
+            const endSec = parseTimeToSeconds(item.end);
+            if (currentTotalSeconds >= startSec && currentTotalSeconds < endSec) {
                 currentInterval = item;
                 break;
             }
         }
 
         if (!currentInterval) {
-            // Default fallback if right at boundary
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
                 label: 'Pergantian Jam Pelajaran',
@@ -139,12 +145,12 @@ export function useScheduleEngine(schedules = [], options = {}) {
             };
         }
 
-        // Calculate countdown and progress
-        const startM = parseTimeToMinutes(currentInterval.start);
-        const endM = parseTimeToMinutes(currentInterval.end);
-        const totalDurationSec = (endM - startM) * 60;
-        const elapsedSec = (currentMinutes - startM) * 60 + currentSecondsIntoMinute;
-        const remainingSec = Math.max(0, totalDurationSec - elapsedSec);
+        // Exact countdown and progress calculation
+        const startSec = parseTimeToSeconds(currentInterval.start);
+        const endSec = parseTimeToSeconds(currentInterval.end);
+        const totalDurationSec = endSec - startSec;
+        const elapsedSec = currentTotalSeconds - startSec;
+        const remainingSec = Math.max(0, endSec - currentTotalSeconds);
 
         const mRemaining = Math.floor(remainingSec / 60);
         const sRemaining = remainingSec % 60;
@@ -168,7 +174,6 @@ export function useScheduleEngine(schedules = [], options = {}) {
         }
 
         // Handle Active Class Period
-        // Find schedule covering this period number
         const activeSlot = todaySchedules.find(s =>
             currentInterval.period >= s.period_start && currentInterval.period <= s.period_end
         ) || null;
@@ -184,7 +189,7 @@ export function useScheduleEngine(schedules = [], options = {}) {
             countdownSeconds: remainingSec,
             progressPercent,
         };
-    }, [currentMinutes, currentSecondsIntoMinute, clock.isWeekend, periodDefinitions, todaySchedules, options.dayOverride]);
+    }, [currentTotalSeconds, clock.isWeekend, periodDefinitions, todaySchedules, options.dayOverride]);
 
     // Next upcoming slot helper
     const nextSlot = useMemo(() => {
@@ -193,20 +198,23 @@ export function useScheduleEngine(schedules = [], options = {}) {
         return todaySchedules.find(s => s.period_start > curPeriod) || null;
     }, [engineState.activePeriod, todaySchedules]);
 
-    // Period status evaluator helper for timeline rows
+    // Period status evaluator helper for timeline rows:
+    // - 'selesai': exactly when currentTotalSeconds >= endSec
+    // - 'berlangsung': currentTotalSeconds >= startSec && currentTotalSeconds < endSec
+    // - 'mendatang': currentTotalSeconds < startSec
     const getPeriodStatus = (periodNum) => {
         if (clock.isWeekend && !options.dayOverride) return 'mendatang';
-        if (currentMinutes >= parseTimeToMinutes('15:00') && !options.dayOverride) return 'selesai';
-        if (currentMinutes < parseTimeToMinutes('06:30') && !options.dayOverride) return 'mendatang';
+        if (currentTotalSeconds >= parseTimeToSeconds('15:00') && !options.dayOverride) return 'selesai';
+        if (currentTotalSeconds < parseTimeToSeconds('06:30') && !options.dayOverride) return 'mendatang';
 
         const def = periodDefinitions.find(p => p.period === periodNum);
         if (!def) return 'mendatang';
 
-        const startM = parseTimeToMinutes(def.start);
-        const endM = parseTimeToMinutes(def.end);
+        const startSec = parseTimeToSeconds(def.start);
+        const endSec = parseTimeToSeconds(def.end);
 
-        if (currentMinutes >= endM) return 'selesai';
-        if (currentMinutes >= startM && currentMinutes < endM) return 'berlangsung';
+        if (currentTotalSeconds >= endSec) return 'selesai';
+        if (currentTotalSeconds >= startSec && currentTotalSeconds < endSec) return 'berlangsung';
         return 'mendatang';
     };
 

@@ -1359,50 +1359,114 @@ export default function Dashboard({
                             Belum ada laporan piket yang disetor siswa.
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {picketReports.map((p) => (
                                 <div
                                     key={p.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs"
+                                    className="p-5 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col gap-3 text-xs"
                                 >
-                                    <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-2 flex-wrap">
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-slate-900 text-sm">{p.classroom?.name}</span>
                                             <span className="text-slate-400 text-xs">•</span>
-                                            <span className="text-slate-600">Disetor: <strong>{p.student?.name}</strong></span>
-                                            <span className="text-slate-400 font-mono text-[11px]">({p.date})</span>
+                                            <span className="text-slate-600">Pelapor: <strong>{p.student?.name}</strong></span>
+                                            <span className="text-slate-400 font-mono text-[11px]">({p.date} • {p.delivery_time || '15:00 WIB'})</span>
                                         </div>
-                                        <p className="text-slate-700 italic">"{p.notes}"</p>
+
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
+                                                p.status === 'approved'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                    : p.status === 'rejected'
+                                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                                            }`}>
+                                                {p.status === 'approved' ? 'Terverifikasi Bersih (ACC)' : p.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC Guru'}
+                                            </span>
+
+                                            {p.status === 'pending' && (
+                                                <div className="flex items-center gap-1.5 pl-2">
+                                                    <button
+                                                        onClick={() => handleVerifyPicket(p.id, 'approved')}
+                                                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs"
+                                                    >
+                                                        Setujui (ACC)
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleVerifyPicket(p.id, 'rejected')}
+                                                        className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                                    >
+                                                        Tolak
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 shrink-0">
-                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
-                                            p.status === 'approved'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : p.status === 'rejected'
-                                                ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                                : 'bg-amber-50 text-amber-700 border-amber-200'
-                                        }`}>
-                                            {p.status === 'approved' ? 'Terverifikasi (ACC)' : p.status === 'rejected' ? 'Ditolak' : 'Menunggu ACC'}
-                                        </span>
+                                    {p.area_location && (
+                                        <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                                            <span>Area: <strong>{p.area_location}</strong></span>
+                                        </div>
+                                    )}
 
-                                        {p.status === 'pending' && (
-                                            <div className="flex items-center gap-1.5 pl-2">
-                                                <button
-                                                    onClick={() => handleVerifyPicket(p.id, 'approved')}
-                                                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs"
-                                                >
-                                                    Setujui (ACC)
-                                                </button>
-                                                <button
-                                                    onClick={() => handleVerifyPicket(p.id, 'rejected')}
-                                                    className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
-                                                >
-                                                    Tolak
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <p className="text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        "{p.notes}"
+                                    </p>
+
+                                    {/* Duty Students Checklist Tags */}
+                                    {p.duty_students && p.duty_students.length > 0 && (
+                                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                                            <span className="text-slate-400 text-[11px] font-semibold">Petugas Piket:</span>
+                                            {p.duty_students.map((name, i) => (
+                                                <span key={i} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200">
+                                                    {name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Photos & Videos Media Previews */}
+                                    {p.photos && p.photos.length > 0 ? (
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                                            {p.photos.map((photo, pIdx) => {
+                                                const isVideo = typeof photo === 'string' && photo.match(/\.(mp4|mov|webm|avi)(\?.*)?$/i);
+                                                return (
+                                                    <button
+                                                        key={pIdx}
+                                                        type="button"
+                                                        onClick={() => setSelectedProofModal(photo)}
+                                                        className="aspect-video rounded-lg overflow-hidden border border-slate-200 group relative block bg-slate-900"
+                                                    >
+                                                        {isVideo ? (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-white p-2">
+                                                                <span className="text-[10px] text-amber-300 font-bold uppercase">▶ Video MARKI</span>
+                                                            </div>
+                                                        ) : (
+                                                            <img
+                                                                src={photo}
+                                                                alt={`Bukti Piket ${pIdx + 1}`}
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                            />
+                                                        )}
+                                                        <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition-opacity">
+                                                            Lihat Media
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : p.photo_url ? (
+                                        <div className="pt-1">
+                                            <button
+                                                onClick={() => setSelectedProofModal(p.photo_url)}
+                                                className="text-indigo-600 font-semibold text-[11px] hover:underline inline-flex items-center gap-1"
+                                            >
+                                                <Eye className="w-3.5 h-3.5" />
+                                                <span>Lihat Bukti Foto / Video</span>
+                                            </button>
+                                        </div>
+                                    ) : null}
                                 </div>
                             ))}
                         </div>
@@ -1461,13 +1525,22 @@ export default function Dashboard({
 
             {/* MODAL: PRATINJAU BUKTI */}
             {selectedProofModal && (
-                <Modal isOpen={Boolean(selectedProofModal)} onClose={() => setSelectedProofModal(null)} title="Pratinjau Bukti Dokumen">
+                <Modal isOpen={Boolean(selectedProofModal)} onClose={() => setSelectedProofModal(null)} title="Pratinjau Bukti Dokumen & Media">
                     <div className="p-2 space-y-3">
-                        <img
-                            src={selectedProofModal}
-                            alt="Bukti Dokumen"
-                            className="max-h-[70vh] w-auto mx-auto rounded-xl border border-slate-200 shadow-sm"
-                        />
+                        {typeof selectedProofModal === 'string' && (selectedProofModal.match(/\.(mp4|mov|webm|avi)(\?.*)?$/i) || selectedProofModal.includes('video')) ? (
+                            <video
+                                src={selectedProofModal}
+                                controls
+                                autoPlay
+                                className="max-h-[70vh] w-full rounded-xl border border-slate-200 bg-black shadow-sm"
+                            />
+                        ) : (
+                            <img
+                                src={selectedProofModal}
+                                alt="Bukti Dokumen"
+                                className="max-h-[70vh] w-auto mx-auto rounded-xl border border-slate-200 shadow-sm"
+                            />
+                        )}
                         <div className="flex justify-end pt-2">
                             <button
                                 type="button"

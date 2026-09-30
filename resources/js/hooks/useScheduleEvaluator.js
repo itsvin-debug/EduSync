@@ -7,22 +7,26 @@ export { SCHOOL_PERIODS };
 /**
  * Pure evaluator helper to parse 'HH:mm' to total minutes since midnight
  */
-export function parseTimeToMinutes(timeStr) {
+export function parseTimeToSeconds(timeStr) {
     if (!timeStr) return 0;
     const [h, m] = timeStr.split(':').map(Number);
-    return (h || 0) * 60 + (m || 0);
+    return (h || 0) * 3600 + (m || 0) * 60;
+}
+
+export function parseTimeToMinutes(timeStr) {
+    return Math.floor(parseTimeToSeconds(timeStr) / 60);
 }
 
 /**
  * useScheduleEvaluator:
  * A high-precision evaluator for school periods, classes, and individual schedules.
- * Ticks synchronously with `useRealtimeClock` (1000ms interval) in WIB timezone.
+ * Ticks synchronously with `useRealtimeClock` (1000ms interval) in WIB timezone with seconds-precision.
  */
 export function useScheduleEvaluator(schedules = [], options = {}) {
     const clock = useRealtimeClock();
     const effectiveDay = options.dayOverride || clock.dayName;
-    const currentMinutes = clock.hours * 60 + clock.minutes;
-    const currentSecondsIntoMinute = clock.seconds;
+    const currentTotalSeconds = clock.hours * 3600 + clock.minutes * 60 + clock.seconds;
+    const currentMinutes = Math.floor(currentTotalSeconds / 60);
 
     const isJumat = effectiveDay === 'Jumat';
     const periodDefinitions = isJumat ? SCHOOL_PERIODS.jumat : SCHOOL_PERIODS.regular;
@@ -49,12 +53,12 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
             };
         }
 
-        const schoolOpenMinutes = parseTimeToMinutes('06:30');
-        const schoolCloseMinutes = parseTimeToMinutes('15:00');
+        const schoolOpenSec = parseTimeToSeconds('06:30');
+        const schoolCloseSec = parseTimeToSeconds('15:00');
 
-        // 2. Before 06:30 / 07:00 WIB
-        if (currentMinutes < schoolOpenMinutes && !options.dayOverride) {
-            const diffSeconds = (schoolOpenMinutes - currentMinutes) * 60 - currentSecondsIntoMinute;
+        // 2. Before 06:30 WIB
+        if (currentTotalSeconds < schoolOpenSec && !options.dayOverride) {
+            const diffSeconds = schoolOpenSec - currentTotalSeconds;
             const h = Math.floor(diffSeconds / 3600);
             const m = Math.floor((diffSeconds % 3600) / 60);
             const s = diffSeconds % 60;
@@ -74,8 +78,8 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
             };
         }
 
-        // 3. After 15:00 / 15:30 WIB
-        if (currentMinutes >= schoolCloseMinutes && !options.dayOverride) {
+        // 3. After 15:00 WIB
+        if (currentTotalSeconds >= schoolCloseSec && !options.dayOverride) {
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
                 label: 'Jam Sekolah Selesai',
@@ -90,12 +94,12 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
             };
         }
 
-        // 4. Find active period interval
+        // 4. Find active period interval strictly: now >= start && now < end
         let currentInterval = null;
         for (const item of periodDefinitions) {
-            const startM = parseTimeToMinutes(item.start);
-            const endM = parseTimeToMinutes(item.end);
-            if (currentMinutes >= startM && currentMinutes < endM) {
+            const startSec = parseTimeToSeconds(item.start);
+            const endSec = parseTimeToSeconds(item.end);
+            if (currentTotalSeconds >= startSec && currentTotalSeconds < endSec) {
                 currentInterval = item;
                 break;
             }
@@ -116,11 +120,11 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
             };
         }
 
-        const startM = parseTimeToMinutes(currentInterval.start);
-        const endM = parseTimeToMinutes(currentInterval.end);
-        const totalDurationSec = (endM - startM) * 60;
-        const elapsedSec = (currentMinutes - startM) * 60 + currentSecondsIntoMinute;
-        const remainingSec = Math.max(0, totalDurationSec - elapsedSec);
+        const startSec = parseTimeToSeconds(currentInterval.start);
+        const endSec = parseTimeToSeconds(currentInterval.end);
+        const totalDurationSec = endSec - startSec;
+        const elapsedSec = currentTotalSeconds - startSec;
+        const remainingSec = Math.max(0, endSec - currentTotalSeconds);
 
         const mRemaining = Math.floor(remainingSec / 60);
         const sRemaining = remainingSec % 60;
@@ -161,22 +165,22 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
             countdownSeconds: remainingSec,
             progressPercent,
         };
-    }, [currentMinutes, currentSecondsIntoMinute, clock.isWeekend, periodDefinitions, todaySchedules, options.dayOverride]);
+    }, [currentTotalSeconds, clock.isWeekend, periodDefinitions, todaySchedules, options.dayOverride]);
 
     // Helper: evaluate period status for timeline rows ('selesai' | 'berlangsung' | 'mendatang')
     const getPeriodStatus = (periodNum) => {
         if (clock.isWeekend && !options.dayOverride) return 'mendatang';
-        if (currentMinutes >= parseTimeToMinutes('15:00') && !options.dayOverride) return 'selesai';
-        if (currentMinutes < parseTimeToMinutes('06:30') && !options.dayOverride) return 'mendatang';
+        if (currentTotalSeconds >= parseTimeToSeconds('15:00') && !options.dayOverride) return 'selesai';
+        if (currentTotalSeconds < parseTimeToSeconds('06:30') && !options.dayOverride) return 'mendatang';
 
         const def = periodDefinitions.find(p => p.period === periodNum);
         if (!def) return 'mendatang';
 
-        const startM = parseTimeToMinutes(def.start);
-        const endM = parseTimeToMinutes(def.end);
+        const startSec = parseTimeToSeconds(def.start);
+        const endSec = parseTimeToSeconds(def.end);
 
-        if (currentMinutes >= endM) return 'selesai';
-        if (currentMinutes >= startM && currentMinutes < endM) return 'berlangsung';
+        if (currentTotalSeconds >= endSec) return 'selesai';
+        if (currentTotalSeconds >= startSec && currentTotalSeconds < endSec) return 'berlangsung';
         return 'mendatang';
     };
 

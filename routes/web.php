@@ -162,10 +162,14 @@ Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function
 
     // Student Leave / Sick Application Submission (Regular + Ketua Kelas)
     Route::post('/leave-request', [StudentController::class, 'submitLeaveRequest'])->name('siswa.leave-request.submit');
+    Route::post('/leave-requests', [StudentController::class, 'submitLeaveRequest']);
 
     // Class Leader Special Privileges (Ketua Kelas Only)
+    Route::post('/students', [StudentController::class, 'storeStudent'])->name('siswa.students.store');
     Route::post('/attendance/batch', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch');
     Route::post('/attendance/batch-store', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch-store');
+    Route::post('/attendance/send-report', [StudentController::class, 'sendAttendanceReport'])->name('siswa.attendance.send-report');
+    Route::get('/attendance/export-pdf', [StudentController::class, 'downloadAttendancePdf'])->name('siswa.attendance.export-pdf');
     Route::post('/duty-report', [StudentController::class, 'submitDutyReport'])->name('siswa.duty-report.submit');
     Route::post('/learning-tasks/{id}/status', [StudentController::class, 'updateTaskStatus'])->name('siswa.learning-tasks.status');
 
