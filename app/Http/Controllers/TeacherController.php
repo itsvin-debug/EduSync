@@ -18,6 +18,7 @@ use App\Models\StudentLeaveRequest;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\AuditLog;
+use App\Models\CocurricularSchedule;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -149,8 +150,11 @@ class TeacherController extends Controller
             ->orderBy('name')
             ->get();
 
+        $cocurricularToday = CocurricularSchedule::whereDate('date', now()->format('Y-m-d'))->first();
+
         return Inertia::render('Teacher/Dashboard', [
             'teacher' => $teacher,
+            'cocurricularToday' => $cocurricularToday,
             'personalSchedules' => $personalSchedules,
             'todaySchedules' => $todaySchedules,
             'activeSchedule' => $activeSchedule,

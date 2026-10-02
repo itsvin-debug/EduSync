@@ -8,6 +8,8 @@ use App\Models\Teacher;
 use App\Models\Schedule;
 use Inertia\Inertia;
 
+use App\Models\CocurricularSchedule;
+
 class LandingController extends Controller
 {
     public function index()
@@ -31,6 +33,39 @@ class LandingController extends Controller
             ->take(12)
             ->get();
 
+        $today = date('Y-m-d');
+        $tomorrow = date('Y-m-d', strtotime('+1 day'));
+
+        $todayKoku = CocurricularSchedule::with('classroom.department')
+            ->whereDate('date', $today)
+            ->first();
+
+        $tomorrowKoku = CocurricularSchedule::with('classroom.department')
+            ->whereDate('date', $tomorrow)
+            ->first();
+
+        $nextUpcomingKoku = CocurricularSchedule::with('classroom.department')
+            ->whereDate('date', '>', $today)
+            ->orderBy('date')
+            ->first();
+
+        $upcomingKokus = CocurricularSchedule::with('classroom.department')
+            ->whereDate('date', '>=', $today)
+            ->orderBy('date')
+            ->take(6)
+            ->get();
+
+        if ($upcomingKokus->isEmpty()) {
+            $upcomingKokus = CocurricularSchedule::with('classroom.department')
+                ->orderBy('date')
+                ->take(6)
+                ->get();
+        }
+
+        $allKokus = CocurricularSchedule::with('classroom.department')
+            ->orderBy('date')
+            ->get();
+
         $month = (int) date('n');
         $year = (int) date('Y');
         $academicYear = $month >= 7 ? "{$year}/" . ($year + 1) . " Ganjil" : ($year - 1) . "/{$year} Genap";
@@ -40,6 +75,14 @@ class LandingController extends Controller
             'classrooms' => $classrooms,
             'teachers' => $teachers,
             'featuredSchedules' => $featuredSchedules,
+            'cocurricular' => [
+                'today' => $todayKoku,
+                'tomorrow' => $tomorrowKoku,
+                'next_upcoming' => $nextUpcomingKoku,
+                'upcoming' => $upcomingKokus,
+                'all' => $allKokus,
+                'current_date' => $today,
+            ],
             'stats' => [
                 'total_schedules' => $totalSchedules,
                 'total_teachers' => $totalTeachers,

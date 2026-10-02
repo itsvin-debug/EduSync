@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import Logo from '@/Components/Logo';
 import ClassMonitoringGrid from '@/Components/ClassMonitoringGrid';
+import CocurricularCard from '@/Components/CocurricularCard';
+import CocurricularModal from '@/Components/CocurricularModal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import { useScheduleEngine, SCHOOL_PERIODS } from '@/hooks/useScheduleEngine';
 
@@ -35,12 +37,14 @@ export default function Index({
     teachers = [],
     featuredSchedules = [],
     stats = {},
+    cocurricular = {},
 }) {
     const clock = useRealtimeClock();
     const engine = useScheduleEngine(featuredSchedules);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGrade, setSelectedGrade] = useState('all');
     const [selectedDept, setSelectedDept] = useState('all');
+    const [isKokuModalOpen, setIsKokuModalOpen] = useState(false);
 
     // Real-time schedule interval and live badge evaluator
     const getScheduleStatus = (sched) => {
@@ -58,15 +62,15 @@ export default function Index({
         const currentTotal = clock.hours * 60 + clock.minutes;
 
         if (clock.isWeekend) {
-            return { label: 'Upcoming', status: 'upcoming', timeStr: `${startTime} - ${endTime} WIB` };
+            return { label: 'Upcoming', status: 'upcoming', timeStr: `${startTime} - ${endTime}` };
         }
         if (currentTotal >= startTotal && currentTotal < endTotal) {
-            return { label: 'In Progress', status: 'in_progress', timeStr: `${startTime} - ${endTime} WIB` };
+            return { label: 'In Progress', status: 'in_progress', timeStr: `${startTime} - ${endTime}` };
         }
         if (currentTotal < startTotal) {
-            return { label: 'Upcoming', status: 'upcoming', timeStr: `${startTime} - ${endTime} WIB` };
+            return { label: 'Upcoming', status: 'upcoming', timeStr: `${startTime} - ${endTime}` };
         }
-        return { label: 'Completed', status: 'completed', timeStr: `${startTime} - ${endTime} WIB` };
+        return { label: 'Completed', status: 'completed', timeStr: `${startTime} - ${endTime}` };
     };
 
     // Filter schedules for quick lookup
@@ -126,6 +130,13 @@ export default function Index({
                     <div className="flex items-center gap-6">
                         <nav className="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-600">
                             <a href="#beranda" className="text-slate-900 hover:text-indigo-600 transition-colors">Beranda</a>
+                            <button
+                                type="button"
+                                onClick={() => setIsKokuModalOpen(true)}
+                                className="hover:text-indigo-600 transition-colors cursor-pointer text-xs font-semibold text-slate-600"
+                            >
+                                Jadwal Kokurikuler
+                            </button>
                             <a href="#jadwal-instan" className="hover:text-indigo-600 transition-colors">Jadwal Instan</a>
                             <a href="#kejuruan" className="hover:text-indigo-600 transition-colors">Konsentrasi Keahlian</a>
                             <a href="#pengumuman" className="hover:text-indigo-600 transition-colors">Agenda Sekolah</a>
@@ -257,115 +268,13 @@ export default function Index({
                             </div>
                         </div>
 
-                        {/* Right Column: Live Schedule Preview Card (Stitch Screen 4) */}
+                        {/* Right Column: Live Kokurikuler Schedule Preview Card */}
                         <div className="lg:col-span-5 w-full">
-                            <div className="p-6 sm:p-7 bg-white border border-slate-200 rounded-2xl shadow-xs">
-                                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                                    <div>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 block">
-                                            Live Timetable
-                                        </span>
-                                        <h2 className="font-bold text-slate-900 text-base mt-0.5">
-                                            Co-curricular / Class Period Schedule
-                                        </h2>
-                                    </div>
-                                    {engine.state === 'CLASS_ACTIVE' ? (
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            <span>{engine.activePeriod?.name} ({engine.activePeriod?.time}) • Sisa {engine.countdownFormatted}</span>
-                                        </div>
-                                    ) : engine.state === 'BREAK_TIME' ? (
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold border border-amber-200">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            <span>{engine.breakInfo?.name || 'Waktu Istirahat'} • Sisa {engine.countdownFormatted}</span>
-                                        </div>
-                                    ) : engine.state === 'WEEKEND_HOLIDAY' ? (
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
-                                            <span>Libur Akhir Pekan</span>
-                                        </div>
-                                    ) : (
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
-                                            <span>Jam Sekolah Selesai</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {engine.state === 'CLASS_ACTIVE' && (
-                                    <div className="mt-3">
-                                        <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                                            <span>Progress Sesi {engine.activePeriod?.name}</span>
-                                            <span className="font-mono font-semibold text-slate-700">{engine.progressPercent}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                            <div className="bg-emerald-500 h-full transition-all duration-1000" style={{ width: `${engine.progressPercent}%` }}></div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Schedule list items with Real-Time Start/End Times & Live Badges */}
-                                <div className="mt-4 flex flex-col gap-3">
-                                    {featuredSchedules.slice(0, 3).map((sched, idx) => {
-                                        const statusInfo = getScheduleStatus(sched);
-                                        return (
-                                            <div
-                                                key={sched.id || idx}
-                                                className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-slate-300 transition-colors"
-                                            >
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-xs px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md">
-                                                                {sched.classroom?.name}
-                                                            </span>
-                                                            <span className="text-[11px] font-mono font-semibold text-slate-600 flex items-center gap-1">
-                                                                <Clock className="w-3 h-3 text-indigo-600" />
-                                                                {statusInfo.timeStr}
-                                                            </span>
-                                                        </div>
-                                                        <div className="font-bold text-xs text-slate-900 mt-1.5 line-clamp-1">
-                                                            {sched.subject?.name}
-                                                        </div>
-                                                        <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
-                                                            <span className="flex items-center gap-1">
-                                                                <Users className="w-3 h-3 text-slate-400" />
-                                                                <span className="font-medium text-slate-700">{sched.teacher?.name}</span>
-                                                            </span>
-                                                            <span>•</span>
-                                                            <span className="flex items-center gap-1">
-                                                                <MapPin className="w-3 h-3 text-slate-400" />
-                                                                <span>{sched.room?.name || 'Lab Komputer'}</span>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border shrink-0 tracking-wide flex items-center gap-1 ${
-                                                        statusInfo.status === 'in_progress'
-                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-2xs'
-                                                            : statusInfo.status === 'upcoming'
-                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                                            : 'bg-slate-100 text-slate-500 border-slate-200'
-                                                    }`}>
-                                                        {statusInfo.status === 'in_progress' && (
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                                                        )}
-                                                        <span>{statusInfo.label}</span>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="pt-4 mt-4 border-t border-slate-100 flex justify-between items-center text-xs">
-                                    <span className="text-slate-400 text-[11px]">Sinkronisasi Dapodik otomatis</span>
-                                    <a
-                                        href="#jadwal-instan"
-                                        className="font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                                    >
-                                        <span>Buka Seluruh Jadwal</span>
-                                        <ArrowRight className="w-3 h-3" />
-                                    </a>
-                                </div>
-                            </div>
+                            <CocurricularCard
+                                cocurricular={cocurricular}
+                                clock={clock}
+                                onOpenModal={() => setIsKokuModalOpen(true)}
+                            />
                         </div>
                     </div>
                 </section>
@@ -645,6 +554,13 @@ export default function Index({
                     </div>
                 </div>
             </footer>
+            {/* COCURRICULAR SCHEDULE MODAL */}
+            <CocurricularModal
+                isOpen={isKokuModalOpen}
+                onClose={() => setIsKokuModalOpen(false)}
+                allSchedules={cocurricular.all || []}
+                currentDate={cocurricular.current_date}
+            />
         </div>
     );
 }
