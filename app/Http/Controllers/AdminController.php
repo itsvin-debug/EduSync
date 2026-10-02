@@ -22,6 +22,8 @@ use App\Models\TrashReport;
 use App\Models\ClassFine;
 use App\Models\SchoolOrganization;
 use App\Models\StudentLeaveRequest;
+use App\Models\CocurricularSchedule;
+use App\Services\SchedulePdfParserService;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -1323,6 +1325,71 @@ class AdminController extends Controller
     {
         $this->logAction('SCHEDULE_AUTO_GENERATED', "Admin menjalankan engine auto-generate sinkronisasi kurikulum.");
         return back()->with('success', 'Sinkronisasi alokasi kurikulum berhasil dijalankan.');
+    }
+
+    /**
+     * Real-time PDF schedule parser preview
+     */
+    public function previewPdfSchedule(Request $request, SchedulePdfParserService $parser)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:pdf|max:10240',
+        ]);
+
+        $file = $request->file('file');
+        $result = $parser->parseSchedulePdf($file->getRealPath());
+
+        return response()->json($result);
+    }
+
+    /**
+     * Import parsed schedule data with replace or append mode
+     */
+    public function importPdfSchedule(Request $request, SchedulePdfParserService $parser)
+    {
+        $validated = $request->validate([
+            'preview_data' => 'required|array|min:1',
+            'type' => 'required|in:kbm,cocurricular',
+            'mode' => 'required|in:replace,append',
+        ]);
+
+        $res = $parser->importSchedules($validated['preview_data'], $validated['type'], $validated['mode']);
+
+        $modeLabel = $validated['mode'] === 'replace' ? 'menimpa seluruh jadwal lama' : 'menambahkan ke jadwal aktif';
+        $typeLabel = $validated['type'] === 'kbm' ? 'KBM' : 'Kokurikuler';
+        $this->logAction('SCHEDULE_IMPORTED_PDF', "Admin mengimpor {$res['imported_count']} sesi jadwal {$typeLabel} dengan metode {$modeLabel}.");
+
+        return back()->with('success', "Berhasil memproses {$res['imported_count']} sesi jadwal ({$modeLabel}).");
+    }
+
+    /**
+     * Purge all schedules for a specific class
+     */
+    public function purgeClassSchedules(Request $request, SchedulePdfParserService $parser)
+    {
+        $validated = $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+        ]);
+
+        $classroom = Classroom::findOrFail($validated['classroom_id']);
+        $deleted = $parser->purgeClassSchedule((int) $validated['classroom_id']);
+
+        $this->logAction('SCHEDULE_PURGED_CLASS', "Admin menghapus seluruh jadwal ({$deleted} sesi) untuk kelas {$classroom->name}.");
+
+        return back()->with('success', "Seluruh jadwal kelas {$classroom->name} ({$deleted} sesi) berhasil dihapus.");
+    }
+
+    /**
+     * Global wipe: delete all schedules across all classes
+     */
+    public function wipeAllSchedules(SchedulePdfParserService $parser)
+    {
+        $count = Schedule::count();
+        $parser->wipeAllSchedules();
+
+        $this->logAction('SCHEDULE_WIPED_ALL', "Admin mengosongkan seluruh matriks jadwal KBM sekolah ({$count} sesi dihapus).");
+
+        return back()->with('success', "Seluruh jadwal KBM sekolah ({$count} sesi) berhasil dikosongkan.");
     }
 
     public function masterData()

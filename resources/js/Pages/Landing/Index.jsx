@@ -122,9 +122,6 @@ export default function Index({
                                 <span className="text-xs text-slate-600 font-medium hidden sm:inline">SMKN 1 Ciomas</span>
                             </div>
                         </Link>
-                        <div className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
-                            SMK PK TERAKREDITASI A
-                        </div>
                     </div>
 
                     <div className="flex items-center gap-6">

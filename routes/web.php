@@ -106,11 +106,15 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/settings/password', [AdminController::class, 'updateAdminPassword'])->name('admin.settings.password');
     Route::post('/settings/2fa', [AdminController::class, 'toggleAdmin2FA'])->name('admin.settings.2fa');
 
-    // Matrix Builder & Inval
+    // Matrix Builder, PDF Parser & Schedule Management
     Route::get('/schedules', [AdminController::class, 'scheduleBuilder'])->name('admin.schedules');
     Route::post('/schedules', [AdminController::class, 'storeSchedule'])->name('admin.schedules.store');
     Route::put('/schedules/{id}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
     Route::delete('/schedules/{id}', [AdminController::class, 'deleteSchedule'])->name('admin.schedules.delete');
+    Route::post('/schedules/preview-pdf', [AdminController::class, 'previewPdfSchedule'])->name('admin.schedules.preview-pdf');
+    Route::post('/schedules/import-pdf', [AdminController::class, 'importPdfSchedule'])->name('admin.schedules.import-pdf');
+    Route::post('/schedules/wipe-all', [AdminController::class, 'wipeAllSchedules'])->name('admin.schedules.wipe-all');
+    Route::post('/schedules/purge-class', [AdminController::class, 'purgeClassSchedules'])->name('admin.schedules.purge-class');
     Route::post('/schedules/auto-generate', [AdminController::class, 'autoGenerate'])->name('admin.schedules.autogenerate');
     Route::get('/master-data', [AdminController::class, 'masterData'])->name('admin.master');
     Route::get('/inval', [AdminController::class, 'invalManagement'])->name('admin.inval');
