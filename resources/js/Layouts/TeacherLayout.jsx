@@ -109,7 +109,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                                     </span>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium truncate max-w-[160px] mt-0.5">
-                                    SMK Negeri Vokasi
+                                    SMKN 1 Ciomas
                                 </p>
                             </div>
                         </Link>
@@ -220,7 +220,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <span>© {clock.year} EDUSYNC SMK Negeri — Sistem Manajemen Kehadiran & Aktivitas Kelas (TA {clock.academicYear})</span>
+                    <span>© {clock.year} EDUSYNC SMKN 1 Ciomas — Sistem Manajemen Kehadiran & Aktivitas Kelas (TA {clock.academicYear})</span>
                     <span className="text-slate-400">Portal Guru Terintegrasi Dapodik</span>
                 </footer>
             </div>

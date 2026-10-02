@@ -145,7 +145,7 @@ export default function RecapExport({
 
                 {/* Print Title Header (Only visible on print) */}
                 <div className="hidden print:block mb-6 text-center border-b pb-4">
-                    <h2 className="text-xl font-bold text-black uppercase">SMK NEGERI 1 REKAYASA TEKNOLOGI</h2>
+                    <h2 className="text-xl font-bold text-black uppercase">SMK NEGERI 1 CIOMAS</h2>
                     <h3 className="text-sm font-semibold text-slate-700 uppercase">Laporan Rekapitulasi {activeTab.toUpperCase()}</h3>
                     <p className="text-xs text-slate-500">Periode: {startDate} s/d {endDate}</p>
                 </div>

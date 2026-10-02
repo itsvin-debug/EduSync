@@ -106,7 +106,7 @@ export default function Index({
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
-            <Head title="EDUSYNC — Portal Akademik & Penjadwalan SMK Negeri" />
+            <Head title="EDUSYNC — Portal Akademik & Penjadwalan SMKN 1 Ciomas" />
 
             {/* 1. TOP HEADER (Stitch Screen 4) */}
             <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
@@ -119,7 +119,7 @@ export default function Index({
                             <div className="flex items-center gap-2">
                                 <span className="font-bold text-slate-900 tracking-tight text-lg">EDUSYNC</span>
                                 <span className="text-slate-300 font-normal">—</span>
-                                <span className="text-xs text-slate-600 font-medium hidden sm:inline">SMK Negeri Portal</span>
+                                <span className="text-xs text-slate-600 font-medium hidden sm:inline">SMKN 1 Ciomas</span>
                             </div>
                         </Link>
                         <div className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
@@ -130,6 +130,7 @@ export default function Index({
                     <div className="flex items-center gap-6">
                         <nav className="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-600">
                             <a href="#beranda" className="text-slate-900 hover:text-indigo-600 transition-colors">Beranda</a>
+                            <a href="#fitur-web" className="hover:text-indigo-600 transition-colors">Fitur Portal</a>
                             <button
                                 type="button"
                                 onClick={() => setIsKokuModalOpen(true)}
@@ -137,9 +138,8 @@ export default function Index({
                             >
                                 Jadwal Kokurikuler
                             </button>
-                            <a href="#jadwal-instan" className="hover:text-indigo-600 transition-colors">Jadwal Instan</a>
+                            <a href="#jadwal-instan" className="hover:text-indigo-600 transition-colors">Jadwal Pelajaran</a>
                             <a href="#kejuruan" className="hover:text-indigo-600 transition-colors">Konsentrasi Keahlian</a>
-                            <a href="#pengumuman" className="hover:text-indigo-600 transition-colors">Agenda Sekolah</a>
                         </nav>
 
                         <div className="flex items-center gap-2.5">
@@ -212,17 +212,17 @@ export default function Index({
                     <div className="grid lg:grid-cols-12 gap-10 items-center">
                         {/* Left Column */}
                         <div className="lg:col-span-7 flex flex-col items-start">
-                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                                <span>Portal Resmi Vokasi • Standar Industri DUDI</span>
+                                <span>Portal Akademik & Penjadwalan Terintegrasi • SMKN 1 Ciomas</span>
                             </div>
 
                             <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mt-5">
-                                Sistem Informasi & Penjadwalan Terpadu
+                                Portal Informasi & Penjadwalan SMKN 1 Ciomas
                             </h1>
 
                             <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-4 max-w-xl">
-                                Platform tata kelola jadwal akademik, rotasi bengkel praktik kejuruan, dan sinkronisasi presensi harian guru serta peserta didik SMK Negeri dalam satu portal terpusat berstandar industri.
+                                Pusat informasi resmi manajemen jadwal kegiatan belajar mengajar (KBM), rotasi bengkel dan laboratorium praktik, jadwal harian kokurikuler 2.0 (Pentas Kreasi, Makan Bersama, Jumat Taqwa), serta pemantauan presensi siswa dan guru SMKN 1 Ciomas secara akurat dan transparan.
                             </p>
 
                             <div className="flex flex-wrap items-center gap-3 mt-7 w-full sm:w-auto">
@@ -231,14 +231,22 @@ export default function Index({
                                     className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
                                 >
                                     <CalendarDays className="w-4 h-4 text-indigo-300" />
-                                    <span>Lihat Jadwal Hari Ini</span>
+                                    <span>Lihat Jadwal Pelajaran (KBM)</span>
                                 </a>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsKokuModalOpen(true)}
+                                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-semibold text-xs border border-indigo-200 transition-colors flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
+                                >
+                                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                                    <span>Jadwal Kokurikuler 2.0</span>
+                                </button>
                                 <Link
                                     href="/login"
                                     className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold text-xs border border-slate-200 transition-colors flex items-center justify-center gap-2 shadow-xs"
                                 >
                                     <ShieldCheck className="w-4 h-4 text-slate-500" />
-                                    <span>Akses Akun Guru / Siswa</span>
+                                    <span>Akses Akun Pengguna</span>
                                 </Link>
                             </div>
 
@@ -246,24 +254,24 @@ export default function Index({
                             <div className="mt-10 pt-7 border-t border-slate-200 grid grid-cols-3 gap-6 w-full">
                                 <div>
                                     <div className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono tracking-tight">
-                                        {stats.total_classrooms || 24}
+                                        {stats.total_classrooms || 31}
                                     </div>
-                                    <div className="text-xs font-semibold text-slate-700 mt-1">Rombel Aktif</div>
+                                    <div className="text-xs font-semibold text-slate-700 mt-1">Rombel Terjadwal</div>
                                     <div className="text-[11px] text-slate-400 mt-0.5">Tingkat X, XI, XII</div>
                                 </div>
                                 <div>
                                     <div className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono tracking-tight">
                                         12
                                     </div>
-                                    <div className="text-xs font-semibold text-slate-700 mt-1">Lab & Bengkel</div>
-                                    <div className="text-[11px] text-slate-400 mt-0.5">Standar Mitra DUDI</div>
+                                    <div className="text-xs font-semibold text-slate-700 mt-1">Lab & Ruang Praktik</div>
+                                    <div className="text-[11px] text-slate-400 mt-0.5">Standar Praktik Kejuruan</div>
                                 </div>
                                 <div>
                                     <div className="text-2xl sm:text-3xl font-bold text-indigo-600 font-mono tracking-tight">
                                         100%
                                     </div>
                                     <div className="text-xs font-semibold text-slate-700 mt-1">Bebas Bentrok</div>
-                                    <div className="text-[11px] text-slate-400 mt-0.5">Validasi Dapodik</div>
+                                    <div className="text-[11px] text-slate-400 mt-0.5">Validasi Kurikulum</div>
                                 </div>
                             </div>
                         </div>
@@ -279,27 +287,86 @@ export default function Index({
                     </div>
                 </section>
 
+                {/* 3.5 FITUR UTAMA PORTAL WEB SMKN 1 CIOMAS */}
+                <section id="fitur-web" className="py-16 bg-white border-y border-slate-200 w-full">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center max-w-2xl mx-auto mb-12">
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 block mb-1">
+                                Informasi & Fitur Terintegrasi
+                            </span>
+                            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                                Fitur Utama Portal Web SMKN 1 Ciomas
+                            </h2>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-2">
+                                Aplikasi manajemen terpadu yang mempermudah siswa, guru, dan staf sekolah mengakses data jadwal dan akademik harian.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center mb-4">
+                                    <Calendar className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-bold text-slate-900 text-sm">Penjadwalan KBM & Rotasi Lab</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    Akses instan susunan mata pelajaran per jam pelajaran (JP), nama guru pengampu, serta alokasi ruang teori dan laboratorium praktik kejuruan tanpa potensi bentrok.
+                                </p>
+                            </div>
+
+                            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 text-teal-600 flex items-center justify-center mb-4">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-bold text-slate-900 text-sm">Jadwal Kokurikuler 2.0 Otomatis</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    Kalender rotasi petugas harian Pentas Kreasi (Selasa & Kamis), Makan Bersama (Rabu), dan Jumat Taqwa (Jumat) yang sinkron otomatis mengikuti kalender nyata semester ganjil.
+                                </p>
+                            </div>
+
+                            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mb-4">
+                                    <Users className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-bold text-slate-900 text-sm">Monitoring KBM & Presensi Harian</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    Pemantauan sesi KBM secara transparan, status kehadiran siswa per kelas, presensi kehadiran guru mengajar, hingga verifikasi piket kebersihan kelas.
+                                </p>
+                            </div>
+
+                            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mb-4">
+                                    <ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-bold text-slate-900 text-sm">Portal Terpadu Multi-Role</h3>
+                                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                                    Ruang kerja khusus untuk Siswa & Ketua Kelas (ruang belajar & input absensi), Guru (rekap jam mengajar), dan Administrator (kelola jurusan, kelas, & jadwal).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* 4. CLASS SCHEDULE QUICK LOOKUP SECTION (Stitch Screen 4) */}
-                <section id="jadwal-instan" className="py-16 bg-white border-y border-slate-200 w-full">
+                <section id="jadwal-instan" className="py-16 bg-slate-50 border-b border-slate-200 w-full">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
                         {/* Live Class Matrix Monitoring */}
                         <ClassMonitoringGrid
                             classrooms={classrooms}
-                            title="Monitoring Sesi KBM Seluruh Rombel"
+                            title="Monitoring Sesi KBM Seluruh Rombel SMKN 1 Ciomas"
                         />
 
                         <div>
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-100">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-slate-200">
                             <div>
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 mb-2">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-700 text-xs font-semibold border border-slate-200 mb-2">
                                     <Search className="w-3.5 h-3.5 text-indigo-600" />
-                                    <span>Pencarian Instan</span>
+                                    <span>Pencarian Jadwal Cepat</span>
                                 </div>
                                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                                    Penelusuran Jadwal Kelas & Laboratorium
+                                    Penelusuran Jadwal Kelas & Laboratorium SMKN 1 Ciomas
                                 </h2>
                                 <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                                    Lihat susunan jadwal mata pelajaran dan ruang bengkel tanpa perlu login akun. Diperbarui langsung oleh staf kurikulum.
+                                    Lihat susunan jadwal mata pelajaran dan ruang bengkel tanpa perlu login akun. Diperbarui langsung oleh staf kurikulum SMKN 1 Ciomas.
                                 </p>
                             </div>
                             <div className="flex items-center gap-3">
@@ -488,10 +555,10 @@ export default function Index({
                             Pendidikan Kejuruan Unggulan
                         </span>
                         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                            5 Konsentrasi Keahlian Berstandar Industri
+                            5 Konsentrasi Keahlian SMKN 1 Ciomas
                         </h2>
                         <p className="text-xs sm:text-sm text-slate-500 mt-2">
-                            Kurikulum Merdeka SMK Pusat Keunggulan dengan sinkronisasi jam blok laboratorium.
+                            Kurikulum Merdeka vokasi SMKN 1 Ciomas dengan sinkronisasi jam blok laboratorium & bengkel kejuruan.
                         </p>
                     </div>
 
@@ -542,7 +609,7 @@ export default function Index({
                             E
                         </div>
                         <div>
-                            <span className="font-bold text-slate-900">EDUSYNC</span> • SMK Negeri 1 Rekayasa Teknologi
+                            <span className="font-bold text-slate-900">EDUSYNC</span> • SMKN 1 Ciomas
                         </div>
                     </div>
                     <div className="flex items-center gap-4 text-slate-400 text-[11px]">
@@ -550,7 +617,7 @@ export default function Index({
                         <span>•</span>
                         <span>Standar Kurikulum Merdeka</span>
                         <span>•</span>
-                        <span className="text-emerald-600 font-semibold">Dapodik 100% Online</span>
+                        <span className="text-emerald-600 font-semibold">Dapodik Terverifikasi</span>
                     </div>
                 </div>
             </footer>

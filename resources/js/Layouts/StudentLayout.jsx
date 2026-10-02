@@ -388,7 +388,7 @@ export default function StudentLayout({
                 <footer className="w-full bg-white border-t border-slate-200 py-4 px-6 sm:px-8 text-xs text-slate-500">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                         <div>
-                            <span className="font-semibold text-slate-800">EDUSYNC</span> • Portal Akademik & Jadwal SMK Negeri 1 Rekayasa Teknologi
+                            <span className="font-semibold text-slate-800">EDUSYNC</span> • Portal Akademik & Jadwal SMKN 1 Ciomas
                         </div>
                         <div className="flex items-center gap-3 text-slate-400 text-[11px]">
                             <span>Tahun Ajaran {clock.academicYear} • {clock.semester}</span>

@@ -567,7 +567,7 @@ export default function Dashboard({
                     <div className="flex items-center gap-2.5 flex-wrap">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-indigo-300 text-[11px] font-semibold uppercase tracking-wider">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            SMK Negeri 1 Rekayasa Teknologi • {isClassLeader ? 'Portal Ketua Kelas' : 'Portal Siswa'}
+                            SMKN 1 Ciomas • {isClassLeader ? 'Portal Ketua Kelas' : 'Portal Siswa'}
                         </span>
                         <span className="font-mono font-bold text-amber-300 text-xs px-2.5 py-0.5 rounded-full bg-slate-800/90 border border-slate-700">
                             {clock.timeString}

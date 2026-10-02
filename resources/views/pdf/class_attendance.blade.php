@@ -201,7 +201,7 @@
     <div class="header-kop">
         <p class="instansi-prov">Pemerintah Daerah Provinsi Jawa Barat</p>
         <p class="instansi-dinas">Dinas Pendidikan — Cabang Dinas Wilayah VII</p>
-        <h1 class="nama-sekolah">SMK Negeri 1 Rekayasa Teknologi</h1>
+        <h1 class="nama-sekolah">SMK Negeri 1 Ciomas</h1>
         <p class="kontak-sekolah">Jl. Rekayasa No. 101, Kota Bandung, Jawa Barat | Telp: (022) 7234567 | Pos: 40124 | info@smkn1rekayasa.sch.id</p>
     </div>
 
@@ -360,7 +360,7 @@
 
     <!-- CATATAN KAKI SISTEM -->
     <div class="footer-note">
-        Dokumen ini diterbitkan secara otomatis melalui platform <strong>EDUSYNC Sistem Informasi Akademik SMK Negeri 1 Rekayasa Teknologi</strong>. Waktu cetak: {{ now()->timezone('Asia/Jakarta')->isoFormat('D MMMM YYYY, HH:mm:ss') }} WIB. Berkas ini sah dan terverifikasi secara digital.
+        Dokumen ini diterbitkan secara otomatis melalui platform <strong>EDUSYNC Sistem Informasi Akademik SMKN 1 Ciomas</strong>. Waktu cetak: {{ now()->timezone('Asia/Jakarta')->isoFormat('D MMMM YYYY, HH:mm:ss') }}. Berkas ini sah dan terverifikasi secara digital.
     </div>
 </body>
 </html>

@@ -223,7 +223,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                             ADMIN
                                         </span>
                                     </div>
-                                    <span className="text-[10px] text-slate-400 font-medium truncate mt-0.5">SMK Negeri Portal</span>
+                                    <span className="text-[10px] text-slate-400 font-medium truncate mt-0.5">SMKN 1 Ciomas</span>
                                 </div>
                             )}
                         </Link>

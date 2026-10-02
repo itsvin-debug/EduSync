@@ -137,7 +137,7 @@ export default function Login({ classrooms = [], departments = [], currentUser =
                                 EDUSYNC
                             </span>
                             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">
-                                Portal Akademik SMK Negeri
+                                Portal Akademik SMKN 1 Ciomas
                             </span>
                         </div>
                     </Link>
@@ -895,7 +895,7 @@ export default function Login({ classrooms = [], departments = [], currentUser =
                         </span>
                     </div>
                     <div className="text-[11px] text-slate-400">
-                        © 2026 EDUSYNC SMK Negeri. Hak Cipta Dilindungi.
+                        © 2026 EDUSYNC SMKN 1 Ciomas. Hak Cipta Dilindungi.
                     </div>
                 </div>
             </footer>
