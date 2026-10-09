@@ -226,7 +226,7 @@ export default function CocurricularCard({
                                 return (
                                     <div
                                         key={item.id || idx}
-                                        className="p-3 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-slate-300 transition-colors flex items-center justify-between gap-3"
+                                        className="p-3 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg transition-colors duration-200 ease-bouncy flex items-center justify-between gap-3"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${theme.bg} ${theme.text} border ${theme.border}`}>
@@ -276,7 +276,7 @@ export default function CocurricularCard({
                 <button
                     onClick={onOpenModal}
                     type="button"
-                    className="w-full sm:w-auto font-semibold text-indigo-600 hover:text-indigo-800 flex items-center justify-center sm:justify-end gap-1.5 transition-colors py-1 cursor-pointer"
+                    className="w-full sm:w-auto font-semibold text-indigo-600 hover:text-indigo-800 flex items-center justify-center sm:justify-end gap-1.5 transition-colors duration-200 ease-bouncy py-1 cursor-pointer"
                 >
                     <span>Buka Seluruh Jadwal Koku (11 Minggu)</span>
                     <ArrowRight className="w-3.5 h-3.5" />

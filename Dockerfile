@@ -24,6 +24,9 @@ RUN apk add --no-cache \
 # Install PHP extensions required by Laravel & Supabase (pdo_pgsql)
 RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql bcmath gd zip opcache
 
+# Copy PHP and OPcache configuration
+COPY docker/opcache.ini $PHP_INI_DIR/conf.d/opcache.ini
+
 # Copy Composer binary
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -35,8 +38,8 @@ COPY . .
 # Copy compiled frontend assets from frontend stage
 COPY --from=frontend /app/public/build ./public/build
 
-# Install production PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install production PHP dependencies with authoritative classmap
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction
 
 # Configure permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache

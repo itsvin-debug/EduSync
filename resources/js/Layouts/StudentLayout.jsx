@@ -68,7 +68,7 @@ export default function StudentLayout({
                     <div className="p-4 sm:p-5 pb-4 border-b border-slate-800/80 shrink-0">
                         <Link href="/siswa/dashboard" className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
-                                <span className="material-symbols-outlined text-[20px]">school</span>
+                                <GraduationCap className="w-5 h-5 text-white" />
                             </div>
                             <div className="min-w-0">
                                 <div className="flex items-center gap-1.5">
@@ -124,7 +124,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('today')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'today'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -138,7 +138,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('weekly')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'weekly'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -167,7 +167,7 @@ export default function StudentLayout({
                                         <button
                                             type="button"
                                             onClick={() => onTabChange && onTabChange('absensi')}
-                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                                 activeTab === 'absensi'
                                                     ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -188,7 +188,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('izin')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'izin'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -211,7 +211,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('tugas')}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'tugas'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -227,7 +227,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('piket')}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'piket'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -244,7 +244,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('denda')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'denda'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -258,7 +258,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('guru')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'guru'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -281,7 +281,7 @@ export default function StudentLayout({
                                     <button
                                         type="button"
                                         onClick={() => onTabChange && onTabChange('settings')}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 ease-bouncy ${
                                             activeTab === 'settings'
                                                 ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                 : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -309,7 +309,7 @@ export default function StudentLayout({
 
                         <button
                             onClick={handleLogout}
-                            className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors text-xs font-medium"
+                            className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 ease-bouncy text-xs font-medium"
                         >
                             <span className="flex items-center gap-2">
                                 <LogOut className="w-4 h-4" />
@@ -381,7 +381,7 @@ export default function StudentLayout({
 
                 {/* Main Content Body */}
                 <main className="w-full flex-1 p-6 sm:p-8">
-                    {children}
+                    <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
 
                 {/* Clean Bottom Footer */}

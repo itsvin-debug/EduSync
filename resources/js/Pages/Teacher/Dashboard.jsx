@@ -318,14 +318,14 @@ export default function Dashboard({
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setActiveTab('presensi_kelas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                         >
                             <Users className="w-4 h-4" />
                             <span>Pantau Presensi Siswa</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('tugas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-colors"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-colors duration-200 ease-bouncy"
                         >
                             <ClipboardList className="w-4 h-4 text-amber-300" />
                             <span>Delegasi Tugas Ketua Kelas</span>
@@ -437,7 +437,7 @@ export default function Dashboard({
                                         const status = att?.status || 'Belum Dicatat';
 
                                         return (
-                                            <tr key={st.id} className="hover:bg-slate-50/60 transition-colors">
+                                            <tr key={st.id} className="hover:bg-slate-50/60 transition-colors duration-200 ease-bouncy">
                                                 <td className="py-3 px-3 text-center font-mono text-slate-400">{idx + 1}</td>
                                                 <td className="py-3 px-4">
                                                     <div className="font-bold text-slate-900">{st.name}</div>
@@ -552,14 +552,14 @@ export default function Dashboard({
                                             <>
                                                 <button
                                                     onClick={() => handleApproveLeave(leave.id)}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors"
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy"
                                                 >
                                                     <Check className="w-4 h-4" />
                                                     <span>Setujui (Auto-Sync)</span>
                                                 </button>
                                                 <button
                                                     onClick={() => handleRejectLeave(leave.id)}
-                                                    className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                                    className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform font-semibold text-xs transition-colors duration-200 ease-bouncy"
                                                 >
                                                     Tolak
                                                 </button>
@@ -721,7 +721,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={taskProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
                             >
                                 <Send className="w-3.5 h-3.5" />
                                 <span>{taskProcessing ? 'Mendelegasikan...' : 'Kirim Tugas ke Ketua Kelas'}</span>
@@ -750,7 +750,7 @@ export default function Dashboard({
                                 {myLearningTasks.map((t) => (
                                     <div
                                         key={t.id}
-                                        className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between gap-2"
+                                        className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all duration-200 ease-bouncy flex flex-col justify-between gap-2"
                                     >
                                         <div className="flex items-center justify-between gap-2 flex-wrap">
                                             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -886,7 +886,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={trashProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
                             >
                                 <Trash2 className="w-3.5 h-3.5" />
                                 <span>{trashProcessing ? 'Mengirimkan...' : 'Kirim Laporan Sampah'}</span>
@@ -962,7 +962,7 @@ export default function Dashboard({
                                 {todaySchedules.map((s) => (
                                     <div
                                         key={s.id}
-                                        className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white transition-all flex items-start justify-between gap-4"
+                                        className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white transition-all duration-200 ease-bouncy flex items-start justify-between gap-4"
                                     >
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
@@ -980,7 +980,7 @@ export default function Dashboard({
 
                                         <button
                                             onClick={() => setIsSwapModalOpen(true)}
-                                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-medium hover:bg-slate-100 transition-colors"
+                                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 text-xs font-medium hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform transition-colors duration-200 ease-bouncy"
                                         >
                                             Tukar Jam
                                         </button>
@@ -1013,13 +1013,13 @@ export default function Dashboard({
                         <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
                             <button
                                 onClick={() => setActiveTab('perizinan_siswa')}
-                                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-xs"
+                                className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors duration-200 ease-bouncy shadow-xs"
                             >
                                 Periksa Izin Siswa ({pendingStudentLeaves.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('piket')}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors duration-200 ease-bouncy"
                             >
                                 Periksa Laporan Piket Siswa
                             </button>
@@ -1042,7 +1042,7 @@ export default function Dashboard({
                                 <button
                                     key={d}
                                     onClick={() => setSelectedWeeklyDay(d)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ease-bouncy ${
                                         selectedWeeklyDay === d
                                             ? 'bg-white text-indigo-700 shadow-xs'
                                             : 'text-slate-600 hover:text-slate-900'
@@ -1063,7 +1063,7 @@ export default function Dashboard({
                             {weeklyDaySchedules.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between"
+                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
@@ -1116,10 +1116,10 @@ export default function Dashboard({
                                             key={opt.val}
                                             type="button"
                                             onClick={() => setAttendanceData('status', opt.val)}
-                                            className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all ${
+                                            className={`py-2 px-3 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy ${
                                                 attendanceData.status === opt.val
                                                     ? `${opt.activeClass} border-transparent shadow-xs`
-                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform'
                                             }`}
                                         >
                                             {opt.label}
@@ -1142,7 +1142,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={attendanceProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs"
                             >
                                 {attendanceProcessing ? 'Menyimpan...' : (todayAttendance ? 'Perbarui Presensi Hari Ini' : 'Simpan Presensi Hari Ini')}
                             </button>
@@ -1285,7 +1285,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={dutyProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs"
                             >
                                 {dutyProcessing ? 'Mengirimkan...' : 'Kirim Permohonan Izin Dinas'}
                             </button>
@@ -1363,7 +1363,7 @@ export default function Dashboard({
                             {picketReports.map((p) => (
                                 <div
                                     key={p.id}
-                                    className="p-5 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col gap-3 text-xs"
+                                    className="p-5 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 transition-all duration-200 ease-bouncy flex flex-col gap-3 text-xs"
                                 >
                                     <div className="flex items-center justify-between gap-2 flex-wrap">
                                         <div className="flex items-center gap-2">
@@ -1388,13 +1388,13 @@ export default function Dashboard({
                                                 <div className="flex items-center gap-1.5 pl-2">
                                                     <button
                                                         onClick={() => handleVerifyPicket(p.id, 'approved')}
-                                                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs"
+                                                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors duration-200 ease-bouncy shadow-xs"
                                                     >
                                                         Setujui (ACC)
                                                     </button>
                                                     <button
                                                         onClick={() => handleVerifyPicket(p.id, 'rejected')}
-                                                        className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                                        className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform font-semibold text-xs transition-colors duration-200 ease-bouncy"
                                                     >
                                                         Tolak
                                                     </button>
@@ -1446,7 +1446,7 @@ export default function Dashboard({
                                                             <img
                                                                 src={photo}
                                                                 alt={`Bukti Piket ${pIdx + 1}`}
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                                className="w-full h-full object-cover group-hover:scale-105 active:scale-95 transition-transform duration-200 ease-bouncy"
                                                             />
                                                         )}
                                                         <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition-opacity">
@@ -1626,14 +1626,14 @@ export default function Dashboard({
                         <button
                             type="button"
                             onClick={() => setIsSwapModalOpen(false)}
-                            className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                            className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors duration-200 ease-bouncy"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
                             disabled={swapProcessing}
-                            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
+                            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy disabled:opacity-50"
                         >
                             Kirim Permohonan Inval
                         </button>
@@ -1749,7 +1749,7 @@ export default function Dashboard({
                                 <button
                                     type="submit"
                                     disabled={profileSaving}
-                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all duration-200 ease-bouncy disabled:opacity-50 flex items-center gap-1.5"
                                 >
                                     <Check className="w-4 h-4" />
                                     <span>{profileSaving ? 'Menyimpan...' : 'Simpan Perubahan Data'}</span>
@@ -1824,7 +1824,7 @@ export default function Dashboard({
                                 <button
                                     type="submit"
                                     disabled={passwordSaving}
-                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all duration-200 ease-bouncy disabled:opacity-50 flex items-center gap-1.5"
                                 >
                                     <KeyRound className="w-4 h-4" />
                                     <span>{passwordSaving ? 'Memproses...' : 'Perbarui Kata Sandi'}</span>

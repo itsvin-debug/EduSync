@@ -26,7 +26,7 @@ export default function KbmMonitor({ classrooms = [], departments = [] }) {
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <Link
                             href="/admin/dashboard"
-                            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors mr-2"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors duration-200 ease-bouncy mr-2"
                         >
                             <ArrowLeft className="w-3.5 h-3.5" />
                             <span>Kembali ke Dashboard</span>

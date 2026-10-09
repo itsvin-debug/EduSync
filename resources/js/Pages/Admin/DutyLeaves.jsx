@@ -138,7 +138,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                             <button
                                 onClick={() => setStatusFilter('all')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'all'
                                         ? 'bg-slate-900 text-white'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -148,7 +148,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                             </button>
                             <button
                                 onClick={() => setStatusFilter('pending')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'pending'
                                         ? 'bg-amber-600 text-white'
                                         : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
@@ -158,7 +158,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                             </button>
                             <button
                                 onClick={() => setStatusFilter('di_luar_dinas')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'di_luar_dinas'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -168,7 +168,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                             </button>
                             <button
                                 onClick={() => setStatusFilter('selesai')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'selesai'
                                         ? 'bg-emerald-600 text-white'
                                         : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -201,7 +201,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                                     </tr>
                                 ) : (
                                     filteredLeaves.map((leave) => (
-                                        <tr key={leave.id} className="hover:bg-slate-50/70 transition-colors">
+                                        <tr key={leave.id} className="hover:bg-slate-50/70 transition-colors duration-200 ease-bouncy">
                                             <td className="px-6 py-4">
                                                 <div className="font-semibold text-slate-900 leading-snug">
                                                     {leave.teacher?.name}
@@ -291,13 +291,13 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                                                     <div className="inline-flex items-center gap-1.5">
                                                         <button
                                                             onClick={() => handleApprove(leave.id)}
-                                                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                                            className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                                                         >
                                                             Setujui
                                                         </button>
                                                         <button
                                                             onClick={() => handleReject(leave.id)}
-                                                            className="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg border border-rose-200 transition-colors"
+                                                            className="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg border border-rose-200 transition-colors duration-200 ease-bouncy"
                                                         >
                                                             Tolak
                                                         </button>
@@ -305,7 +305,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                                                 ) : (
                                                     <button
                                                         onClick={() => setSelectedLeave(leave)}
-                                                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                                                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors duration-200 ease-bouncy"
                                                     >
                                                         Detail Laporan
                                                     </button>
@@ -383,7 +383,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                         <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                             <button
                                 onClick={() => setSelectedLeave(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Tutup
                             </button>
@@ -392,7 +392,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                                     handleToggleDutyStatus(selectedLeave.id);
                                     setSelectedLeave(null);
                                 }}
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 {selectedLeave.duty_status === 'di_luar_dinas' ? 'Tandai Selesai' : 'Ubah ke Di Luar Dinas'}
                             </button>

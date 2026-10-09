@@ -18,7 +18,7 @@ export default function EmptyState({
             {actionLabel && onAction && (
                 <button
                     onClick={onAction}
-                    className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
+                    className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors duration-200 ease-bouncy shadow-sm"
                 >
                     <Sparkles className="w-4 h-4 text-indigo-400" />
                     <span>{actionLabel}</span>

@@ -1,3 +1,4 @@
+import AvatarCropperModal from "@/Components/AvatarCropperModal";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -106,14 +107,22 @@ export default function Dashboard({
     const [profileSaving, setProfileSaving] = useState(false);
     const [passwordSaving, setPasswordSaving] = useState(false);
     const [avatarFile, setAvatarFile] = useState(null);
+    const [cropModalOpen, setCropModalOpen] = useState(false);
+    const [tempAvatarUrl, setTempAvatarUrl] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(student?.avatar || null);
 
     const handleAvatarChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            setAvatarFile(file);
-            setAvatarPreview(URL.createObjectURL(file));
+            setTempAvatarUrl(URL.createObjectURL(file));
+            setCropModalOpen(true);
+            e.target.value = null; // reset input
         }
+    };
+
+    const handleCropComplete = (croppedFile, previewUrl) => {
+        setAvatarFile(croppedFile);
+        setAvatarPreview(previewUrl);
     };
 
     const handleProfileUpdate = (e) => {
@@ -688,7 +697,7 @@ export default function Dashboard({
                                 href={`https://wa.me/${engineState.activeSlot.teacher.phone.replace(/[^0-9]/g, '')}?text=Halo%20${encodeURIComponent(engineState.activeSlot.teacher.name)}%2C%20saya%20siswa%20${encodeURIComponent(classroom?.name)}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                             >
                                 <MessageCircle className="w-3.5 h-3.5" />
                                 <span>WhatsApp Guru</span>
@@ -696,7 +705,7 @@ export default function Dashboard({
                         ) : (
                             <button
                                 onClick={() => setActiveTab('weekly')}
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                             >
                                 <CalendarDays className="w-3.5 h-3.5" />
                                 <span>Lihat Jadwal Lengkap</span>
@@ -706,7 +715,7 @@ export default function Dashboard({
                         {isClassLeader && (
                             <button
                                 onClick={() => setActiveTab('piket')}
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-white text-xs font-medium border border-slate-600/70 transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-white text-xs font-medium border border-slate-600/70 transition-colors duration-200 ease-bouncy"
                             >
                                 <Camera className="w-3.5 h-3.5 text-amber-300" />
                                 <span>Verifikasi Piket Kelas</span>
@@ -739,7 +748,7 @@ export default function Dashboard({
                         </div>
                         <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
                             <div
-                                className="bg-emerald-500 h-full rounded-full transition-all"
+                                className="bg-emerald-500 h-full rounded-full transition-all duration-200 ease-bouncy"
                                 style={{ width: `${personalAttendanceRate}%` }}
                             ></div>
                         </div>
@@ -948,7 +957,7 @@ export default function Dashboard({
                             <button
                                 type="button"
                                 onClick={() => setShowAddStudentModal(true)}
-                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 shadow-2xs transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 shadow-2xs transition-colors duration-200 ease-bouncy"
                             >
                                 <UserPlus className="w-3.5 h-3.5" />
                                 <span>+ Tambah Siswa Baru</span>
@@ -958,7 +967,7 @@ export default function Dashboard({
                                 type="button"
                                 onClick={handleSendAttendanceReport}
                                 disabled={sendingReport}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy disabled:opacity-50"
                             >
                                 <Send className="w-3.5 h-3.5" />
                                 <span>{sendingReport ? 'Mengirim...' : 'Kirim Laporan ke Guru'}</span>
@@ -968,7 +977,7 @@ export default function Dashboard({
                                 href="/siswa/attendance/export-pdf"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                             >
                                 <Download className="w-3.5 h-3.5" />
                                 <span>Unduh PDF Resmi</span>
@@ -1078,7 +1087,7 @@ export default function Dashboard({
                                         const isAutoSynced = record.is_auto_synced;
 
                                         return (
-                                            <tr key={st.id} className="hover:bg-slate-50/70 transition-colors">
+                                            <tr key={st.id} className="hover:bg-slate-50/70 transition-colors duration-200 ease-bouncy">
                                                 {/* 1. No / Absen Number */}
                                                 <td className="py-3 px-3 text-center font-mono font-semibold text-slate-700">
                                                     {st.attendance_number || (idx + 1)}
@@ -1225,7 +1234,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={isLocked}
-                                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors duration-200 ease-bouncy shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <Send className="w-4 h-4" />
                                 <span>Simpan & Sinkronkan Presensi Kelas</span>
@@ -1270,7 +1279,7 @@ export default function Dashboard({
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {myAttendances.map((item) => (
-                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors duration-200 ease-bouncy">
                                             <td className="py-3 px-4 font-semibold text-slate-800">
                                                 {item.date}
                                             </td>
@@ -1352,9 +1361,9 @@ export default function Dashboard({
                                                 setLeavePhotoPreview(URL.createObjectURL(file));
                                             }
                                         }}
-                                        className="border-2 border-dashed border-sky-300 hover:border-sky-500 rounded-2xl p-4 bg-sky-50/40 hover:bg-sky-50/70 transition-all cursor-pointer flex flex-col items-center justify-center text-center group"
+                                        className="border-2 border-dashed border-sky-300 hover:border-sky-500 rounded-2xl p-4 bg-sky-50/40 hover:bg-sky-50/70 transition-all duration-200 ease-bouncy cursor-pointer flex flex-col items-center justify-center text-center group"
                                     >
-                                        <div className="w-11 h-11 rounded-xl bg-sky-100 group-hover:bg-sky-200 text-sky-600 flex items-center justify-center mb-2 transition-colors">
+                                        <div className="w-11 h-11 rounded-xl bg-sky-100 group-hover:bg-sky-200 text-sky-600 flex items-center justify-center mb-2 transition-colors duration-200 ease-bouncy">
                                             <Camera className="w-5 h-5" />
                                         </div>
                                         <p className="font-bold text-slate-800 text-xs">
@@ -1394,7 +1403,7 @@ export default function Dashboard({
                                         <button
                                             type="button"
                                             onClick={handleRemoveLeaveFile}
-                                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                             title="Hapus atau Ganti Foto"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -1424,10 +1433,10 @@ export default function Dashboard({
                                             key={opt.val}
                                             type="button"
                                             onClick={() => setLeaveData('type', opt.val)}
-                                            className={`py-2 rounded-xl border text-center font-semibold transition-all ${
+                                            className={`py-2 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy ${
                                                 leaveData.type === opt.val
                                                     ? 'bg-sky-600 text-white border-transparent shadow-xs'
-                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform'
                                             }`}
                                         >
                                             {opt.label}
@@ -1493,7 +1502,7 @@ export default function Dashboard({
                             <button
                                 type="submit"
                                 disabled={leaveProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
+                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
                             >
                                 <Send className="w-3.5 h-3.5" />
                                 <span>{leaveProcessing ? 'Mengirim...' : 'Kirim Permohonan Izin'}</span>
@@ -1609,7 +1618,7 @@ export default function Dashboard({
                             {learningTasks.map((task) => (
                                 <div
                                     key={task.id}
-                                    className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between"
+                                    className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
                                         <div className="flex items-center justify-between gap-2 mb-2">
@@ -1664,7 +1673,7 @@ export default function Dashboard({
                                                 href={task.file_url}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors shrink-0"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy shrink-0"
                                             >
                                                 <ExternalLink className="w-3.5 h-3.5" />
                                                 <span>Unduh / Buka Bahan</span>
@@ -1728,10 +1737,10 @@ export default function Dashboard({
                                                     key={day}
                                                     type="button"
                                                     onClick={() => setActiveDutyDay(day)}
-                                                    className={`py-2 px-3 rounded-xl border font-semibold text-xs transition-all flex items-center justify-center gap-1.5 ${
+                                                    className={`py-2 px-3 rounded-xl border font-semibold text-xs transition-all duration-200 ease-bouncy flex items-center justify-center gap-1.5 ${
                                                         isSelected
                                                             ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform'
                                                     }`}
                                                 >
                                                     <span>{day}</span>
@@ -1768,21 +1777,21 @@ export default function Dashboard({
                                                         <button
                                                             type="button"
                                                             onClick={() => handleSelectAllDutyDayStudents(displayedRoster)}
-                                                            className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] border border-emerald-200 transition-colors"
+                                                            className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] border border-emerald-200 transition-colors duration-200 ease-bouncy"
                                                         >
                                                             Pilih Semua ({activeDutyDay})
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={handleClearAllDutyStudents}
-                                                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-[11px] transition-colors"
+                                                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-[11px] transition-colors duration-200 ease-bouncy"
                                                         >
                                                             Bersihkan
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowAllDutyStudents(!showAllDutyStudents)}
-                                                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors"
+                                                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[11px] border border-indigo-200 transition-colors duration-200 ease-bouncy"
                                                         >
                                                             {showAllDutyStudents ? 'Roster Hari Saja' : 'Semua Siswa'}
                                                         </button>
@@ -1795,7 +1804,7 @@ export default function Dashboard({
                                                         return (
                                                             <label
                                                                 key={st.id}
-                                                                className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer select-none transition-all ${
+                                                                className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer select-none transition-all duration-200 ease-bouncy ${
                                                                     isChecked
                                                                         ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-semibold shadow-2xs'
                                                                         : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -1839,13 +1848,13 @@ export default function Dashboard({
                                                 handleDutyMediaChange(e.dataTransfer.files);
                                             }
                                         }}
-                                        className="border-2 border-dashed border-amber-300 hover:border-amber-500 rounded-2xl p-5 bg-amber-50/40 hover:bg-amber-50/70 transition-all cursor-pointer flex flex-col items-center justify-center text-center group"
+                                        className="border-2 border-dashed border-amber-300 hover:border-amber-500 rounded-2xl p-5 bg-amber-50/40 hover:bg-amber-50/70 transition-all duration-200 ease-bouncy cursor-pointer flex flex-col items-center justify-center text-center group"
                                     >
                                         <div className="flex items-center gap-2 mb-2">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors duration-200 ease-bouncy">
                                                 <Camera className="w-5 h-5" />
                                             </div>
-                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors">
+                                            <div className="w-10 h-10 rounded-xl bg-amber-100 group-hover:bg-amber-200 text-amber-700 flex items-center justify-center transition-colors duration-200 ease-bouncy">
                                                 <Video className="w-5 h-5" />
                                             </div>
                                         </div>
@@ -1965,7 +1974,7 @@ export default function Dashboard({
                                     <button
                                         type="submit"
                                         disabled={dutyProcessing}
-                                        className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                                        className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors duration-200 ease-bouncy shadow-xs flex items-center gap-1.5 disabled:opacity-50"
                                     >
                                         <Send className="w-3.5 h-3.5 text-amber-300" />
                                         <span>{dutyProcessing ? 'Mengirim Verifikasi...' : 'Setor Laporan Piket Pulang'}</span>
@@ -2050,7 +2059,7 @@ export default function Dashboard({
                                                         <img
                                                             src={`/storage/${photo}`}
                                                             alt={`Bukti Piket ${pIdx + 1}`}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                            className="w-full h-full object-cover group-hover:scale-105 active:scale-95 transition-transform duration-200 ease-bouncy"
                                                         />
                                                         <span className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-semibold transition-opacity">
                                                             Lihat Foto
@@ -2091,7 +2100,7 @@ export default function Dashboard({
                                 <button
                                     key={d}
                                     onClick={() => setSelectedWeeklyDay(d)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ease-bouncy ${
                                         selectedWeeklyDay === d
                                             ? 'bg-white text-indigo-700 shadow-xs'
                                             : 'text-slate-600 hover:text-slate-900'
@@ -2112,7 +2121,7 @@ export default function Dashboard({
                             {weeklyDaySchedules.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between"
+                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
@@ -2203,13 +2212,13 @@ export default function Dashboard({
                             return (
                                 <div
                                     key={idx}
-                                    className={`p-4 rounded-xl border transition-all flex items-start gap-4 text-xs ${
+                                    className={`p-4 rounded-xl border transition-all duration-200 ease-bouncy flex items-start gap-4 text-xs ${
                                         isCurrent
                                             ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs'
                                             : isCompleted
                                             ? 'bg-slate-50/40 border-slate-200/60 opacity-80'
                                             : slot
-                                            ? 'bg-white border-slate-200 hover:border-slate-300'
+                                            ? 'bg-white border-slate-200 hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg'
                                             : 'bg-slate-50/50 border-slate-200/60'
                                     }`}
                                 >
@@ -2336,7 +2345,7 @@ export default function Dashboard({
                                             {!isLunas && !isPending && (
                                                 <button
                                                     onClick={() => setSelectedFine(fine)}
-                                                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs"
+                                                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors duration-200 ease-bouncy shadow-xs"
                                                 >
                                                     Konfirmasi Pembayaran
                                                 </button>
@@ -2378,7 +2387,7 @@ export default function Dashboard({
                         {organizations.map((org) => (
                             <div
                                 key={org.id}
-                                className="p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-xs transition-all bg-white flex flex-col justify-between"
+                                className="p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
                             >
                                 <div>
                                     <div className="flex items-center justify-between gap-2 mb-2">
@@ -2437,7 +2446,7 @@ export default function Dashboard({
                         {teachers.map((t) => (
                             <div
                                 key={t.id}
-                                className="p-4 rounded-xl border border-slate-200 hover:border-indigo-200 hover:shadow-xs transition-all bg-white flex flex-col justify-between"
+                                className="p-4 rounded-xl border border-slate-200 hover:border-indigo-200 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
                             >
                                 <div>
                                     <div className="flex items-center justify-between gap-2 mb-2">
@@ -2461,7 +2470,7 @@ export default function Dashboard({
                                         href={`https://wa.me/${(t.phone || '081234567890').replace(/[^0-9]/g, '')}?text=Halo%20${encodeURIComponent(t.name)}%2C%20saya%20siswa%20${encodeURIComponent(classroom?.name)}`}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                                     >
                                         <MessageCircle className="w-3.5 h-3.5" />
                                         <span>Chat WA</span>
@@ -2606,7 +2615,7 @@ export default function Dashboard({
                                         Dukung format JPG, PNG, atau WEBP maks 5MB. Foto profil akan muncul di header & sidebar navigasi.
                                     </p>
                                     <div className="mt-2.5 flex items-center justify-center sm:justify-start gap-2">
-                                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors">
+                                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy">
                                             <Camera className="w-3.5 h-3.5" />
                                             <span>Pilih Foto Baru</span>
                                             <input
@@ -2699,7 +2708,7 @@ export default function Dashboard({
                                 <button
                                     type="submit"
                                     disabled={profileSaving}
-                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-xs transition-all duration-200 ease-bouncy disabled:opacity-50 flex items-center gap-1.5"
                                 >
                                     <Check className="w-4 h-4" />
                                     <span>{profileSaving ? 'Menyimpan...' : 'Simpan Perubahan Profil'}</span>
@@ -2774,7 +2783,7 @@ export default function Dashboard({
                                 <button
                                     type="submit"
                                     disabled={passwordSaving}
-                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl shadow-xs transition-all duration-200 ease-bouncy disabled:opacity-50 flex items-center gap-1.5"
                                 >
                                     <KeyRound className="w-4 h-4" />
                                     <span>{passwordSaving ? 'Memproses...' : 'Perbarui Kata Sandi'}</span>
@@ -2866,6 +2875,13 @@ export default function Dashboard({
                     </form>
                 </Modal>
             )}
+        
+            <AvatarCropperModal
+                isOpen={cropModalOpen}
+                onClose={() => setCropModalOpen(false)}
+                imageSrc={tempAvatarUrl}
+                onCropCompleteCallback={handleCropComplete}
+            />
         </StudentLayout>
     );
 }

@@ -17,7 +17,7 @@ export default function ClassCard({ classroom, onOpenDetail }) {
     const isPkl = classroom.is_pkl;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-all hover:shadow-sm">
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg transition-all duration-200 ease-bouncy hover:shadow-md">
             <div>
                 {/* 1. CARD HEADER */}
                 <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
@@ -154,10 +154,10 @@ export default function ClassCard({ classroom, onOpenDetail }) {
 
                 <button
                     onClick={() => onOpenDetail(classroom)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors group cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors duration-200 ease-bouncy group cursor-pointer"
                 >
                     <span>Lihat Detail</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200 ease-bouncy" />
                 </button>
             </div>
         </div>

@@ -1,3 +1,4 @@
+import AvatarCropperModal from "@/Components/AvatarCropperModal";
 import React, { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -110,7 +111,7 @@ export default function Settings({ adminUser = {} }) {
                                         adminUser.name?.substring(0, 2).toUpperCase() || 'AD'
                                     )}
                                 </div>
-                                <label className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full cursor-pointer shadow-sm transition-colors">
+                                <label className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full cursor-pointer shadow-sm transition-colors duration-200 ease-bouncy">
                                     <Camera className="w-3.5 h-3.5" />
                                     <input
                                         type="file"
@@ -174,7 +175,7 @@ export default function Settings({ adminUser = {} }) {
                         <div className="pt-2 flex justify-end">
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Simpan Profil
                             </button>
@@ -244,7 +245,7 @@ export default function Settings({ adminUser = {} }) {
                         <div className="pt-2 flex justify-end">
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Perbarui Kata Sandi
                             </button>
@@ -272,7 +273,7 @@ export default function Settings({ adminUser = {} }) {
                         <div className="shrink-0">
                             <button
                                 onClick={handleToggle2FA}
-                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shadow-sm ${
+                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 ease-bouncy shadow-sm ${
                                     adminUser.two_factor_enabled
                                         ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
                                         : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -299,6 +300,13 @@ export default function Settings({ adminUser = {} }) {
                     )}
                 </div>
             </div>
+        
+            <AvatarCropperModal
+                isOpen={cropModalOpen}
+                onClose={() => setCropModalOpen(false)}
+                imageSrc={tempAvatarUrl}
+                onCropCompleteCallback={handleCropComplete}
+            />
         </AdminLayout>
     );
 }

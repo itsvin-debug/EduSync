@@ -215,7 +215,7 @@ export default function TeacherPresence({
                         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                             <button
                                 onClick={() => setStatusFilter('all')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'all'
                                         ? 'bg-slate-900 text-white'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -225,7 +225,7 @@ export default function TeacherPresence({
                             </button>
                             <button
                                 onClick={() => setStatusFilter('active_now')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'active_now'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -235,7 +235,7 @@ export default function TeacherPresence({
                             </button>
                             <button
                                 onClick={() => setStatusFilter('tidak_hadir')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'tidak_hadir'
                                         ? 'bg-rose-600 text-white'
                                         : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -245,7 +245,7 @@ export default function TeacherPresence({
                             </button>
                             <button
                                 onClick={() => setStatusFilter('tugas_pending')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     statusFilter === 'tugas_pending'
                                         ? 'bg-amber-600 text-white'
                                         : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
@@ -281,7 +281,7 @@ export default function TeacherPresence({
                                     filteredSchedules.map((item) => (
                                         <tr
                                             key={item.id}
-                                            className={`transition-colors ${
+                                            className={`transition-colors duration-200 ease-bouncy ${
                                                 item.isCurrentPeriod ? 'bg-indigo-50/30 font-medium' : 'hover:bg-slate-50/70'
                                             }`}
                                         >
@@ -379,7 +379,7 @@ export default function TeacherPresence({
                                                 {item.task && (
                                                     <button
                                                         onClick={() => handleVerifyTask(item.task.id)}
-                                                        className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                                                        className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors duration-200 ease-bouncy ${
                                                             item.task.is_verified
                                                                 ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                                                 : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -458,13 +458,13 @@ export default function TeacherPresence({
                         <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                             <button
                                 onClick={() => setSelectedTask(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Tutup
                             </button>
                             <button
                                 onClick={() => handleVerifyTask(selectedTask.id)}
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 {selectedTask.is_verified ? 'Tandai Belum Verifikasi' : 'Setujui & Verifikasi'}
                             </button>

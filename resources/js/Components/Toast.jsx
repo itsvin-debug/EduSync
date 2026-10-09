@@ -54,7 +54,7 @@ export default function Toast() {
                 </div>
                 <button
                     onClick={() => setVisible(false)}
-                    className="shrink-0 p-1 rounded-md text-slate-400 hover:text-slate-700 transition-colors"
+                    className="shrink-0 p-1 rounded-md text-slate-400 hover:text-slate-700 transition-colors duration-200 ease-bouncy"
                 >
                     <X className="w-4 h-4" />
                 </button>

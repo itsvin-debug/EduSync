@@ -99,7 +99,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                     <div className="p-5 pb-4 border-b border-slate-800/80 shrink-0">
                         <Link href="/guru/dashboard" className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
-                                <span className="material-symbols-outlined text-[20px]">school</span>
+                                <GraduationCap className="w-4.5 h-4.5 text-white" />
                             </div>
                             <div>
                                 <div className="flex items-center gap-1.5">
@@ -148,7 +148,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                                             <button
                                                 type="button"
                                                 onClick={() => handleItemClick(item.id)}
-                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-all text-left ${
+                                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg font-medium transition-all duration-200 ease-bouncy text-left ${
                                                     isActive
                                                         ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
@@ -168,7 +168,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                     <div className="p-3 border-t border-slate-800/80 bg-[#0B1120] shrink-0">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors text-xs font-medium"
+                            className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 ease-bouncy text-xs font-medium"
                         >
                             <span className="flex items-center gap-2">
                                 <LogOut className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                         <button
                             type="button"
                             onClick={() => onTabChange && onTabChange('settings')}
-                            className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors text-slate-700"
+                            className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors duration-200 ease-bouncy text-slate-700"
                             title="Pengaturan Profil & Sandi"
                         >
                             <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px]">
@@ -216,7 +216,7 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                 </header>
 
                 <main className="p-6 sm:p-8 flex-1">
-                    {children}
+                    <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">

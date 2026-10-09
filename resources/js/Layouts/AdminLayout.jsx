@@ -204,7 +204,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
             {/* COLLAPSIBLE SIDEBAR */}
             <aside
-                className={`fixed left-0 top-0 bottom-0 bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-all duration-300 ease-in-out ${
+                className={`fixed left-0 top-0 bottom-0 bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-all duration-200 ease-in-out ${
                     isCollapsed ? 'w-[76px]' : 'w-[264px]'
                 }`}
             >
@@ -230,7 +230,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
                         <button
                             onClick={toggleSidebar}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors duration-200 ease-bouncy shrink-0"
                             title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
                         >
                             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -254,15 +254,15 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                                 key={item.href}
                                                 href={item.href}
                                                 title={isCollapsed ? item.name : undefined}
-                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
+                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ease-bouncy group ${
                                                     item.active
                                                         ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                                                 }`}
                                             >
                                                 <Icon
-                                                    className={`w-4 h-4 shrink-0 transition-transform ${
-                                                        item.active ? 'text-white' : 'text-slate-400 group-hover:scale-105'
+                                                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ease-bouncy ${
+                                                        item.active ? 'text-white' : 'text-slate-400 group-hover:scale-105 active:scale-95'
                                                     }`}
                                                 />
                                                 {!isCollapsed && (
@@ -303,7 +303,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
                         <button
                             onClick={handleLogout}
-                            className={`flex items-center w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors text-xs font-medium cursor-pointer ${
+                            className={`flex items-center w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 ease-bouncy text-xs font-medium cursor-pointer ${
                                 isCollapsed ? 'justify-center' : 'justify-between'
                             }`}
                             title="Keluar Akun"
@@ -320,7 +320,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
             {/* MAIN CONTENT AREA */}
             <div
-                className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
+                className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out ${
                     isCollapsed ? 'pl-[76px]' : 'pl-[264px]'
                 }`}
             >
@@ -329,7 +329,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={toggleSidebar}
-                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform transition-colors duration-200 ease-bouncy cursor-pointer"
                             title="Buka / Tutup Sidebar"
                         >
                             <Menu className="w-4 h-4" />
@@ -351,7 +351,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors duration-200 ease-bouncy shadow-2xs"
                         >
                             <span>Portal Publik</span>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -360,7 +360,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                 </header>
 
                 <main className="p-6 sm:p-8 flex-1">
-                    {children}
+                    <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
             </div>
         </div>

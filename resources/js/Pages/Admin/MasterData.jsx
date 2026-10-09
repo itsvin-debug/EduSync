@@ -174,21 +174,21 @@ export default function MasterData({
                 <div className="flex items-center gap-2 flex-wrap">
                     <button
                         onClick={handleExportCSV}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                     >
                         <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
                         <span>Ekspor CSV</span>
                     </button>
                     <button
                         onClick={() => setIsImportModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                     >
                         <Upload className="w-4 h-4 text-indigo-600" />
                         <span>Impor CSV</span>
                     </button>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors duration-200 ease-bouncy"
                     >
                         <Plus className="w-4 h-4" />
                         <span>+ Tambah Data</span>
@@ -209,10 +209,10 @@ export default function MasterData({
                                 setSearchQuery('');
                                 setSelectedRowIds([]);
                             }}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ease-bouncy ${
                                 isActive
                                     ? 'bg-slate-900 text-white shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform'
                             }`}
                         >
                             <Icon className="w-4 h-4" />
@@ -248,7 +248,7 @@ export default function MasterData({
                             </span>
                             <button
                                 onClick={handleBatchDelete}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-semibold transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-semibold transition-colors duration-200 ease-bouncy"
                             >
                                 <Trash2 className="w-3.5 h-3.5" />
                                 <span>Hapus Terpilih</span>
@@ -287,7 +287,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredTeachers.map((t, idx) => (
-                                    <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={t.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -358,7 +358,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredStudents.map((s) => (
-                                    <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={s.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -421,7 +421,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredSubjects.map((sub) => (
-                                    <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -481,7 +481,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredRooms.map((r) => (
-                                    <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={r.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -541,7 +541,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredClassrooms.map((c) => (
-                                    <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={c.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
@@ -598,7 +598,7 @@ export default function MasterData({
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredAcademicYears.map((ay) => (
-                                    <tr key={ay.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={ay.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4 font-bold text-slate-900 font-mono">
                                             {ay.year}
                                         </td>
@@ -632,7 +632,7 @@ export default function MasterData({
                                             ) : (
                                                 <button
                                                     onClick={() => handleToggleAcademicYear(ay.id)}
-                                                    className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 text-[11px] font-semibold transition-colors shadow-xs"
+                                                    className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform text-[11px] font-semibold transition-colors duration-200 ease-bouncy shadow-xs"
                                                 >
                                                     Aktifkan
                                                 </button>
@@ -654,7 +654,7 @@ export default function MasterData({
                 description="Unggah berkas CSV sesuai format kolom sistem untuk memperbarui basis data secara massal."
             >
                 <div className="space-y-4 text-xs">
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-400 bg-slate-50 transition-colors">
+                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-indigo-400 bg-slate-50 transition-colors duration-200 ease-bouncy">
                         <Upload className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
                         <div className="font-semibold text-slate-800">Tarik & Lepas file .CSV di sini</div>
                         <div className="text-[11px] text-slate-400 mt-1">atau klik untuk memilih berkas dari komputer</div>
@@ -671,7 +671,7 @@ export default function MasterData({
                         <button
                             type="button"
                             onClick={() => document.getElementById('csvFileInput').click()}
-                            className="mt-3 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors"
+                            className="mt-3 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors duration-200 ease-bouncy"
                         >
                             Pilih Berkas CSV
                         </button>

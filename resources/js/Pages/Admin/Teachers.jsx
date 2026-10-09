@@ -205,7 +205,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
 
                             <button
                                 type="submit"
-                                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors"
+                                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Cari
                             </button>
@@ -251,7 +251,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                     teachers.map((t) => {
                                         const isPassRevealed = revealedPasswords[t.id];
                                         return (
-                                            <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
+                                            <tr key={t.id} className="hover:bg-slate-50/70 transition-colors duration-200 ease-bouncy">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
@@ -324,7 +324,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                         </div>
                                                         <button
                                                             onClick={() => togglePasswordReveal(t.id)}
-                                                            className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
+                                                            className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors duration-200 ease-bouncy"
                                                             title={isPassRevealed ? 'Sembunyikan' : 'Lihat Sandi Awal'}
                                                         >
                                                             {isPassRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -358,14 +358,14 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                         <>
                                                             <button
                                                                 onClick={() => handleApprove(t.user_id, t.name)}
-                                                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1 shadow-xs transition-colors"
+                                                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1 shadow-xs transition-colors duration-200 ease-bouncy"
                                                                 title="Setujui Akun Guru"
                                                             >
                                                                 <span>Setujui</span>
                                                             </button>
                                                             <button
                                                                 onClick={() => handleReject(t.user_id, t.name)}
-                                                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-colors"
+                                                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-colors duration-200 ease-bouncy"
                                                                 title="Tolak Akun Guru"
                                                             >
                                                                 <span>Tolak</span>
@@ -374,21 +374,21 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                     )}
                                                     <button
                                                         onClick={() => setResetPassTeacher(t)}
-                                                        className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                                         title="Reset Password"
                                                     >
                                                         <KeyRound className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleOpenEdit(t)}
-                                                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                                         title="Edit Data"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(t)}
-                                                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                                         title="Hapus Akun"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -520,8 +520,8 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                         <label
                                             key={sub.id}
                                             onClick={() => toggleSubject(sub.id)}
-                                            className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs transition-colors ${
-                                                isChecked ? 'bg-indigo-50 text-indigo-900 font-semibold' : 'hover:bg-slate-100 text-slate-700'
+                                            className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs transition-colors duration-200 ease-bouncy ${
+                                                isChecked ? 'bg-indigo-50 text-indigo-900 font-semibold' : 'hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform text-slate-700'
                                             }`}
                                         >
                                             <div className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${
@@ -568,13 +568,13 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                         <button
                             type="button"
                             onClick={() => setIsAddModalOpen(false)}
-                            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all"
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                         >
                             Simpan Akun Guru
                         </button>
@@ -688,8 +688,8 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                             <label
                                                 key={sub.id}
                                                 onClick={() => toggleSubject(sub.id)}
-                                                className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs transition-colors ${
-                                                    isChecked ? 'bg-indigo-50 text-indigo-900 font-semibold' : 'hover:bg-slate-100 text-slate-700'
+                                                className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs transition-colors duration-200 ease-bouncy ${
+                                                    isChecked ? 'bg-indigo-50 text-indigo-900 font-semibold' : 'hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform text-slate-700'
                                                 }`}
                                             >
                                                 <div className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${
@@ -738,13 +738,13 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                             <button
                                 type="button"
                                 onClick={() => setEditTeacher(null)}
-                                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Simpan Perubahan
                             </button>
@@ -787,13 +787,13 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                             <button
                                 type="button"
                                 onClick={() => setResetPassTeacher(null)}
-                                className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Konfirmasi Reset
                             </button>

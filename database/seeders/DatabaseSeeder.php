@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
             EduSyncSeeder::class,
             AdminCoreFeaturesSeeder::class,
             EnterpriseConsolidationSeeder::class,
+            ClassLeaderSyncSeeder::class,
+            CocurricularScheduleSeeder::class,
         ]);
     }
 }

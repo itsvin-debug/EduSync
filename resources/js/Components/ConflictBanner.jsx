@@ -65,14 +65,14 @@ export default function ConflictBanner({ conflicts = [], onAutoFix }) {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleAutoGenerate}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                     >
                         <RefreshCw className="w-3.5 h-3.5" />
                         <span>Auto-Resolve AI</span>
                     </button>
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-medium text-amber-900 hover:bg-amber-100 transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-medium text-amber-900 hover:bg-amber-100 transition-colors duration-200 ease-bouncy"
                     >
                         <span>{isExpanded ? 'Tutup Rincian' : 'Lihat Rincian'}</span>
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}

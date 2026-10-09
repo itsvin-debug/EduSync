@@ -59,7 +59,7 @@ export default function InvalManagement({ invalRequests = [], teachers = [] }) {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {invalRequests.map((req) => (
-                                    <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={req.id} className="hover:bg-slate-50/50 transition-colors duration-200 ease-bouncy">
                                         <td className="py-3 px-4">
                                             <div className="font-semibold text-slate-900">{req.requester?.name}</div>
                                             <div className="text-[11px] text-slate-500">{req.requester?.title || 'Guru Pengampu'}</div>
@@ -95,13 +95,13 @@ export default function InvalManagement({ invalRequests = [], teachers = [] }) {
                                                 <div className="flex items-center justify-center gap-1.5">
                                                     <button
                                                         onClick={() => handleApprove(req.id)}
-                                                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors shadow-xs"
+                                                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors duration-200 ease-bouncy shadow-xs"
                                                     >
                                                         ACC
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(req.id)}
-                                                        className="px-2.5 py-1 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 font-semibold text-[11px] transition-colors"
+                                                        className="px-2.5 py-1 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 font-semibold text-[11px] transition-colors duration-200 ease-bouncy"
                                                     >
                                                         Tolak
                                                     </button>
