@@ -27,7 +27,8 @@
 5. [Integritas Data & Logika Bisnis](#-integritas-data--logika-bisnis)
 6. [Akun Demo & Kredensial](#-akun-demo--kredensial)
 7. [Panduan Instalasi & Menjalankan Aplikasi](#-panduan-instalasi--menjalankan-aplikasi)
-   - [🐧 Panduan untuk Linux](#-panduan-instalasi-di-linux)
+   - [🐧 Panduan untuk Linux (Native)](#-panduan-instalasi-di-linux-ubuntudebian)
+   - [🐧 Panduan untuk Linux (Menggunakan Lerd)](#-panduan-instalasi-di-linux-menggunakan-lerd)
    - [🪟 Panduan untuk Windows](#-panduan-instalasi-di-windows)
 8. [Rangkaian Pengujian Otomatis (Testing)](#-rangkaian-pengujian-otomatis-testing)
 9. [Panduan Deployment Lengkap](#-panduan-deployment-lengkap)
@@ -213,6 +214,48 @@ php artisan serve
 npm run dev
 ```
 Akses aplikasi di: **http://127.0.0.1:8000**
+
+---
+
+### 🐧 Panduan Instalasi di Linux (Menggunakan Lerd)
+
+Jika Anda menggunakan sistem operasi berbasis Linux seperti Fedora atau Ubuntu dan memanfaatkan utilitas **Lerd** untuk manajemen environment lokal, setup dapat dilakukan dengan sangat mudah karena Lerd menggunakan Podman untuk isolasi service.
+
+**Langkah 1: Clone Repository & Setup Lerd**
+```bash
+git clone https://github.com/itsvin-debug/jadwalsekolah.git
+cd jadwalsekolah
+lerd link
+lerd setup
+```
+
+**Langkah 2: Konfigurasi Database (.env)**
+Sesuaikan kredensial database di file `.env`. Lerd menjalankan MySQL di dalam container dengan *hostname* `lerd-mysql` dan password default `lerd`.
+```env
+DB_CONNECTION=mysql
+DB_HOST=lerd-mysql
+DB_PORT=3306
+DB_DATABASE=edusync_db
+DB_USERNAME=root
+DB_PASSWORD=lerd
+```
+
+**Langkah 3: Pembuatan Database & Migrasi**
+Buat database secara langsung ke dalam container MySQL Lerd, lalu jalankan migrasi database:
+```bash
+# Membuat database di dalam container lerd-mysql
+podman exec -i lerd-mysql mysql -u root -plerd -e "CREATE DATABASE IF NOT EXISTS edusync_db;"
+
+# Menjalankan migrasi
+lerd php artisan migrate --seed
+```
+
+**Langkah 4: Menjalankan Aplikasi**
+Lerd secara otomatis akan menyajikan backend di domain `.test` (contoh: `http://jadwalsekolah.test`). Anda cukup menyalakan compiler frontend di terminal terpisah:
+```bash
+npm run dev
+```
+Akses aplikasi di browser menggunakan domain lokal Anda (misalnya: **http://jadwalsekolah.test**).
 
 ---
 
