@@ -181,7 +181,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setTypeFilter('all')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     typeFilter === 'all'
                                         ? 'bg-slate-900 text-white'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -191,7 +191,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
                             </button>
                             <button
                                 onClick={() => setTypeFilter('organisasi')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     typeFilter === 'organisasi'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -201,7 +201,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
                             </button>
                             <button
                                 onClick={() => setTypeFilter('ekskul')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     typeFilter === 'ekskul'
                                         ? 'bg-emerald-600 text-white'
                                         : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -223,7 +223,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
                             {filteredOrgs.map((org) => (
                                 <div
                                     key={org.id}
-                                    className="rounded-xl border border-slate-200/80 bg-white p-5 hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between"
+                                    className="rounded-xl border border-slate-200/80 bg-white p-5 hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg hover:shadow-md transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
                                         <div className="flex items-start justify-between gap-3">
@@ -279,14 +279,14 @@ export default function Organizations({ organizations = [], teachers = [], stude
                                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                                         <button
                                             onClick={() => handleOpenEdit(org)}
-                                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                             title="Edit Organisasi"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(org)}
-                                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-200 ease-bouncy"
                                             title="Hapus Organisasi"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -448,13 +448,13 @@ export default function Organizations({ organizations = [], teachers = [], stude
                         <button
                             type="button"
                             onClick={() => setIsAddModalOpen(false)}
-                            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                         >
                             Simpan Data
                         </button>
@@ -604,13 +604,13 @@ export default function Organizations({ organizations = [], teachers = [], stude
                             <button
                                 type="button"
                                 onClick={() => setEditOrg(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Simpan Perubahan
                             </button>

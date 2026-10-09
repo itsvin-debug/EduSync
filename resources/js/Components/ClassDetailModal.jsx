@@ -108,7 +108,7 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
 
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform transition-colors duration-200 ease-bouncy"
                         title="Tutup Modal"
                     >
                         <X className="w-5 h-5" />
@@ -136,10 +136,10 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
                                 <button
                                     key={day}
                                     onClick={() => setSelectedDay(day)}
-                                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
+                                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ease-bouncy flex items-center gap-2 whitespace-nowrap ${
                                         isSelected
                                             ? 'bg-slate-900 text-white shadow-xs'
-                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80'
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform hover:text-slate-900 border border-slate-200/80'
                                     }`}
                                 >
                                     <span>{day}</span>
@@ -185,7 +185,7 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
                                     return (
                                         <div
                                             key={`break-${idx}`}
-                                            className={`p-3.5 rounded-xl border border-dashed flex items-center justify-between text-xs transition-colors ${
+                                            className={`p-3.5 rounded-xl border border-dashed flex items-center justify-between text-xs transition-colors duration-200 ease-bouncy ${
                                                 isBreakActive
                                                     ? 'bg-amber-50/80 border-amber-300 text-amber-900 ring-2 ring-amber-200/50'
                                                     : 'bg-slate-50/80 border-slate-200 text-slate-500'
@@ -217,11 +217,11 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
                                 return (
                                     <div
                                         key={`period-${pNum}`}
-                                        className={`p-4 rounded-xl border transition-all ${
+                                        className={`p-4 rounded-xl border transition-all duration-200 ease-bouncy ${
                                             isPeriodActive
                                                 ? 'bg-indigo-50/60 border-l-4 border-indigo-600 border-indigo-200 shadow-xs ring-1 ring-indigo-300/40'
                                                 : matchedSchedule
-                                                    ? 'bg-white border-slate-200 hover:border-slate-300'
+                                                    ? 'bg-white border-slate-200 hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg'
                                                     : 'bg-slate-50/50 border-slate-200/60'
                                         }`}
                                     >
@@ -301,7 +301,7 @@ export default function ClassDetailModal({ isOpen, onClose, classroom }) {
 
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors shadow-xs"
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy shadow-xs"
                     >
                         Tutup Tampilan
                     </button>

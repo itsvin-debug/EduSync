@@ -31,9 +31,11 @@ fi
 
 # Cache configurations in production
 if [ "$APP_ENV" = "production" ]; then
+    echo "Warming up production caches..."
     php artisan config:cache || true
     php artisan route:cache || true
     php artisan view:cache || true
+    php artisan event:cache || true
 fi
 
 echo "Starting services via Supervisord..."

@@ -106,37 +106,37 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                     <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
                         <button
                             onClick={() => setSelectedGrade('all')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
                                 selectedGrade === 'all'
                                     ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
                             }`}
                         >
                             Semua Tingkat ({classrooms.length})
                         </button>
                         <button
                             onClick={() => setSelectedGrade('10')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
                                 selectedGrade === '10'
                                     ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
                             }`}
                         >
                             Kelas X
                         </button>
                         <button
                             onClick={() => setSelectedGrade('11')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
                                 selectedGrade === '11'
                                     ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
                             }`}
                         >
                             Kelas XI
                         </button>
                         <button
                             onClick={() => setSelectedGrade('pkl')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
                                 selectedGrade === 'pkl'
                                     ? 'bg-amber-600 text-white shadow-xs'
                                     : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
@@ -152,7 +152,7 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                     <span className="text-slate-400 text-[11px] font-medium mr-1 shrink-0">Jurusan:</span>
                     <button
                         onClick={() => setSelectedDept('all')}
-                        className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${
+                        className={`px-2.5 py-1 rounded-md font-semibold transition-colors duration-200 ease-bouncy ${
                             selectedDept === 'all'
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -164,7 +164,7 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                         <button
                             key={d.code}
                             onClick={() => setSelectedDept(d.code)}
-                            className={`px-2.5 py-1 rounded-md font-semibold transition-colors ${
+                            className={`px-2.5 py-1 rounded-md font-semibold transition-colors duration-200 ease-bouncy ${
                                 selectedDept === d.code
                                     ? 'bg-indigo-600 text-white'
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'

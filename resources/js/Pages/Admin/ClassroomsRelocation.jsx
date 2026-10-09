@@ -135,7 +135,7 @@ export default function ClassroomsRelocation({
                         return (
                             <div
                                 key={cls.id}
-                                className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between"
+                                className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs hover:border-indigo-300 hover:-translate-y-1 active:scale-[0.97] hover:shadow-lg hover:shadow-md transition-all duration-200 ease-bouncy flex flex-col justify-between"
                             >
                                 <div>
                                     <div className="flex items-start justify-between gap-3">
@@ -189,7 +189,7 @@ export default function ClassroomsRelocation({
 
                                     <button
                                         onClick={() => handleOpenRelocate(cls)}
-                                        className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5"
+                                        className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy flex items-center gap-1.5"
                                     >
                                         <ArrowRightLeft className="w-3.5 h-3.5" />
                                         Pindah Ruangan
@@ -266,13 +266,13 @@ export default function ClassroomsRelocation({
                             <button
                                 type="button"
                                 onClick={() => setRelocateClassroom(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Konfirmasi & Pindahkan Sekarang
                             </button>

@@ -91,7 +91,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                             <button
                                 onClick={() => setActionFilter('all')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     actionFilter === 'all'
                                         ? 'bg-slate-900 text-white'
                                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -101,7 +101,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                             </button>
                             <button
                                 onClick={() => setActionFilter('STUDENT')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     actionFilter === 'STUDENT'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -111,7 +111,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                             </button>
                             <button
                                 onClick={() => setActionFilter('TEACHER')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     actionFilter === 'TEACHER'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -121,7 +121,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                             </button>
                             <button
                                 onClick={() => setActionFilter('DUTY')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     actionFilter === 'DUTY'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
@@ -131,7 +131,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                             </button>
                             <button
                                 onClick={() => setActionFilter('FINE')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                     actionFilter === 'FINE'
                                         ? 'bg-amber-600 text-white'
                                         : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
@@ -166,7 +166,7 @@ export default function AuditLogs({ auditLogs = [] }) {
                                     </tr>
                                 ) : (
                                     filteredLogs.map((log) => (
-                                        <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
+                                        <tr key={log.id} className="hover:bg-slate-50/70 transition-colors duration-200 ease-bouncy">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-xs font-mono font-bold text-slate-900 flex items-center gap-1.5">
                                                     <Clock className="w-3.5 h-3.5 text-slate-400" />

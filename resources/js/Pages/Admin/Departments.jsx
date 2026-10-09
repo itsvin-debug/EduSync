@@ -176,7 +176,7 @@ export default function Departments({ departments = [], teachers = [] }) {
                                 <button
                                     key={dept.id}
                                     onClick={() => setSelectedDeptId(dept.id)}
-                                    className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start gap-3 ${
+                                    className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 ease-bouncy flex items-start gap-3 ${
                                         isSelected
                                             ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                                             : 'bg-white text-slate-800 border-slate-200/80 hover:bg-slate-50'
@@ -247,14 +247,14 @@ export default function Departments({ departments = [], teachers = [] }) {
                                                     setAssignKaprogDept(activeDepartment);
                                                     setSelectedTeacherId(activeDepartment.head_teacher_id || '');
                                                 }}
-                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+                                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors duration-200 ease-bouncy flex items-center gap-1.5"
                                             >
                                                 <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
                                                 Tugaskan Kaprog
                                             </button>
                                             <button
                                                 onClick={() => handleOpenEdit(activeDepartment)}
-                                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 border border-indigo-200/60"
+                                                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition-colors duration-200 ease-bouncy flex items-center gap-1.5 border border-indigo-200/60"
                                             >
                                                 <Edit2 className="w-3.5 h-3.5" />
                                                 Edit Jurusan
@@ -497,13 +497,13 @@ export default function Departments({ departments = [], teachers = [] }) {
                         <button
                             type="button"
                             onClick={() => setIsAddModalOpen(false)}
-                            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                         >
                             Simpan Jurusan
                         </button>
@@ -597,13 +597,13 @@ export default function Departments({ departments = [], teachers = [] }) {
                             <button
                                 type="button"
                                 onClick={() => setEditDept(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Simpan Perubahan
                             </button>
@@ -649,13 +649,13 @@ export default function Departments({ departments = [], teachers = [] }) {
                             <button
                                 type="button"
                                 onClick={() => setAssignKaprogDept(null)}
-                                className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-lg transition-colors duration-200 ease-bouncy"
                             >
                                 Batal
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all"
+                                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all duration-200 ease-bouncy"
                             >
                                 Tetapkan Kaprog
                             </button>

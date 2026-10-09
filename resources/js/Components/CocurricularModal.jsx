@@ -91,7 +91,7 @@ export default function CocurricularModal({ isOpen, onClose, allSchedules = [], 
         const isToday = item.date === currentDate;
 
         return (
-            <div className={`p-3 rounded-xl border transition-all ${
+            <div className={`p-3 rounded-xl border transition-all duration-200 ease-bouncy ${
                 isToday 
                     ? 'bg-amber-50/80 border-amber-300 shadow-xs ring-1 ring-amber-400/50' 
                     : 'bg-white border-slate-100 hover:border-slate-200'
@@ -141,7 +141,7 @@ export default function CocurricularModal({ isOpen, onClose, allSchedules = [], 
 
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors duration-200 ease-bouncy"
                         title="Tutup"
                     >
                         <X className="w-5 h-5" />
@@ -157,7 +157,7 @@ export default function CocurricularModal({ isOpen, onClose, allSchedules = [], 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Cari kelas (contoh: X PPLG 2, OSIS, XI BCF)..."
-                            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all placeholder:text-slate-400"
+                            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all duration-200 ease-bouncy placeholder:text-slate-400"
                         />
                         {searchQuery && (
                             <button
@@ -221,7 +221,7 @@ export default function CocurricularModal({ isOpen, onClose, allSchedules = [], 
                                     filteredWeeks.map((week, idx) => (
                                         <tr
                                             key={week.week_range || idx}
-                                            className={`transition-colors ${
+                                            className={`transition-colors duration-200 ease-bouncy ${
                                                 week.isCurrentWeek 
                                                     ? 'bg-indigo-50/30 font-medium' 
                                                     : 'hover:bg-slate-50/60'
@@ -265,7 +265,7 @@ export default function CocurricularModal({ isOpen, onClose, allSchedules = [], 
                     </div>
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-xs"
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors duration-200 ease-bouncy shadow-xs"
                     >
                         Tutup Jadwal
                     </button>

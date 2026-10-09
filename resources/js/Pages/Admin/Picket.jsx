@@ -114,7 +114,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                         <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
                             <button
                                 onClick={() => setActiveSection('piket')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ease-bouncy ${
                                     activeSection === 'piket' ? 'bg-white text-emerald-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                                 }`}
                             >
@@ -122,7 +122,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                             </button>
                             <button
                                 onClick={() => setActiveSection('sampah')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 ease-bouncy ${
                                     activeSection === 'sampah' ? 'bg-white text-rose-800 shadow-xs' : 'text-slate-600 hover:text-slate-900'
                                 }`}
                             >
@@ -186,7 +186,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                                 <button
                                     onClick={() => setStatusFilter('all')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                         statusFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                                 >
@@ -194,7 +194,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                 </button>
                                 <button
                                     onClick={() => setStatusFilter('pending')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                         statusFilter === 'pending' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
                                     }`}
                                 >
@@ -202,7 +202,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                 </button>
                                 <button
                                     onClick={() => setStatusFilter('approved')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                         statusFilter === 'approved' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                     }`}
                                 >
@@ -210,7 +210,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                 </button>
                                 <button
                                     onClick={() => setStatusFilter('rejected')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200 ease-bouncy ${
                                         statusFilter === 'rejected' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
                                     }`}
                                 >
@@ -235,7 +235,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                     return (
                                         <div
                                             key={report.id}
-                                            className="rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-xs transition-all flex flex-col justify-between"
+                                            className="rounded-2xl border border-slate-200 bg-white overflow-hidden hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                         >
                                             <div>
                                                 {/* Image Preview with delivery pill */}
@@ -244,13 +244,13 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                                         <img
                                                             src={`/storage/${photos[0]}`}
                                                             alt={`Piket ${report.classroom?.name}`}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            className="w-full h-full object-cover group-hover:scale-105 active:scale-95 transition-transform duration-200"
                                                         />
                                                     ) : report.photo_url ? (
                                                         <img
                                                             src={report.photo_url}
                                                             alt={`Piket ${report.classroom?.name}`}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            className="w-full h-full object-cover group-hover:scale-105 active:scale-95 transition-transform duration-200"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
@@ -347,7 +347,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                                         setSelectedReport(report);
                                                         setVerificationNotes(report.validation_notes || 'Dokumentasi 5R kebersihan ruang kelas terverifikasi lengkap.');
                                                     }}
-                                                    className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                                                    className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors duration-200 ease-bouncy flex items-center justify-center gap-1.5 shadow-xs"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
                                                     <span>Inspeksi Detail & ACC</span>
@@ -427,14 +427,14 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                                 <>
                                                     <button
                                                         onClick={() => handleConvertTrashToFine(t.id)}
-                                                        className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+                                                        className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy flex items-center gap-1.5"
                                                     >
                                                         <AlertCircle className="w-3.5 h-3.5" />
                                                         <span>Terbitkan Sanksi Denda</span>
                                                     </button>
                                                     <button
                                                         onClick={() => handleDismissTrash(t.id)}
-                                                        className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold transition-colors"
+                                                        className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold transition-colors duration-200 ease-bouncy"
                                                     >
                                                         Abaikan / Selesai
                                                     </button>
@@ -517,7 +517,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                             <button
                                 type="button"
                                 onClick={() => setSelectedReport(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform rounded-xl transition-colors duration-200 ease-bouncy"
                             >
                                 Tutup
                             </button>
@@ -526,14 +526,14 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                                 <button
                                     type="button"
                                     onClick={() => handleVerify(selectedReport.id, 'rejected')}
-                                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-xl border border-rose-200 transition-colors"
+                                    className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-xl border border-rose-200 transition-colors duration-200 ease-bouncy"
                                 >
                                     Tolak (Kurang Bersih)
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleVerify(selectedReport.id, 'approved')}
-                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors duration-200 ease-bouncy"
                                 >
                                     Setujui (Lolos 5R)
                                 </button>
