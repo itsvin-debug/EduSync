@@ -367,7 +367,7 @@ class EduSyncSeeder extends Seeder
             ]);
         };
 
-        // --- PPLG SCHEDULE DATA (PAGE 4) ---
+        // PPLG schedule
         // SENIN
         // X PPLG 1
         $addSchedule('X_PPLG_1', 'Senin', 2, 4, 'PAI', '12A', 'R_TEORI_101');
@@ -500,7 +500,7 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_PPLG_3', 'Jumat', 2, 2, 'KIK', '24B', 'LAB_PPLG_2');
         $addSchedule('XI_PPLG_3', 'Jumat', 3, 7, 'PRODUKTIF PPLG', '26A', 'LAB_PPLG_2');
 
-        // --- ANIMASI SCHEDULE DATA (PAGE 2) ---
+        // Animasi schedule
         // SENIN
         $addSchedule('X_ANIMASI_1', 'Senin', 2, 6, 'PRODUKTIF ANM', '25A', 'STUDIO_ANM_1');
         $addSchedule('X_ANIMASI_1', 'Senin', 7, 8, 'PRODUKTIF ANM', '14A', 'STUDIO_ANM_1');
@@ -585,7 +585,7 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_ANIMASI_2', 'Jumat', 4, 5, 'PJOK', '35A', 'LAPANGAN');
         $addSchedule('XI_ANIMASI_2', 'Jumat', 6, 7, 'PPKN', '16A', 'R_TEORI_201');
 
-        // --- BROADCASTING SCHEDULE DATA (PAGE 3) ---
+        // Broadcasting schedule
         // SENIN
         $addSchedule('X_BCF_1', 'Senin', 2, 5, 'PRODUKTIF BCF', '21A', 'STUDIO_BCF');
         $addSchedule('X_BCF_1', 'Senin', 6, 7, 'PRODUKTIF BCF', '44A', 'STUDIO_BCF');
@@ -675,7 +675,7 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_BCF_2', 'Jumat', 2, 5, 'PRODUKTIF BCF', '45A', 'STUDIO_BCF');
         $addSchedule('XI_BCF_2', 'Jumat', 6, 7, 'BISNIS DIGITAL', '45B', 'STUDIO_BCF');
 
-        // --- TEKNIK OTOMOTIF SCHEDULE DATA (PAGE 5) ---
+        // Teknik Otomotif schedule
         // SENIN
         $addSchedule('X_TO_1', 'Senin', 2, 6, 'IPAS', '40A', 'BENGKEL_TO_1');
         $addSchedule('X_TO_1', 'Senin', 7, 8, 'SENBUD', '46A', 'R_TEORI_101');
@@ -758,7 +758,7 @@ class EduSyncSeeder extends Seeder
         $addSchedule('XI_TO_2', 'Jumat', 2, 4, 'MATEMATIKA', '36A', 'R_TEORI_201');
         $addSchedule('XI_TO_2', 'Jumat', 5, 7, 'PAI', '33A', 'R_TEORI_201');
 
-        // --- TPFL SCHEDULE DATA (PAGE 6) ---
+        // TPFL schedule
         // SENIN
         $addSchedule('X_TPFL', 'Senin', 2, 4, 'MATEMATIKA', '18A', 'R_TEORI_101');
         $addSchedule('X_TPFL', 'Senin', 5, 6, 'SENBUD', '46A', 'R_TEORI_101');

@@ -60,7 +60,7 @@ class AdminController extends Controller
                 if ($a->day === $b->day) {
                     $overlap = max($a->period_start, $b->period_start) <= min($a->period_end, $b->period_end);
                     if ($overlap) {
-                        // 1. Teacher Collision
+                        // Teacher conflict
                         if ($a->teacher_id && $a->teacher_id === $b->teacher_id && $a->id !== $b->id) {
                             $teacherName = $a->teacher?->name ?? $b->teacher?->name ?? 'Guru #' . $a->teacher_id;
                             $classA = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
@@ -74,7 +74,7 @@ class AdminController extends Controller
                             ];
                         }
 
-                        // 2. Classroom Collision (Same class having multiple lessons simultaneously)
+                        // Classroom conflict
                         if ($a->classroom_id && $a->classroom_id === $b->classroom_id && $a->id !== $b->id) {
                             $className = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
                             $subA = $a->subject?->name ?? 'Mapel #' . $a->subject_id;
@@ -90,7 +90,7 @@ class AdminController extends Controller
                             ];
                         }
 
-                        // 3. Room Collision
+                        // Room conflict
                         if ($a->room_id && $a->room_id === $b->room_id && $a->classroom_id !== $b->classroom_id) {
                             $roomName = $a->room?->name ?? $b->room?->name ?? 'Ruang #' . $a->room_id;
                             $classA = $a->classroom?->name ?? 'Kelas #' . $a->classroom_id;
@@ -152,9 +152,7 @@ class AdminController extends Controller
         return null;
     }
 
-    // ==========================================
-    // 1. DASHBOARD & REAL-TIME ATTENDANCE ANALYTICS (Features 1 & 2)
-    // ==========================================
+    // Dashboard & attendance analytics
     public function dashboard()
     {
         $today = Carbon::today()->toDateString();
@@ -230,9 +228,7 @@ class AdminController extends Controller
         ]);
     }
 
-    // ==========================================
-    // 2. LIVE KBM MONITOR (Feature 2)
-    // ==========================================
+    // Live KBM monitor
     public function kbmMonitor()
     {
         $classrooms = Classroom::with([
@@ -252,9 +248,7 @@ class AdminController extends Controller
         ]);
     }
 
-    // ==========================================
-    // 3. STUDENT ACCOUNT MANAGEMENT (Feature 3)
-    // ==========================================
+    // Student account management
     public function students(Request $request)
     {
         $query = User::where('role', 'siswa')->with(['classroom.department', 'department']);
@@ -373,9 +367,7 @@ class AdminController extends Controller
         return back()->with('success', "Akun siswa {$name} telah dihapus.");
     }
 
-    // ==========================================
-    // 4. TEACHER ACCOUNT MANAGEMENT (Feature 4)
-    // ==========================================
+    // Teacher account management
     public function teachers(Request $request)
     {
         $query = Teacher::with(['user', 'department', 'subjects']);
@@ -539,9 +531,7 @@ class AdminController extends Controller
         return back()->with('success', "Akun pengajar {$name} telah dihapus.");
     }
 
-    // ==========================================
-    // 5. TEACHER PRESENCE & TASK VERIFICATION (Feature 5)
-    // ==========================================
+    // Teacher presence & task verification
     public function teacherPresence()
     {
         $today = Carbon::today()->toDateString();
@@ -575,9 +565,7 @@ class AdminController extends Controller
         return back()->with('success', 'Status verifikasi tugas KBM berhasil diperbarui.');
     }
 
-    // ==========================================
-    // 6. OFFICIAL DUTY LEAVES ("Izin Keluar Dinas") (Feature 6)
-    // ==========================================
+    // Official duty leaves
     public function dutyLeaves()
     {
         $dutyLeaves = OfficialDutyLeave::with(['teacher', 'reviewer'])->latest()->get();
@@ -637,9 +625,7 @@ class AdminController extends Controller
         return back()->with('success', "Status kedinasan berhasil diubah menjadi '{$newStatus}'.");
     }
 
-    // ==========================================
-    // 7. CLASS PICKET MONITOR (Feature 7)
-    // ==========================================
+    // Class picket monitor
     public function picket()
     {
         $picketReports = PicketReport::with(['student', 'submittedBy', 'classroom.department', 'validator'])->latest()->get();
@@ -668,9 +654,7 @@ class AdminController extends Controller
         return back()->with('success', "Status piket kelas {$picket->classroom->name} berhasil diperbarui.");
     }
 
-    // ==========================================
-    // 8. TRASH REPORTING MODULE (Feature 8)
-    // ==========================================
+    // Trash reports
     public function trashReports()
     {
         $reports = TrashReport::with(['classroom', 'teacher', 'fine'])->latest()->get();
@@ -723,9 +707,7 @@ class AdminController extends Controller
         return back()->with('success', 'Laporan sampah telah diarsipkan/diabaikan.');
     }
 
-    // ==========================================
-    // 9 & 10. CLASS PENALTY FINES & SETTLEMENT APPROVAL (Features 9 & 10)
-    // ==========================================
+    // Class penalty fines
     public function classFines()
     {
         $fines = ClassFine::with(['classroom', 'issuedByTeacher', 'homeroomTeacher', 'verifier'])->latest()->get();
@@ -799,9 +781,7 @@ class AdminController extends Controller
         return back()->with('success', 'Bukti pembayaran denda telah ditolak.');
     }
 
-    // ==========================================
-    // 11. EXTRACURRICULAR & ORGANIZATIONS (Feature 11)
-    // ==========================================
+    // Extracurriculars & student organizations
     public function organizations()
     {
         $orgs = SchoolOrganization::with(['leaderStudent', 'supervisorTeacher'])->latest()->get();
@@ -871,9 +851,7 @@ class AdminController extends Controller
         return back()->with('success', "Data {$name} telah dihapus.");
     }
 
-    // ==========================================
-    // 12. ADMIN ACTIVITY AUDIT LOGS (Feature 12)
-    // ==========================================
+    // Admin activity audit logs
     public function auditLogs()
     {
         $logs = AuditLog::with('user')->latest()->take(50)->get();
@@ -883,9 +861,7 @@ class AdminController extends Controller
         ]);
     }
 
-    // ==========================================
-    // 13. DATA EXPORT & RECAP ENGINE (Feature 13)
-    // ==========================================
+    // Attendance recap export
     public function recapExport(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::today()->subDays(7)->toDateString());
@@ -919,9 +895,7 @@ class AdminController extends Controller
         ]);
     }
 
-    // ==========================================
-    // 14. JURUSAN & KAPROG MODULE
-    // ==========================================
+    // Department & kaprog management
     public function departments(Request $request)
     {
         $departments = Department::with(['headTeacher', 'teachers.subjects', 'classrooms.room', 'subjects'])
@@ -1034,9 +1008,7 @@ class AdminController extends Controller
         return back()->with('success', "{$teacher->name} berhasil ditugaskan sebagai Kaprog {$dept->name}.");
     }
 
-    // ==========================================
-    // 15. DYNAMIC CLASS ROOM RELOCATION
-    // ==========================================
+    // Classroom relocation
     public function classroomsRelocation(Request $request)
     {
         $query = Classroom::with(['department', 'homeroomTeacher', 'room', 'schedules.subject', 'schedules.teacher']);
@@ -1114,9 +1086,7 @@ class AdminController extends Controller
         return back()->with('success', "Ruang kelas {$classroom->name} berhasil direlokasi ke {$newRoom->name}. Jadwal KBM terkait otomatis terupdate.");
     }
 
-    // ==========================================
-    // 16. ADMIN ACCOUNT SETTINGS & SECURITY
-    // ==========================================
+    // Account settings & security
     public function settings()
     {
         $user = auth()->user();
@@ -1195,9 +1165,7 @@ class AdminController extends Controller
         return back()->with('success', "Autentikasi dua faktor berhasil {$statusText}.");
     }
 
-    // ==========================================
-    // EXISTING MATRIX & INVAL METHODS
-    // ==========================================
+    // Matrix builder & inval management
     public function scheduleBuilder(Request $request)
     {
         $classrooms = Classroom::with('department')->orderBy('grade')->orderBy('name')->get();
@@ -1463,9 +1431,7 @@ class AdminController extends Controller
         return back()->with('success', 'Pengajuan penggantian guru telah ditolak.');
     }
 
-    // ==========================================
-    // 14. ACCOUNT VERIFICATION (Siswa & Guru)
-    // ==========================================
+    // User verification
     public function approveUser(Request $request, $id)
     {
         $user = User::find($id);
@@ -1528,9 +1494,7 @@ class AdminController extends Controller
         return back()->with('success', "Pendaftaran akun {$user->name} telah ditolak.");
     }
 
-    // ==========================================
-    // 15. MASTER ATTENDANCE & LEAVE MANAGEMENT OVERRIDE
-    // ==========================================
+    // Attendance & leave overrides
     public function overrideAttendance(Request $request, $id)
     {
         $validated = $request->validate([

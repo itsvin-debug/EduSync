@@ -205,7 +205,7 @@ class StudentController extends Controller
             return back()->with('error', 'Hanya Ketua Kelas yang memiliki hak akses untuk mencatat presensi harian rombel.');
         }
 
-        // 13:00 Auto-lock Check for non-admin
+        // Attendance locks at 13:00 WIB for non-admin users
         if (now()->hour >= 13 && $user->role !== 'admin') {
             return back()->with('error', 'Presensi kelas hari ini telah terkunci otomatis pada pukul 13:00 WIB. Hubungi Admin Kurikulum jika ada perbaikan data.');
         }

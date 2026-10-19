@@ -82,25 +82,25 @@ class TeacherController extends Controller
 
         $allTeachers = Teacher::where('id', '!=', $teacher->id)->orderBy('name')->get();
 
-        // Sync with Admin features: Presensi Hari Ini
+        // Today's attendance
         $todayAttendance = TeacherAttendance::where('teacher_id', $teacher->id)
             ->where('date', now()->toDateString())
             ->first();
 
-        // Sync with Admin features: Tugas KBM Mandiri
+        // Learning tasks
         $myLearningTasks = LearningTask::where('teacher_id', $teacher->id)
             ->with(['classroom.department', 'subject', 'classLeader'])
             ->latest()
             ->take(15)
             ->get();
 
-        // Sync with Admin features: Izin Keluar Dinas
+        // Official duty leaves
         $myDutyLeaves = OfficialDutyLeave::where('teacher_id', $teacher->id)
             ->latest()
             ->take(10)
             ->get();
 
-        // Sync with Admin features: Laporan Sampah / Kebersihan
+        // Trash reports
         $myTrashReports = TrashReport::where('teacher_id', $teacher->id)
             ->with(['classroom.department', 'department'])
             ->latest()
@@ -413,19 +413,19 @@ class TeacherController extends Controller
 
         $teacher = $this->getTeacher();
 
-        // 1. Cannot request oneself as substitute
+        // Cannot request oneself as substitute
         if ((int) $validated['substitute_teacher_id'] === (int) $teacher->id) {
             return back()->withErrors(['substitute_teacher_id' => 'Guru pengganti tidak boleh diri Anda sendiri.'])->withInput();
         }
 
         $schedule = Schedule::with(['classroom', 'subject', 'teacher'])->findOrFail($validated['schedule_id']);
 
-        // 2. Must own the schedule (unless admin)
+        // Only schedule owner or admin may request
         if ($schedule->teacher_id !== $teacher->id && auth()->user()->role !== 'admin') {
             return back()->withErrors(['schedule_id' => 'Anda hanya dapat mengajukan permohonan inval untuk jadwal mengajar Anda sendiri.'])->withInput();
         }
 
-        // 3. Verify date matches schedule day of week
+        // Ensure selected date matches schedule day
         $targetDate = \Carbon\Carbon::parse($validated['date']);
         $dayName = match($targetDate->dayOfWeekIso) {
             1 => 'Senin',
@@ -443,7 +443,7 @@ class TeacherController extends Controller
             ])->withInput();
         }
 
-        // 4. Verify no pending duplicate request
+        // Check for pending duplicate requests
         $duplicate = InvalRequest::where('schedule_id', $schedule->id)
             ->where('date', $validated['date'])
             ->where('status', 'pending')
@@ -453,7 +453,7 @@ class TeacherController extends Controller
             return back()->withErrors(['schedule_id' => 'Sudah ada permohonan inval yang sedang menunggu persetujuan untuk jadwal dan tanggal ini.'])->withInput();
         }
 
-        // 5. Verify substitute teacher is not busy teaching at that exact slot
+        // Ensure substitute is free during the period
         $substituteBusy = Schedule::where('teacher_id', $validated['substitute_teacher_id'])
             ->where('day', $schedule->day)
             ->where('period_start', '<=', $schedule->period_end)

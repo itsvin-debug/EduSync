@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Student Attendances (Feature 1)
+        // Student attendances
         Schema::create('student_attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Teacher Attendances (Feature 1)
+        // Teacher attendances
         Schema::create('teacher_attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 3. Learning Tasks / Tugas KBM Guru Pengganti / Mandiri (Feature 5)
+        // Learning tasks
         Schema::create('learning_tasks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 4. Official Duty Leave / Izin Keluar Dinas Guru (Feature 6)
+        // Official duty leaves
         Schema::create('official_duty_leaves', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
@@ -68,13 +68,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 5. Enhance picket_reports with video_url and delivery_time if not present (Feature 7)
+        // Picket report attachments
         Schema::table('picket_reports', function (Blueprint $table) {
             $table->string('video_url')->nullable()->after('photo_url');
             $table->string('delivery_time')->nullable()->after('notes');
         });
 
-        // 6. Teacher Trash Reports / Laporan Sampah (Feature 8)
+        // Trash reports
         Schema::create('trash_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('classroom_id')->constrained('classrooms')->cascadeOnDelete();
@@ -87,7 +87,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 7. Class Penalty Fines / Denda Kebersihan Kelas (Features 9 & 10)
+        // Class fines
         Schema::create('class_fines', function (Blueprint $table) {
             $table->id();
             $table->foreignId('trash_report_id')->nullable()->constrained('trash_reports')->nullOnDelete();
@@ -105,7 +105,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 8. Extracurricular & Student Organizations (Feature 11)
+        // Extracurricular & student organizations
         Schema::create('school_organizations', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // OSIS, MPK, Pramuka, etc.

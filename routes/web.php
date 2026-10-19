@@ -7,10 +7,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 
-// 1. Landing & Public Portal (Screen 4)
+// Public portal
 Route::get('/', [LandingController::class, 'index'])->name('home');
 
-// 2. Authentication & Quick Role Switching (Screen 3)
+// Authentication & quick login
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -33,80 +33,80 @@ Route::get('/dashboard', function () {
     return redirect()->route('siswa.dashboard');
 })->middleware('auth')->name('dashboard');
 
-// 3. Admin Portal (The 13 Core Features)
+// Admin portal
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    // Feature 1 & 2: Real-time Attendance Analytics & Dashboard
+    // Attendance analytics & KBM monitoring
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/kbm-monitor', [AdminController::class, 'kbmMonitor'])->name('admin.kbm');
 
-    // Feature 3: Student Account Management
+    // Student account management
     Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
     Route::post('/students', [AdminController::class, 'storeStudent'])->name('admin.students.store');
     Route::put('/students/{id}', [AdminController::class, 'updateStudent'])->name('admin.students.update');
     Route::post('/students/{id}/reset-password', [AdminController::class, 'resetStudentPassword'])->name('admin.students.reset-password');
     Route::delete('/students/{id}', [AdminController::class, 'deleteStudent'])->name('admin.students.delete');
 
-    // Feature 4: Teacher Account Management
+    // Teacher account management
     Route::get('/teachers', [AdminController::class, 'teachers'])->name('admin.teachers');
     Route::post('/teachers', [AdminController::class, 'storeTeacher'])->name('admin.teachers.store');
     Route::put('/teachers/{id}', [AdminController::class, 'updateTeacher'])->name('admin.teachers.update');
     Route::post('/teachers/{id}/reset-password', [AdminController::class, 'resetTeacherPassword'])->name('admin.teachers.reset-password');
     Route::delete('/teachers/{id}', [AdminController::class, 'deleteTeacher'])->name('admin.teachers.delete');
 
-    // Feature 5: Real-Time Teacher Presence Monitor & Learning Tasks
+    // Teacher presence and learning tasks
     Route::get('/teacher-presence', [AdminController::class, 'teacherPresence'])->name('admin.teacher-presence');
     Route::post('/learning-tasks/{id}/verify', [AdminController::class, 'verifyLearningTask'])->name('admin.learning-tasks.verify');
 
-    // Feature 6: Teacher Official Duty Leave Management
+    // Duty leaves
     Route::get('/duty-leaves', [AdminController::class, 'dutyLeaves'])->name('admin.duty-leaves');
     Route::post('/duty-leaves/{id}/approve', [AdminController::class, 'approveDutyLeave'])->name('admin.duty-leaves.approve');
     Route::post('/duty-leaves/{id}/reject', [AdminController::class, 'rejectDutyLeave'])->name('admin.duty-leaves.reject');
     Route::post('/duty-leaves/{id}/toggle-status', [AdminController::class, 'toggleDutyStatus'])->name('admin.duty-leaves.toggle-status');
 
-    // Feature 7: Class Cleanliness / Picket Monitor
+    // Picket monitor
     Route::get('/picket', [AdminController::class, 'picket'])->name('admin.picket');
     Route::post('/picket/{id}/verify', [AdminController::class, 'verifyPicket'])->name('admin.picket.verify');
 
-    // Feature 8: Teacher Trash Reporting Module
+    // Trash reports
     Route::get('/trash-reports', [AdminController::class, 'trashReports'])->name('admin.trash-reports');
     Route::post('/trash-reports/{id}/convert-fine', [AdminController::class, 'convertTrashReportToFine'])->name('admin.trash-reports.convert-fine');
     Route::post('/trash-reports/{id}/dismiss', [AdminController::class, 'dismissTrashReport'])->name('admin.trash-reports.dismiss');
 
-    // Feature 9 & 10: Class Penalty Fines & Settlement Approval
+    // Class fines
     Route::get('/class-fines', [AdminController::class, 'classFines'])->name('admin.class-fines');
     Route::post('/class-fines', [AdminController::class, 'storeClassFine'])->name('admin.class-fines.store');
     Route::post('/class-fines/{id}/settle', [AdminController::class, 'settleClassFine'])->name('admin.class-fines.settle');
     Route::post('/class-fines/{id}/reject-settlement', [AdminController::class, 'rejectClassFineSettlement'])->name('admin.class-fines.reject-settlement');
 
-    // Feature 11: Extracurricular & Student Organization Management
+    // Student organizations
     Route::get('/organizations', [AdminController::class, 'organizations'])->name('admin.organizations');
     Route::post('/organizations', [AdminController::class, 'storeOrganization'])->name('admin.organizations.store');
     Route::put('/organizations/{id}', [AdminController::class, 'updateOrganization'])->name('admin.organizations.update');
     Route::delete('/organizations/{id}', [AdminController::class, 'deleteOrganization'])->name('admin.organizations.delete');
 
-    // Feature 12: Admin Activity Audit Logs
+    // Audit logs
     Route::get('/audit-logs', [AdminController::class, 'auditLogs'])->name('admin.audit-logs');
 
-    // Feature 13: Data Export & Attendance Recap Engine
+    // Attendance recap export
     Route::get('/recap-export', [AdminController::class, 'recapExport'])->name('admin.recap-export');
 
-    // Jurusan, Kaprog & Guru Jurusan Module
+    // Department management
     Route::get('/departments', [AdminController::class, 'departments'])->name('admin.departments');
     Route::post('/departments', [AdminController::class, 'storeDepartment'])->name('admin.departments.store');
     Route::post('/departments/{id}', [AdminController::class, 'updateDepartment'])->name('admin.departments.update');
     Route::post('/departments/{id}/assign-kaprog', [AdminController::class, 'assignKaprog'])->name('admin.departments.assign-kaprog');
 
-    // Dynamic Class Room Relocation Module
+    // Classroom relocation
     Route::get('/classrooms-relocation', [AdminController::class, 'classroomsRelocation'])->name('admin.classrooms-relocation');
     Route::post('/classrooms/{id}/relocate-room', [AdminController::class, 'relocateClassroomRoom'])->name('admin.classrooms.relocate-room');
 
-    // Admin Account Settings & Security
+    // Admin settings & security
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::post('/settings/profile', [AdminController::class, 'updateAdminProfile'])->name('admin.settings.profile');
     Route::post('/settings/password', [AdminController::class, 'updateAdminPassword'])->name('admin.settings.password');
     Route::post('/settings/2fa', [AdminController::class, 'toggleAdmin2FA'])->name('admin.settings.2fa');
 
-    // Matrix Builder, PDF Parser & Schedule Management
+    // Schedules and master data
     Route::get('/schedules', [AdminController::class, 'scheduleBuilder'])->name('admin.schedules');
     Route::post('/schedules', [AdminController::class, 'storeSchedule'])->name('admin.schedules.store');
     Route::put('/schedules/{id}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
@@ -121,54 +121,54 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/inval/{id}/approve', [AdminController::class, 'approveInval'])->name('admin.inval.approve');
     Route::post('/inval/{id}/reject', [AdminController::class, 'rejectInval'])->name('admin.inval.reject');
 
-    // User Account Verification (Siswa & Guru - Cegah orang luar buat akun)
+    // Account verification
     Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('admin.users.approve');
     Route::post('/users/{id}/reject', [AdminController::class, 'rejectUser'])->name('admin.users.reject');
 
-    // Master Attendance & Leave Management Overrides
+    // Attendance overrides & leaves
     Route::post('/attendance/{id}/override', [AdminController::class, 'overrideAttendance'])->name('admin.attendance.override');
     Route::post('/student-leaves/{id}/approve', [AdminController::class, 'approveStudentLeave'])->name('admin.student-leaves.approve');
     Route::post('/student-leaves/{id}/reject', [AdminController::class, 'rejectStudentLeave'])->name('admin.student-leaves.reject');
 
-    // Master Class Leader & Homeroom Teacher Registry
+    // Class leaders and homeroom assignments
     Route::post('/students/{id}/toggle-class-leader', [AdminController::class, 'toggleClassLeader'])->name('admin.students.toggle-class-leader');
     Route::post('/classrooms/{id}/assign-leaders', [AdminController::class, 'assignClassroomLeaders'])->name('admin.classrooms.assign-leaders');
 });
 
-// 4. Teacher Portal (Screen 5 & Teacher Specification)
+// Teacher portal
 Route::prefix('guru')->middleware(['auth', 'role:guru,admin'])->group(function () {
     Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('guru.dashboard');
     Route::post('/swap-request', [TeacherController::class, 'swapRequest'])->name('guru.swap');
     Route::post('/picket/{id}/verify', [TeacherController::class, 'verifyPicket'])->name('guru.picket.verify');
 
-    // Guru Feature Expansions (Sync dengan Admin & Siswa)
+    // Attendance & daily reports
     Route::post('/attendance/check-in', [TeacherController::class, 'checkInAttendance'])->name('guru.attendance.checkin');
     Route::post('/learning-tasks', [TeacherController::class, 'storeLearningTask'])->name('guru.learning-tasks.store');
     Route::post('/duty-leaves', [TeacherController::class, 'storeDutyLeave'])->name('guru.duty-leaves.store');
     Route::post('/trash-reports', [TeacherController::class, 'storeTrashReport'])->name('guru.trash-reports.store');
 
-    // Student Leave & Sickness Verification by Homeroom/Subject Teacher
+    // Leave approvals
     Route::post('/student-leaves/{id}/approve', [TeacherController::class, 'approveStudentLeave'])->name('guru.student-leaves.approve');
     Route::post('/student-leaves/{id}/reject', [TeacherController::class, 'rejectStudentLeave'])->name('guru.student-leaves.reject');
 
-    // Teacher Account Settings
+    // Teacher settings
     Route::post('/settings/profile', [TeacherController::class, 'updateProfile'])->name('guru.settings.profile');
     Route::post('/settings/password', [TeacherController::class, 'updatePassword'])->name('guru.settings.password');
 });
 
-// 5. Student Portal (Screen 6 & Student Mobile-First Specification)
+// Student portal
 Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('siswa.dashboard');
     Route::post('/picket', [StudentController::class, 'submitPicket'])->name('siswa.picket.submit');
 
-    // Siswa Feature Expansions (Sync dengan Admin)
+    // Fines
     Route::post('/fines/{id}/pay', [StudentController::class, 'submitFinePayment'])->name('siswa.fines.pay');
 
-    // Student Leave / Sick Application Submission (Regular + Ketua Kelas)
+    // Leave requests
     Route::post('/leave-request', [StudentController::class, 'submitLeaveRequest'])->name('siswa.leave-request.submit');
     Route::post('/leave-requests', [StudentController::class, 'submitLeaveRequest']);
 
-    // Class Leader Special Privileges (Ketua Kelas Only)
+    // Class leader actions
     Route::post('/students', [StudentController::class, 'storeStudent'])->name('siswa.students.store');
     Route::post('/attendance/batch', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch');
     Route::post('/attendance/batch-store', [StudentController::class, 'batchStoreAttendance'])->name('siswa.attendance.batch-store');
@@ -177,7 +177,7 @@ Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function
     Route::post('/duty-report', [StudentController::class, 'submitDutyReport'])->name('siswa.duty-report.submit');
     Route::post('/learning-tasks/{id}/status', [StudentController::class, 'updateTaskStatus'])->name('siswa.learning-tasks.status');
 
-    // Student Account Settings
+    // Student settings
     Route::post('/settings/profile', [StudentController::class, 'updateProfile'])->name('siswa.settings.profile');
     Route::post('/settings/password', [StudentController::class, 'updatePassword'])->name('siswa.settings.password');
 });
