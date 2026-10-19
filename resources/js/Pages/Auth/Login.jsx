@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import {
     GraduationCap,
     ShieldCheck,
@@ -20,10 +20,12 @@ import {
     Hash,
     BadgeCheck,
     KeyRound,
+    Shield,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
 
 export default function Login({ classrooms = [], departments = [], currentUser = null }) {
+    const { flash, app } = usePage().props;
     const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'reset'
     const [selectedRole, setSelectedRole] = useState('siswa'); // 'siswa', 'guru', 'admin'
     const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +40,7 @@ export default function Login({ classrooms = [], departments = [], currentUser =
     } = useForm({
         email: 'siswa@edusync.sch.id',
         password: 'password',
+        two_factor_code: '',
         remember: true,
     });
 
@@ -129,15 +132,19 @@ export default function Login({ classrooms = [], departments = [], currentUser =
             <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs">
-                            E
+                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs overflow-hidden">
+                            {app?.admin_avatar ? (
+                                <img src={app.admin_avatar} alt="Logo" className="w-full h-full object-cover" />
+                            ) : (
+                                'E'
+                            )}
                         </div>
                         <div className="flex flex-col">
                             <span className="font-bold text-slate-900 tracking-tight leading-none text-base">
-                                EDUSYNC
+                                {app?.name || 'EDUSYNC'}
                             </span>
                             <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">
-                                Portal Akademik SMKN 1 Ciomas
+                                Portal Akademik {app?.school_name || 'SMKN 1 Ciomas'}
                             </span>
                         </div>
                     </Link>
@@ -475,6 +482,42 @@ export default function Login({ classrooms = [], departments = [], currentUser =
                                         </span>
                                     )}
                                 </div>
+
+                                {(flash?.requires_2fa || loginErrors.two_factor_code) && (
+                                    <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200/90 text-indigo-950 space-y-2.5 animate-in fade-in duration-200">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                                <Shield className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-indigo-950">
+                                                    Verifikasi 2 Langkah (2FA) Aktif
+                                                </div>
+                                                <div className="text-[11px] text-indigo-700">
+                                                    Masukkan kode 2FA yang tertera pada Pengaturan Akun Admin.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                autoFocus
+                                                required
+                                                value={loginData.two_factor_code}
+                                                onChange={(e) => setLoginData('two_factor_code', e.target.value)}
+                                                placeholder="Contoh: 2FA-123456 atau 123456"
+                                                className="w-full h-11 px-3.5 pl-9 rounded-xl border border-indigo-300 bg-white text-xs font-mono font-bold tracking-wider text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                            <KeyRound className="w-4 h-4 text-indigo-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                                        </div>
+                                        {loginErrors.two_factor_code && (
+                                            <span className="text-rose-600 text-[11px] font-semibold block flex items-center gap-1">
+                                                <AlertCircle className="w-3 h-3 shrink-0" />
+                                                <span>{loginErrors.two_factor_code}</span>
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="flex items-center justify-between text-xs pt-1">
                                     <label className="flex items-center gap-2 cursor-pointer text-slate-600">

@@ -30,6 +30,7 @@ class User extends Authenticatable
         'is_class_leader',
         'two_factor_enabled',
         'two_factor_code',
+        'last_seen_at',
     ];
 
     protected $hidden = [
@@ -38,14 +39,31 @@ class User extends Authenticatable
         'two_factor_code',
     ];
 
+    protected $appends = [
+        'is_online',
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'password' => 'hashed',
             'is_class_leader' => 'boolean',
             'two_factor_enabled' => 'boolean',
         ];
+    }
+
+    public function getIsOnlineAttribute(): bool
+    {
+        if ($this->last_seen_at && $this->last_seen_at->gt(now()->subMinutes(5))) {
+            return true;
+        }
+
+        return \Illuminate\Support\Facades\DB::table('sessions')
+            ->where('user_id', $this->id)
+            ->where('last_activity', '>=', now()->subMinutes(5)->getTimestamp())
+            ->exists();
     }
 
     public function teacher(): BelongsTo

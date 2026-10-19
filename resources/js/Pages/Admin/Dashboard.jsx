@@ -23,11 +23,38 @@ import {
     FileSpreadsheet,
     Tv,
     Edit3,
+    PieChart,
+    BarChart3,
+    TrendingUp,
+    Layers,
 } from 'lucide-react';
+import {
+    Chart as ChartJS,
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Doughnut, Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 export default function Dashboard({
     metrics = {},
     attendanceStats = {},
+    studentAttendanceStats = {},
+    teacherAttendanceStats = {},
     studentAttendancesToday = [],
     teacherAttendancesToday = [],
     conflicts = [],
@@ -36,6 +63,7 @@ export default function Dashboard({
     classrooms = [],
 }) {
     const { clock, engineState } = useScheduleEngine([]);
+    const [analyticsTab, setAnalyticsTab] = useState('siswa'); // 'siswa', 'guru', 'komparasi'
     const [attendanceTab, setAttendanceTab] = useState('siswa'); // siswa, guru
     const [statusFilter, setStatusFilter] = useState('all');
     const [overrideModal, setOverrideModal] = useState(null);
@@ -55,6 +83,164 @@ export default function Dashboard({
                 setOverrideNotes('');
             },
         });
+    };
+
+    const sStats = (studentAttendanceStats && studentAttendanceStats.total_submitted !== undefined)
+        ? studentAttendanceStats
+        : (attendanceStats || {});
+    const tStats = teacherAttendanceStats || {};
+
+    const studentTotal = sStats?.total_submitted || 0;
+    const studentHadir = sStats?.count_hadir || 0;
+    const studentIzin = sStats?.count_izin || 0;
+    const studentSakit = sStats?.count_sakit || 0;
+    const studentAlpha = sStats?.count_alpha || 0;
+
+    const teacherTotal = tStats?.total_submitted || 0;
+    const teacherHadir = tStats?.count_hadir || 0;
+    const teacherIzin = tStats?.count_izin || 0;
+    const teacherSakit = tStats?.count_sakit || 0;
+    const teacherAlpha = tStats?.count_alpha || 0;
+
+    const currentStats = analyticsTab === 'guru' ? {
+        title: 'Presensi Guru & Staf',
+        sub: 'Rekap kehadiran fingerprint, izin mengajar, dan dinas luar guru',
+        total: teacherTotal,
+        hadir: teacherHadir,
+        izin: teacherIzin,
+        sakit: teacherSakit,
+        alpha: teacherAlpha,
+        hadirPercent: tStats?.hadir_percent || 0,
+        izinPercent: tStats?.izin_percent || 0,
+        sakitPercent: tStats?.sakit_percent || 0,
+        alphaPercent: tStats?.alpha_percent || 0,
+        role: 'Guru',
+    } : {
+        title: 'Presensi Siswa',
+        sub: 'Rekapitulasi otomatis presensi harian siswa dari seluruh rombel',
+        total: studentTotal,
+        hadir: studentHadir,
+        izin: studentIzin,
+        sakit: studentSakit,
+        alpha: studentAlpha,
+        hadirPercent: sStats?.hadir_percent || 0,
+        izinPercent: sStats?.izin_percent || 0,
+        sakitPercent: sStats?.sakit_percent || 0,
+        alphaPercent: sStats?.alpha_percent || 0,
+        role: 'Siswa',
+    };
+
+    // Donut Chart Data
+    const donutData = {
+        labels: ['Hadir', 'Izin', 'Sakit', 'Tanpa Keterangan'],
+        datasets: [
+            {
+                data: currentStats.total === 0 
+                    ? [0, 0, 0, 0] 
+                    : [currentStats.hadir, currentStats.izin, currentStats.sakit, currentStats.alpha],
+                backgroundColor: ['#10B981', '#0284C7', '#F59E0B', '#EF4444'],
+                hoverBackgroundColor: ['#059669', '#0369A1', '#D97706', '#DC2626'],
+                borderWidth: 2,
+                borderColor: '#FFFFFF',
+            },
+        ],
+    };
+
+    // Bar Chart Data
+    const barData = analyticsTab === 'komparasi' ? {
+        labels: ['Hadir', 'Izin', 'Sakit', 'Tanpa Keterangan'],
+        datasets: [
+            {
+                label: `Siswa (${studentTotal})`,
+                data: [studentHadir, studentIzin, studentSakit, studentAlpha],
+                backgroundColor: '#6366F1',
+                borderRadius: 6,
+            },
+            {
+                label: `Guru & Staf (${teacherTotal})`,
+                data: [teacherHadir, teacherIzin, teacherSakit, teacherAlpha],
+                backgroundColor: '#0EA5E9',
+                borderRadius: 6,
+            },
+        ],
+    } : {
+        labels: ['Hadir', 'Izin', 'Sakit', 'Tanpa Keterangan'],
+        datasets: [
+            {
+                label: `Total ${currentStats.role}`,
+                data: [currentStats.hadir, currentStats.izin, currentStats.sakit, currentStats.alpha],
+                backgroundColor: ['#10B981', '#0284C7', '#F59E0B', '#EF4444'],
+                borderRadius: 6,
+            },
+        ],
+    };
+
+    const donutOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 12,
+                    font: { size: 11, family: 'Inter, system-ui, sans-serif', weight: 500 },
+                    color: '#475569',
+                },
+            },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                titleFont: { size: 12 },
+                bodyFont: { size: 11 },
+                padding: 10,
+                cornerRadius: 8,
+            },
+        },
+        cutout: '70%',
+    };
+
+    const barOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: analyticsTab === 'komparasi',
+                position: 'bottom',
+                labels: {
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 12,
+                    font: { size: 11, family: 'Inter, system-ui, sans-serif', weight: 500 },
+                    color: '#475569',
+                },
+            },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                titleFont: { size: 12 },
+                bodyFont: { size: 11 },
+                padding: 10,
+                cornerRadius: 8,
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: {
+                    font: { size: 11, family: 'Inter, system-ui, sans-serif' },
+                    color: '#64748B',
+                },
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: '#F1F5F9' },
+                ticks: {
+                    precision: 0,
+                    font: { size: 11, family: 'Inter, system-ui, sans-serif' },
+                    color: '#64748B',
+                },
+            },
+        },
     };
 
     const statCards = [
@@ -94,7 +280,7 @@ export default function Dashboard({
     });
 
     return (
-        <AdminLayout title="Dashboard & Presensi Terpadu">
+        <AdminLayout title="Dashboard">
             <Head title="Admin Dashboard - EDUSYNC" />
 
             {/* 1. Real-Time Schedule Conflict Detector Banner */}
@@ -174,40 +360,78 @@ export default function Dashboard({
                 })}
             </div>
 
-            {/* 4. FEATURE 1: ATTENDANCE ANALYTICS CALCULATOR */}
+            {/* 4. FEATURE 1: DASHBOARD STATISTIK KEHADIRAN & CHARTS */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs mb-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                {/* Header & Filter Switcher */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1">
-                                <UserCheck className="w-3.5 h-3.5" />
-                                <span>Attendance Calculator Engine</span>
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                <span>Statistik Presensi Terpadu</span>
                             </span>
                             <span className="text-slate-300">•</span>
                             <span className="text-xs text-slate-500 font-mono">
-                                Total Masuk: <strong>{attendanceStats.total_submitted || 0} Siswa</strong>
+                                Total Masuk: <strong className="text-slate-900">{studentTotal + teacherTotal} Absen</strong>
                             </span>
                         </div>
                         <h2 className="text-lg font-bold text-slate-900">
-                            Persentase Kehadiran Siswa Hari Ini
+                            {currentStats.title}
                         </h2>
                         <p className="text-xs text-slate-500 mt-0.5">
-                            Dihitung otomatis dari laporan perwakilan kelas. Diperbarui setiap hari belajar.
+                            {currentStats.sub}
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* Tab Switcher: Siswa / Guru / Komparasi */}
+                        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+                            <button
+                                type="button"
+                                onClick={() => setAnalyticsTab('siswa')}
+                                className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${
+                                    analyticsTab === 'siswa'
+                                        ? 'bg-white text-indigo-700 shadow-2xs font-bold'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Presensi Siswa ({studentTotal})
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setAnalyticsTab('guru')}
+                                className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${
+                                    analyticsTab === 'guru'
+                                        ? 'bg-white text-indigo-700 shadow-2xs font-bold'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Presensi Guru ({teacherTotal})
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setAnalyticsTab('komparasi')}
+                                className={`px-3 py-1.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${
+                                    analyticsTab === 'komparasi'
+                                        ? 'bg-white text-indigo-700 shadow-2xs font-bold'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Komparasi Data
+                            </button>
+                        </div>
+
                         <Link
                             href="/admin/recap-export"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors duration-200 ease-bouncy shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors duration-200 ease-bouncy shadow-2xs"
                         >
                             <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>Export Rekap Bulanan</span>
+                            <span>Export Rekap</span>
                         </Link>
                     </div>
                 </div>
 
-                {/* Percentage Cards (Hadir, Sakit, Izin, Alpha) */}
+                {/* KPI Breakdown Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                     {/* Hadir */}
                     <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col justify-between">
@@ -217,38 +441,16 @@ export default function Dashboard({
                                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             </div>
                             <div className="text-3xl font-extrabold text-emerald-700 font-mono mt-2">
-                                {attendanceStats.hadir_percent || 0}%
+                                {currentStats.hadirPercent}%
                             </div>
                             <div className="text-xs text-emerald-600 mt-0.5">
-                                {attendanceStats.count_hadir || 0} Siswa Tercatat
+                                {currentStats.hadir} {currentStats.role} Tercatat
                             </div>
                         </div>
                         <div className="w-full bg-emerald-200 h-1.5 rounded-full overflow-hidden mt-3">
                             <div
                                 className="bg-emerald-600 h-full transition-all duration-700"
-                                style={{ width: `${attendanceStats.hadir_percent || 0}%` }}
-                            ></div>
-                        </div>
-                    </div>
-
-                    {/* Sakit */}
-                    <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 flex flex-col justify-between">
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-amber-800">Sakit</span>
-                                <AlertCircle className="w-4 h-4 text-amber-600" />
-                            </div>
-                            <div className="text-3xl font-extrabold text-amber-700 font-mono mt-2">
-                                {attendanceStats.sakit_percent || 0}%
-                            </div>
-                            <div className="text-xs text-amber-600 mt-0.5">
-                                {attendanceStats.count_sakit || 0} Siswa (Surat Dokter)
-                            </div>
-                        </div>
-                        <div className="w-full bg-amber-200 h-1.5 rounded-full overflow-hidden mt-3">
-                            <div
-                                className="bg-amber-600 h-full transition-all duration-700"
-                                style={{ width: `${attendanceStats.sakit_percent || 0}%` }}
+                                style={{ width: `${currentStats.hadirPercent}%` }}
                             ></div>
                         </div>
                     </div>
@@ -261,21 +463,43 @@ export default function Dashboard({
                                 <Clock className="w-4 h-4 text-sky-600" />
                             </div>
                             <div className="text-3xl font-extrabold text-sky-700 font-mono mt-2">
-                                {attendanceStats.izin_percent || 0}%
+                                {currentStats.izinPercent}%
                             </div>
                             <div className="text-xs text-sky-600 mt-0.5">
-                                {attendanceStats.count_izin || 0} Siswa Berizin
+                                {currentStats.izin} {currentStats.role} Berizin
                             </div>
                         </div>
                         <div className="w-full bg-sky-200 h-1.5 rounded-full overflow-hidden mt-3">
                             <div
                                 className="bg-sky-600 h-full transition-all duration-700"
-                                style={{ width: `${attendanceStats.izin_percent || 0}%` }}
+                                style={{ width: `${currentStats.izinPercent}%` }}
                             ></div>
                         </div>
                     </div>
 
-                    {/* Alpha */}
+                    {/* Sakit */}
+                    <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-amber-800">Sakit</span>
+                                <AlertCircle className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <div className="text-3xl font-extrabold text-amber-700 font-mono mt-2">
+                                {currentStats.sakitPercent}%
+                            </div>
+                            <div className="text-xs text-amber-600 mt-0.5">
+                                {currentStats.sakit} {currentStats.role} Sakit
+                            </div>
+                        </div>
+                        <div className="w-full bg-amber-200 h-1.5 rounded-full overflow-hidden mt-3">
+                            <div
+                                className="bg-amber-600 h-full transition-all duration-700"
+                                style={{ width: `${currentStats.sakitPercent}%` }}
+                            ></div>
+                        </div>
+                    </div>
+
+                    {/* Alpha / Tanpa Keterangan */}
                     <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200/80 flex flex-col justify-between">
                         <div>
                             <div className="flex items-center justify-between">
@@ -283,17 +507,81 @@ export default function Dashboard({
                                 <UserX className="w-4 h-4 text-rose-600" />
                             </div>
                             <div className="text-3xl font-extrabold text-rose-700 font-mono mt-2">
-                                {attendanceStats.alpha_percent || 0}%
+                                {currentStats.alphaPercent}%
                             </div>
                             <div className="text-xs text-rose-600 mt-0.5">
-                                {attendanceStats.count_alpha || 0} Siswa Alpha
+                                {currentStats.alpha} {currentStats.role} Alpha
                             </div>
                         </div>
                         <div className="w-full bg-rose-200 h-1.5 rounded-full overflow-hidden mt-3">
                             <div
                                 className="bg-rose-600 h-full transition-all duration-700"
-                                style={{ width: `${attendanceStats.alpha_percent || 0}%` }}
+                                style={{ width: `${currentStats.alphaPercent}%` }}
                             ></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* DUAL INTERACTIVE CHARTS: STATISTIK LINGKARAN & STATISTIK BATANG */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 pt-6 border-t border-slate-100">
+                    {/* Statistik Lingkaran (Doughnut Chart) */}
+                    <div className="lg:col-span-5 p-5 rounded-2xl bg-slate-50/60 border border-slate-200/90 flex flex-col">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center">
+                                    <PieChart className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                                        Statistik Lingkaran
+                                    </h3>
+                                    <p className="text-[11px] text-slate-500">
+                                        Distribusi Persentase Kehadiran {currentStats.role}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700">
+                                Total: {currentStats.total}
+                            </span>
+                        </div>
+
+                        <div className="relative h-64 sm:h-72 w-full flex items-center justify-center my-auto pt-2">
+                            {currentStats.total === 0 ? (
+                                <div className="text-center p-6 text-slate-400 text-xs">
+                                    <PieChart className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                                    <span>Belum ada data presensi {currentStats.role.toLowerCase()} yang tercatat hari ini.</span>
+                                </div>
+                            ) : (
+                                <Doughnut data={donutData} options={donutOptions} />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Statistik Batang (Bar Chart) */}
+                    <div className="lg:col-span-7 p-5 rounded-2xl bg-slate-50/60 border border-slate-200/90 flex flex-col">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center">
+                                    <BarChart3 className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                                        Statistik Batang
+                                    </h3>
+                                    <p className="text-[11px] text-slate-500">
+                                        {analyticsTab === 'komparasi'
+                                            ? 'Perbandingan Jumlah Riil Siswa vs Guru per Kategori'
+                                            : `Frekuensi Jumlah Riil Kehadiran ${currentStats.role}`}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                                Realtime Sync
+                            </span>
+                        </div>
+
+                        <div className="relative h-64 sm:h-72 w-full pt-2">
+                            <Bar data={barData} options={barOptions} />
                         </div>
                     </div>
                 </div>

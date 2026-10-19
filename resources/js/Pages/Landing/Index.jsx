@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     CalendarDays,
     Users,
@@ -39,6 +39,11 @@ export default function Index({
     stats = {},
     cocurricular = {},
 }) {
+    const { app } = usePage().props;
+    const appName = app?.name || 'EDUSYNC';
+    const schoolName = app?.school_name || 'SMKN 1 Ciomas';
+    const adminAvatar = app?.admin_avatar;
+
     const clock = useRealtimeClock();
     const engine = useScheduleEngine(featuredSchedules);
     const [searchQuery, setSearchQuery] = useState('');
@@ -106,20 +111,24 @@ export default function Index({
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
-            <Head title="EDUSYNC — Portal Akademik & Penjadwalan SMKN 1 Ciomas" />
+            <Head title={`${appName} — Portal Akademik & Penjadwalan ${schoolName}`} />
 
             {/* 1. TOP HEADER (Stitch Screen 4) */}
             <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-sm">
-                                E
+                            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-sm overflow-hidden shrink-0">
+                                {adminAvatar ? (
+                                    <img src={adminAvatar} alt="Admin Logo" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span>{appName.charAt(0)}</span>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-900 tracking-tight text-lg">EDUSYNC</span>
+                                <span className="font-bold text-slate-900 tracking-tight text-lg">{appName}</span>
                                 <span className="text-slate-300 font-normal">—</span>
-                                <span className="text-xs text-slate-600 font-medium hidden sm:inline">SMKN 1 Ciomas</span>
+                                <span className="text-xs text-slate-600 font-medium hidden sm:inline">{schoolName}</span>
                             </div>
                         </Link>
                     </div>
@@ -211,15 +220,15 @@ export default function Index({
                         <div className="lg:col-span-7 flex flex-col items-start">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                                <span>Portal Akademik & Penjadwalan Terintegrasi • SMKN 1 Ciomas</span>
+                                <span>Portal Akademik & Penjadwalan Terintegrasi • {schoolName}</span>
                             </div>
 
                             <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mt-5">
-                                Portal Informasi & Penjadwalan SMKN 1 Ciomas
+                                Portal Informasi & Penjadwalan {schoolName}
                             </h1>
 
                             <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-4 max-w-xl">
-                                Pusat informasi resmi manajemen jadwal kegiatan belajar mengajar (KBM), rotasi bengkel dan laboratorium praktik, jadwal harian kokurikuler 2.0 (Pentas Kreasi, Makan Bersama, Jumat Taqwa), serta pemantauan presensi siswa dan guru SMKN 1 Ciomas secara akurat dan transparan.
+                                Pusat informasi resmi manajemen jadwal kegiatan belajar mengajar (KBM), rotasi bengkel dan laboratorium praktik, jadwal harian kokurikuler 2.0 (Pentas Kreasi, Makan Bersama, Jumat Taqwa), serta pemantauan presensi siswa dan guru {schoolName} secara akurat dan transparan.
                             </p>
 
                             <div className="flex flex-wrap items-center gap-3 mt-7 w-full sm:w-auto">
@@ -602,11 +611,15 @@ export default function Index({
             <footer className="w-full bg-white border-t border-slate-200 py-8 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                            E
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0 shadow-xs">
+                            {adminAvatar ? (
+                                <img src={adminAvatar} alt="Admin" className="w-full h-full object-cover" />
+                            ) : (
+                                <span>{appName.charAt(0)}</span>
+                            )}
                         </div>
                         <div>
-                            <span className="font-bold text-slate-900">EDUSYNC</span> • SMKN 1 Ciomas
+                            <span className="font-bold text-slate-900">{appName}</span> • {schoolName}
                         </div>
                     </div>
                     <div className="flex items-center gap-4 text-slate-400 text-[11px]">

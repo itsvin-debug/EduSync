@@ -44,6 +44,35 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
 
+            // Two-Factor Authentication (2FA) verification
+            if ($user->two_factor_enabled) {
+                $inputCode = trim((string) $request->input('two_factor_code'));
+                $expectedCode = trim((string) $user->two_factor_code);
+
+                if (empty($inputCode)) {
+                    Auth::logout();
+                    return back()->with([
+                        'requires_2fa' => true,
+                        'user_email' => $user->email,
+                    ])->withErrors([
+                        'two_factor_code' => 'Akun Administrator ini dilindungi verifikasi 2 langkah. Masukkan kode 2FA untuk melanjutkan.',
+                    ])->onlyInput('email');
+                }
+
+                $cleanInput = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($inputCode));
+                $cleanExpected = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($expectedCode));
+
+                if ($cleanInput !== $cleanExpected && $inputCode !== $expectedCode) {
+                    Auth::logout();
+                    return back()->with([
+                        'requires_2fa' => true,
+                        'user_email' => $user->email,
+                    ])->withErrors([
+                        'two_factor_code' => 'Kode verifikasi 2FA tidak sesuai. Silakan periksa kembali.',
+                    ])->onlyInput('email');
+                }
+            }
+
             // Verification & Status Check
             if ($user->status === 'pending_verification') {
                 Auth::logout();

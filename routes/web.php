@@ -102,6 +102,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     // Admin settings & security
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::post('/settings/general', [AdminController::class, 'updateGeneralSettings'])->name('admin.settings.general');
     Route::post('/settings/profile', [AdminController::class, 'updateAdminProfile'])->name('admin.settings.profile');
     Route::post('/settings/password', [AdminController::class, 'updateAdminPassword'])->name('admin.settings.password');
     Route::post('/settings/2fa', [AdminController::class, 'toggleAdmin2FA'])->name('admin.settings.2fa');
@@ -133,6 +134,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Class leaders and homeroom assignments
     Route::post('/students/{id}/toggle-class-leader', [AdminController::class, 'toggleClassLeader'])->name('admin.students.toggle-class-leader');
     Route::post('/classrooms/{id}/assign-leaders', [AdminController::class, 'assignClassroomLeaders'])->name('admin.classrooms.assign-leaders');
+
+    // Real-time API endpoints for admin
+    Route::get('/realtime-online-status', [AdminController::class, 'realtimeOnlineStatus'])->name('admin.realtime-online-status');
+    Route::get('/sidebar-counters', [AdminController::class, 'sidebarCounters'])->name('admin.sidebar-counters');
 });
 
 // Teacher portal
@@ -143,6 +148,7 @@ Route::prefix('guru')->middleware(['auth', 'role:guru,admin'])->group(function (
 
     // Attendance & daily reports
     Route::post('/attendance/check-in', [TeacherController::class, 'checkInAttendance'])->name('guru.attendance.checkin');
+    Route::post('/attendance/class-batch', [TeacherController::class, 'batchStoreClassAttendance'])->name('guru.attendance.class-batch');
     Route::post('/learning-tasks', [TeacherController::class, 'storeLearningTask'])->name('guru.learning-tasks.store');
     Route::post('/duty-leaves', [TeacherController::class, 'storeDutyLeave'])->name('guru.duty-leaves.store');
     Route::post('/trash-reports', [TeacherController::class, 'storeTrashReport'])->name('guru.trash-reports.store');
@@ -167,6 +173,8 @@ Route::prefix('siswa')->middleware(['auth', 'role:siswa,admin'])->group(function
     // Leave requests
     Route::post('/leave-request', [StudentController::class, 'submitLeaveRequest'])->name('siswa.leave-request.submit');
     Route::post('/leave-requests', [StudentController::class, 'submitLeaveRequest']);
+    Route::post('/student-leaves/{id}/approve', [StudentController::class, 'approveStudentLeave'])->name('siswa.student-leaves.approve');
+    Route::post('/student-leaves/{id}/reject', [StudentController::class, 'rejectStudentLeave'])->name('siswa.student-leaves.reject');
 
     // Class leader actions
     Route::post('/students', [StudentController::class, 'storeStudent'])->name('siswa.students.store');

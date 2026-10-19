@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Sparkles,
     CheckCircle2,
@@ -29,6 +30,8 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
     const [selectedReport, setSelectedReport] = useState(null);
     const [verificationNotes, setVerificationNotes] = useState('Dokumentasi 5R kebersihan ruang kelas terverifikasi lengkap.');
     const [selectedPhotoModal, setSelectedPhotoModal] = useState(null);
+    const [dismissTrashTargetId, setDismissTrashTargetId] = useState(null);
+    const [convertFineModal, setConvertFineModal] = useState(null);
 
     // Filter Pickets
     const filteredReports = picketReports.filter((report) => {
@@ -69,19 +72,28 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
     };
 
     const handleConvertTrashToFine = (reportId) => {
-        const amount = prompt('Masukkan nominal denda kebersihan (Rp):', '50000');
-        if (amount) {
-            router.post(`/admin/trash-reports/${reportId}/convert-fine`, { amount: Number(amount) }, {
-                preserveScroll: true,
-                onSuccess: () => alert('Laporan sampah berhasil dikonversi menjadi sanksi denda kebersihan kelas.'),
-            });
-        }
+        setConvertFineModal({ reportId, amount: 50000 });
+    };
+
+    const handleConfirmConvertFine = (e) => {
+        e.preventDefault();
+        if (!convertFineModal) return;
+        router.post(`/admin/trash-reports/${convertFineModal.reportId}/convert-fine`, { amount: Number(convertFineModal.amount) }, {
+            preserveScroll: true,
+            onFinish: () => setConvertFineModal(null),
+        });
     };
 
     const handleDismissTrash = (reportId) => {
-        if (confirm('Arsipkan atau abaikan laporan sampah ini?')) {
-            router.post(`/admin/trash-reports/${reportId}/dismiss`, {}, { preserveScroll: true });
-        }
+        setDismissTrashTargetId(reportId);
+    };
+
+    const handleConfirmDismissTrash = () => {
+        if (!dismissTrashTargetId) return;
+        router.post(`/admin/trash-reports/${dismissTrashTargetId}/dismiss`, {}, {
+            preserveScroll: true,
+            onFinish: () => setDismissTrashTargetId(null),
+        });
     };
 
     const countPending = picketReports.filter((p) => p.status === 'pending').length;
@@ -564,6 +576,56 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                     </div>
                 </Modal>
             )}
+
+            {/* Modal Konversi Denda Sampah */}
+            {convertFineModal && (
+                <Modal isOpen={Boolean(convertFineModal)} onClose={() => setConvertFineModal(null)} title="Konversi Denda Kebersihan Kelas">
+                    <form onSubmit={handleConfirmConvertFine} className="space-y-4 text-xs">
+                        <p className="text-slate-600">
+                            Masukkan nominal denda yang akan dibebankan kepada kas kelas bersangkutan atas pelanggaran kebersihan:
+                        </p>
+                        <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Nominal Denda (Rp)</label>
+                            <input
+                                type="number"
+                                min="5000"
+                                step="5000"
+                                value={convertFineModal.amount}
+                                onChange={(e) => setConvertFineModal({ ...convertFineModal, amount: e.target.value })}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono font-bold"
+                                required
+                            />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setConvertFineModal(null)}
+                                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs"
+                            >
+                                Terbitkan Denda
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            )}
+
+            {/* Modal Arsip Laporan Sampah */}
+            <ConfirmModal
+                isOpen={!!dismissTrashTargetId}
+                onClose={() => setDismissTrashTargetId(null)}
+                onConfirm={handleConfirmDismissTrash}
+                title="Arsipkan Laporan Sampah"
+                message="Arsipkan atau abaikan laporan sampah ini tanpa menerbitkan denda kebersihan kelas?"
+                confirmText="Arsipkan"
+                cancelText="Batal"
+                type="warning"
+            />
         </AdminLayout>
     );
 }

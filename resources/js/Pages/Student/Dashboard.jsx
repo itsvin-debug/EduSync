@@ -76,6 +76,7 @@ export default function Dashboard({
     myAttendances = [],
     myAttendanceStats = { hadir: 0, sakit: 0, izin: 0, dispensasi: 0, alpha: 0 },
     myLeaveRequests = [],
+    classLeaveRequests = [],
     picketHistory = [],
     classFines = [],
     learningTasks = [],
@@ -257,8 +258,11 @@ export default function Dashboard({
         );
     };
 
-    // 2. Student Leave Request Form
-    const leaveFileInputRef = useRef(null);
+    // 2. Student Leave Request Form (Direct Web Camera with MARKI Watermark)
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const [cameraError, setCameraError] = useState(null);
     const [leavePhotoPreview, setLeavePhotoPreview] = useState(null);
 
     const {
@@ -274,40 +278,132 @@ export default function Dashboard({
         end_date: new Date().toISOString().split('T')[0],
         homeroom_teacher_id: classroom?.homeroom_teacher_id || (allTeachers[0]?.id ?? ''),
         notes: '',
-        proof_image: null,
+        proof_image_base64: null,
     });
 
-    const handleLeaveFileChange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setLeaveData('proof_image', file);
-            setLeavePhotoPreview(URL.createObjectURL(file));
+    const startCamera = async () => {
+        setCameraError(null);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
+                audio: false,
+            });
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+            }
+            setIsCameraActive(true);
+        } catch (err) {
+            console.error('Camera error:', err);
+            setCameraError('Kamera tidak dapat diakses. Pastikan izin akses kamera telah diizinkan di peramban.');
         }
     };
 
-    const handleRemoveLeaveFile = () => {
-        setLeaveData('proof_image', null);
-        if (leavePhotoPreview) {
-            URL.revokeObjectURL(leavePhotoPreview);
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject;
+            stream.getTracks().forEach((track) => track.stop());
+            videoRef.current.srcObject = null;
         }
+        setIsCameraActive(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            stopCamera();
+        };
+    }, []);
+
+    const captureMarkiPhoto = () => {
+        if (!videoRef.current) return;
+        const video = videoRef.current;
+        const canvas = canvasRef.current || document.createElement('canvas');
+        const width = video.videoWidth || 1280;
+        const height = video.videoHeight || 720;
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // Draw camera frame
+        ctx.drawImage(video, 0, 0, width, height);
+
+        // Format real-time MARKI timestamp (Day, Date, Month, Year, and HH:mm:ss WIB)
+        const now = new Date();
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+        ];
+        const dayStr = days[now.getDay()];
+        const dateStr = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} WIB`;
+
+        const line1 = `${dayStr}, ${dateStr}`;
+        const line2 = timeStr;
+        const line3 = 'APLIKASI MARKI - SMKN 1 CIOMAS';
+
+        // Watermark badge at bottom right corner
+        const padding = 20;
+        const boxWidth = 330;
+        const boxHeight = 88;
+        const boxX = width - boxWidth - padding;
+        const boxY = height - boxHeight - padding;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 14);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(line1, boxX + 16, boxY + 28);
+
+        ctx.font = 'bold 19px "Courier New", monospace';
+        ctx.fillStyle = '#38BDF8';
+        ctx.fillText(line2, boxX + 16, boxY + 54);
+
+        ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillText(line3, boxX + 16, boxY + 74);
+
+        const base64 = canvas.toDataURL('image/jpeg', 0.9);
+        setLeavePhotoPreview(base64);
+        setLeaveData('proof_image_base64', base64);
+        stopCamera();
+    };
+
+    const handleRetakePhoto = () => {
         setLeavePhotoPreview(null);
-        if (leaveFileInputRef.current) {
-            leaveFileInputRef.current.value = '';
-        }
+        setLeaveData('proof_image_base64', null);
+        startCamera();
     };
 
     const handleLeaveSubmit = (e) => {
         e.preventDefault();
+        if (!leaveData.proof_image_base64) {
+            alert('Silakan ambil foto bukti izin terlebih dahulu menggunakan kamera MARKI.');
+            return;
+        }
+
         postLeave('/siswa/leave-requests', {
             preserveScroll: true,
             onSuccess: () => {
                 resetLeave();
                 setLeavePhotoPreview(null);
-                if (leaveFileInputRef.current) leaveFileInputRef.current.value = '';
-                alert('Pengajuan izin / sakit berhasil dikirimkan ke Wali Kelas.');
+                stopCamera();
+                alert('Permohonan perizinan berhasil dikirimkan ke Wali Kelas.');
             },
         });
     };
+
 
     // 3. End-of-Day Duty & Cleanliness Verification Form for Class Leader
     const dutyFileInputRef = useRef(null);
@@ -1330,194 +1426,337 @@ export default function Dashboard({
 
             {/* TAB: PENGAJUAN IZIN / SAKIT (FOR BOTH CLASS LEADER & REGULAR STUDENTS) */}
             {activeTab === 'izin' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left: Form Permohonan Izin / Sakit */}
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                            <Calendar className="w-5 h-5 text-sky-600" />
-                            <div>
-                                <h3 className="font-bold text-slate-900 text-sm">Formulir Surat Izin / Sakit</h3>
-                                <p className="text-[11px] text-slate-500">Unggah bukti dokter & ditinjau Wali Kelas</p>
+                <div className="space-y-6">
+                    {/* Top: Two-Column MARKI Camera Viewfinder & Permission Form */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+                                    <Camera className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base">
+                                        Pengajuan Izin & Bukti Kamera MARKI
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">
+                                        Potret bukti langsung via kamera web dengan watermark tanggal, jam real-time, dan identitas resmi.
+                                    </p>
+                                </div>
                             </div>
+                            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                                Standar MARKI SMKN 1 Ciomas
+                            </span>
                         </div>
 
-                        <form onSubmit={handleLeaveSubmit} className="space-y-4 text-xs">
-                            {/* 1. Custom Dropzone / Upload Box at the VERY TOP (MARKI App Specs) */}
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1.5 flex items-center justify-between">
-                                    <span>Unggah Bukti Foto / Surat Dokter</span>
-                                    <span className="text-[10px] text-sky-600 font-bold uppercase tracking-wider">Aplikasi MARKI</span>
+                        <form onSubmit={handleLeaveSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            {/* Left Column: MARKI Web Camera Viewfinder */}
+                            <div className="lg:col-span-7 flex flex-col space-y-3">
+                                <label className="font-semibold text-slate-700 text-xs block flex items-center justify-between">
+                                    <span>Bukti Foto Langsung Kamera Web</span>
+                                    <span className="text-[10px] text-sky-600 font-bold uppercase tracking-wider">MARKI Real-Time</span>
                                 </label>
 
-                                {!leavePhotoPreview ? (
-                                    <div
-                                        onClick={() => leaveFileInputRef.current?.click()}
-                                        onDragOver={(e) => e.preventDefault()}
-                                        onDrop={(e) => {
-                                            e.preventDefault();
-                                            const file = e.dataTransfer?.files?.[0];
-                                            if (file) {
-                                                setLeaveData('proof_image', file);
-                                                setLeavePhotoPreview(URL.createObjectURL(file));
-                                            }
-                                        }}
-                                        className="border-2 border-dashed border-sky-300 hover:border-sky-500 rounded-2xl p-4 bg-sky-50/40 hover:bg-sky-50/70 transition-all duration-200 ease-bouncy cursor-pointer flex flex-col items-center justify-center text-center group"
-                                    >
-                                        <div className="w-11 h-11 rounded-xl bg-sky-100 group-hover:bg-sky-200 text-sky-600 flex items-center justify-center mb-2 transition-colors duration-200 ease-bouncy">
-                                            <Camera className="w-5 h-5" />
-                                        </div>
-                                        <p className="font-bold text-slate-800 text-xs">
-                                            Klik atau Tarik Foto Bukti ke Sini
-                                        </p>
-                                        <p className="text-[11px] text-slate-500 mt-0.5">
-                                            JPG, PNG, atau WEBP (Maksimal 5MB)
-                                        </p>
-
-                                        {/* Embedded MARKI Guideline */}
-                                        <div className="mt-3 w-full p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/90 text-[11px] text-amber-900 leading-snug flex items-start gap-2 text-left">
-                                            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                                            <div>
-                                                <strong className="text-amber-950 font-bold">SYARAT MARKI:</strong> Foto surat atau kondisi sakit <strong>WAJIB diambil melalui aplikasi MARKI</strong> dengan watermark tanggal, jam real-time, dan koordinat lokasi.
+                                <div className="relative w-full aspect-[4/3] rounded-2xl bg-slate-900 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+                                    {isCameraActive ? (
+                                        <>
+                                            <video
+                                                ref={videoRef}
+                                                autoPlay
+                                                playsInline
+                                                muted
+                                                className="w-full h-full object-cover"
+                                            />
+                                            {/* Live Watermark Overlay in Viewfinder */}
+                                            <div className="absolute bottom-3 right-3 bg-slate-950/80 border border-sky-400/50 backdrop-blur-xs text-white p-2.5 rounded-xl text-right pointer-events-none shadow-md">
+                                                <div className="text-[11px] font-bold text-white leading-tight">
+                                                    {clock.dayName}, {clock.dateFormatted}
+                                                </div>
+                                                <div className="text-xs font-mono font-bold text-sky-400 leading-tight mt-0.5">
+                                                    {clock.timeString} WIB
+                                                </div>
+                                                <div className="text-[9px] text-slate-400 font-medium tracking-tight mt-0.5 uppercase">
+                                                    MARKI • SMKN 1 CIOMAS
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : leavePhotoPreview ? (
+                                        <div className="relative w-full h-full">
+                                            <img
+                                                src={leavePhotoPreview}
+                                                alt="Bukti MARKI"
+                                                className="w-full h-full object-cover pointer-events-none select-none"
+                                                onContextMenu={(e) => e.preventDefault()}
+                                            />
+                                            <div className="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-xs">
+                                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                                <span>Foto Berhasil Diambil</span>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="relative rounded-2xl border border-sky-200 bg-sky-50/50 p-3 flex items-center gap-3">
-                                        <img
-                                            src={leavePhotoPreview}
-                                            alt="Bukti MARKI"
-                                            className="w-14 h-14 rounded-xl object-cover border border-sky-300 shrink-0 shadow-2xs"
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs truncate">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                                <span className="truncate">{leaveData.proof_image?.name || 'Foto Bukti MARKI'}</span>
+                                    ) : (
+                                        <div className="p-6 text-center text-slate-400 max-w-sm">
+                                            <div className="w-12 h-12 rounded-2xl bg-slate-800 text-sky-400 flex items-center justify-center mx-auto mb-3">
+                                                <Camera className="w-6 h-6" />
                                             </div>
-                                            <p className="text-[11px] text-emerald-700 font-semibold mt-0.5">
-                                                ✓ Terverifikasi format MARKI
+                                            <h4 className="font-bold text-slate-200 text-sm">Kamera Belum Aktif</h4>
+                                            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                                                Sesuai ketentuan, foto tidak dapat diunggah dari galeri. Silakan buka kamera dan ambil foto bukti langsung di sini.
                                             </p>
-                                            <span className="text-[10px] text-slate-400 font-mono">
-                                                {leaveData.proof_image?.size ? (leaveData.proof_image.size / 1024).toFixed(1) + ' KB' : ''}
-                                            </span>
+                                            {cameraError && (
+                                                <div className="mt-3 p-2 rounded-xl bg-rose-500/20 text-rose-300 text-[11px] border border-rose-500/30">
+                                                    {cameraError}
+                                                </div>
+                                            )}
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Camera Action Buttons */}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {!isCameraActive && !leavePhotoPreview && (
                                         <button
                                             type="button"
-                                            onClick={handleRemoveLeaveFile}
-                                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors duration-200 ease-bouncy"
-                                            title="Hapus atau Ganti Foto"
+                                            onClick={startCamera}
+                                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
                                         >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Camera className="w-4 h-4" />
+                                            <span>Buka Kamera & Potret</span>
                                         </button>
+                                    )}
+
+                                    {isCameraActive && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={captureMarkiPhoto}
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                            >
+                                                <Camera className="w-4 h-4" />
+                                                <span>Ambil Foto (MARKI Snapshot)</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={stopCamera}
+                                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                            >
+                                                <span>Tutup Kamera</span>
+                                            </button>
+                                        </>
+                                    )}
+
+                                    {leavePhotoPreview && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRetakePhoto}
+                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                        >
+                                            <Camera className="w-4 h-4" />
+                                            <span>Ambil Ulang Foto</span>
+                                        </button>
+                                    )}
+
+                                    <span className="text-[11px] text-slate-400 italic ml-auto hidden sm:inline">
+                                        Foto terkunci pada formulir dan tidak tersimpan ke galeri.
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Right Column: Form Fields */}
+                            <div className="lg:col-span-5 space-y-4 text-xs">
+                                {/* Jenis Perizinan */}
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1.5">Jenis Perizinan</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[
+                                            { val: 'sakit', label: 'Sakit' },
+                                            { val: 'izin', label: 'Izin' },
+                                            { val: 'dispensasi', label: 'Dispensasi' },
+                                        ].map((opt) => (
+                                            <button
+                                                key={opt.val}
+                                                type="button"
+                                                onClick={() => setLeaveData('type', opt.val)}
+                                                className={`py-2 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy ${
+                                                    leaveData.type === opt.val
+                                                        ? 'bg-sky-600 text-white border-transparent shadow-xs'
+                                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                )}
-
-                                <input
-                                    ref={leaveFileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleLeaveFileChange}
-                                    className="hidden"
-                                />
-                            </div>
-
-                            {/* 2. Jenis Perizinan (Symmetrical segmented pills) */}
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1.5">Jenis Perizinan</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[
-                                        { val: 'sakit', label: 'Sakit' },
-                                        { val: 'izin', label: 'Izin' },
-                                        { val: 'dispensasi', label: 'Dispensasi' },
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.val}
-                                            type="button"
-                                            onClick={() => setLeaveData('type', opt.val)}
-                                            className={`py-2 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy ${
-                                                leaveData.type === opt.val
-                                                    ? 'bg-sky-600 text-white border-transparent shadow-xs'
-                                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform'
-                                            }`}
-                                        >
-                                            {opt.label}
-                                        </button>
-                                    ))}
                                 </div>
-                            </div>
 
-                            {/* 3. Tanggal Mulai & Tanggal Selesai (2 Symmetrical Columns) */}
-                            <div className="grid grid-cols-2 gap-3">
+                                {/* Tanggal Mulai & Tanggal Selesai */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="font-semibold text-slate-700 block mb-1">Tanggal Mulai</label>
+                                        <input
+                                            type="date"
+                                            value={leaveData.start_date}
+                                            onChange={(e) => setLeaveData('start_date', e.target.value)}
+                                            className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="font-semibold text-slate-700 block mb-1">Tanggal Selesai</label>
+                                        <input
+                                            type="date"
+                                            value={leaveData.end_date}
+                                            onChange={(e) => setLeaveData('end_date', e.target.value)}
+                                            className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Wali Kelas / Guru Penilai */}
                                 <div>
-                                    <label className="font-semibold text-slate-700 block mb-1">Tanggal Mulai</label>
-                                    <input
-                                        type="date"
-                                        value={leaveData.start_date}
-                                        onChange={(e) => setLeaveData('start_date', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
+                                    <label className="font-semibold text-slate-700 block mb-1">Wali Kelas / Guru Penilai</label>
+                                    <select
+                                        value={leaveData.homeroom_teacher_id}
+                                        onChange={(e) => setLeaveData('homeroom_teacher_id', e.target.value)}
+                                        className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:bg-white focus:ring-1 focus:ring-sky-500"
+                                        required
+                                    >
+                                        {allTeachers.map((t) => (
+                                            <option key={t.id} value={t.id}>
+                                                {t.name} {t.title ? `(${t.title})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Alasan & Keterangan Dokter */}
+                                <div>
+                                    <label className="font-semibold text-slate-700 block mb-1">Alasan & Keterangan Dokter</label>
+                                    <textarea
+                                        value={leaveData.notes}
+                                        onChange={(e) => setLeaveData('notes', e.target.value)}
+                                        rows={3}
+                                        placeholder="Contoh: Mengalami demam tinggi dan flu berat, disarankan istirahat oleh dokter..."
+                                        className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
                                         required
                                     />
                                 </div>
-                                <div>
-                                    <label className="font-semibold text-slate-700 block mb-1">Tanggal Selesai</label>
-                                    <input
-                                        type="date"
-                                        value={leaveData.end_date}
-                                        onChange={(e) => setLeaveData('end_date', e.target.value)}
-                                        className="w-full h-9 px-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
-                                        required
-                                    />
-                                </div>
-                            </div>
 
-                            {/* 4. Wali Kelas / Guru Penguji */}
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Wali Kelas / Guru Penilai</label>
-                                <select
-                                    value={leaveData.homeroom_teacher_id}
-                                    onChange={(e) => setLeaveData('homeroom_teacher_id', e.target.value)}
-                                    className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:bg-white focus:ring-1 focus:ring-sky-500"
-                                    required
+                                <button
+                                    type="submit"
+                                    disabled={leaveProcessing}
+                                    className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                                 >
-                                    {allTeachers.map((t) => (
-                                        <option key={t.id} value={t.id}>
-                                            {t.name} {t.title ? `(${t.title})` : ''}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <Send className="w-4 h-4" />
+                                    <span>{leaveProcessing ? 'Mengirimkan...' : 'Kirim Permohonan Izin'}</span>
+                                </button>
                             </div>
-
-                            {/* 5. Alasan / Keterangan Sakit/Izin */}
-                            <div>
-                                <label className="font-semibold text-slate-700 block mb-1">Alasan & Keterangan Dokter</label>
-                                <textarea
-                                    value={leaveData.notes}
-                                    onChange={(e) => setLeaveData('notes', e.target.value)}
-                                    rows={3}
-                                    placeholder="Contoh: Mengalami demam dan radang, disarankan istirahat oleh dokter klinik..."
-                                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-sky-500"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={leaveProcessing}
-                                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-1.5"
-                            >
-                                <Send className="w-3.5 h-3.5" />
-                                <span>{leaveProcessing ? 'Mengirim...' : 'Kirim Permohonan Izin'}</span>
-                            </button>
                         </form>
                     </div>
 
-                    {/* Right: Riwayat Permohonan Izin / Sakit */}
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs lg:col-span-2 space-y-4">
+                    {/* Bottom: Verifikasi Surat Izin Teman Sekelas (Special for Ketua Kelas) */}
+                    {isClassLeader && (
+                        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                                <div>
+                                    <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                                        <span>Verifikasi Surat Izin Teman Sekelas ({classroom?.name})</span>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                                            Akses Ketua Kelas
+                                        </span>
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">
+                                        Daftar permohonan izin dari teman sekelas Anda. Permohonan yang disetujui otomatis menyinkronkan presensi harian kelas.
+                                    </p>
+                                </div>
+                                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono">
+                                    {(classLeaveRequests || []).filter((r) => r.status === 'pending').length} Menunggu ACC
+                                </span>
+                            </div>
+
+                            {(!classLeaveRequests || classLeaveRequests.length === 0) ? (
+                                <div className="py-8 text-center text-slate-400 text-xs">
+                                    Belum ada permohonan izin dari teman sekelas.
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {classLeaveRequests.map((req) => (
+                                        <div
+                                            key={req.id}
+                                            className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs"
+                                        >
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="font-bold text-slate-900 text-sm">
+                                                        {req.student?.name}
+                                                    </span>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                                        req.type === 'sakit'
+                                                            ? 'bg-amber-100 text-amber-800'
+                                                            : req.type === 'izin'
+                                                            ? 'bg-sky-100 text-sky-800'
+                                                            : 'bg-indigo-100 text-indigo-800'
+                                                    }`}>
+                                                        {req.type}
+                                                    </span>
+                                                    <span className="text-slate-500 font-mono text-[11px]">
+                                                        {req.start_date} s/d {req.end_date}
+                                                    </span>
+                                                </div>
+
+                                                <p className="text-slate-700">{req.notes}</p>
+                                                <div className="text-[11px] text-slate-500">
+                                                    Verifikasi: <strong>{req.verifier_label}</strong>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                {(req.proof_image_url || req.proof_image) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSelectedProofModal(req.proof_image_url || req.proof_image)}
+                                                        className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer"
+                                                    >
+                                                        <Eye className="w-3.5 h-3.5" />
+                                                        <span>Lihat Foto MARKI</span>
+                                                    </button>
+                                                )}
+
+                                                {req.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => router.post(`/siswa/student-leaves/${req.id}/approve`, {}, { preserveScroll: true })}
+                                                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                                        >
+                                                            Setujui (ACC)
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => router.post(`/siswa/student-leaves/${req.id}/reject`, {}, { preserveScroll: true })}
+                                                            className="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 font-semibold text-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                                        >
+                                                            Tolak
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Bottom: Riwayat Surat Izin / Sakit Saya (Personal) */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-4">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div>
                                 <h3 className="font-bold text-slate-900 text-base">Riwayat Surat Izin / Sakit Saya</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Status verifikasi oleh Wali Kelas & integrasi otomatis ke presensi</p>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    Catatan pengajuan izin pribadi dan status verifikasi resmi
+                                </p>
                             </div>
-                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono">
                                 {myLeaveRequests.length} Pengajuan
                             </span>
                         </div>
@@ -1526,7 +1765,7 @@ export default function Dashboard({
                             <div className="py-12 text-center text-slate-400 text-xs">
                                 <Calendar className="w-10 h-10 mx-auto text-slate-300 mb-2 stroke-1" />
                                 <p className="font-medium text-slate-600">Belum ada surat perizinan yang diajukan</p>
-                                <p className="text-[11px] mt-1">Gunakan formulir di sebelah kiri jika Anda berhalangan hadir ke sekolah.</p>
+                                <p className="text-[11px] mt-1">Gunakan formulir di atas jika Anda berhalangan hadir ke sekolah.</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -1557,29 +1796,33 @@ export default function Dashboard({
                                                         : 'bg-amber-50 text-amber-700 border-amber-200'
                                                 }`}>
                                                     {req.status === 'approved'
-                                                        ? 'Disetujui Guru (Auto-Sync Presensi)'
+                                                        ? 'Disetujui'
                                                         : req.status === 'rejected'
                                                         ? 'Ditolak'
-                                                        : 'Menunggu Review Wali Kelas'}
+                                                        : 'Menunggu Review'}
                                                 </span>
                                             </div>
 
                                             <p className="text-slate-700">{req.notes}</p>
-                                            <div className="text-slate-400 text-[11px]">
-                                                Wali Kelas: <strong>{req.homeroom_teacher?.name || 'Wali Kelas'}</strong>
-                                                {req.rejection_note && (
-                                                    <span className="text-rose-600 block mt-1">Catatan Penolakan: {req.rejection_note}</span>
-                                                )}
+                                            <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                                <span>{req.verifier_label}</span>
                                             </div>
+                                            {req.rejection_note && (
+                                                <div className="text-rose-600 text-[11px]">
+                                                    Catatan: {req.rejection_note}
+                                                </div>
+                                            )}
                                         </div>
 
-                                        {req.proof_image_path && (
+                                        {(req.proof_image_url || req.proof_image) && (
                                             <button
-                                                onClick={() => setSelectedProofModal(`/storage/${req.proof_image_path}`)}
-                                                className="shrink-0 text-sky-600 hover:text-sky-700 font-semibold text-xs flex items-center gap-1 hover:underline"
+                                                type="button"
+                                                onClick={() => setSelectedProofModal(req.proof_image_url || req.proof_image)}
+                                                className="shrink-0 text-sky-600 hover:text-sky-700 font-semibold text-xs flex items-center gap-1 hover:underline cursor-pointer"
                                             >
                                                 <Eye className="w-3.5 h-3.5" />
-                                                <span>Lihat Bukti Surat</span>
+                                                <span>Lihat Bukti Foto MARKI</span>
                                             </button>
                                         )}
                                     </div>

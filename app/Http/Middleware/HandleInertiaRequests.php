@@ -38,6 +38,10 @@ class HandleInertiaRequests extends Middleware
             $semester = 'Genap';
         }
 
+        $appName = \App\Models\Setting::get('app_name', config('app.name', 'EDUSYNC'));
+        $schoolName = \App\Models\Setting::get('school_name', 'SMKN 1 Ciomas');
+        $adminAvatar = \App\Models\User::where('role', 'admin')->whereNotNull('avatar')->value('avatar');
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -51,7 +55,9 @@ class HandleInertiaRequests extends Middleware
             'academic_year' => $academicYear,
             'semester' => $semester,
             'app' => [
-                'name' => config('app.name', 'EDUSYNC'),
+                'name' => $appName,
+                'school_name' => $schoolName,
+                'admin_avatar' => $adminAvatar,
                 'academic_year' => $academicYear,
                 'semester' => $semester,
                 'academic_year_full' => "{$academicYear} Semester {$semester}",

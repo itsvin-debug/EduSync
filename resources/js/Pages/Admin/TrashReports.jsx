@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Trash2,
     Coins,
@@ -23,6 +24,7 @@ export default function TrashReports({ trashReports = [], classrooms = [], teach
     const [statusFilter, setStatusFilter] = useState('all'); // all, pending, fined, dismissed
     const [fineModalReport, setFineModalReport] = useState(null);
     const [fineAmount, setFineAmount] = useState(50000);
+    const [dismissTargetId, setDismissTargetId] = useState(null);
 
     const filteredReports = trashReports.filter((report) => {
         const matchesSearch =
@@ -50,9 +52,15 @@ export default function TrashReports({ trashReports = [], classrooms = [], teach
     };
 
     const handleDismiss = (id) => {
-        if (confirm('Arsipkan / abaikan laporan sampah ini tanpa denda?')) {
-            router.post(`/admin/trash-reports/${id}/dismiss`, {}, { preserveScroll: true });
-        }
+        setDismissTargetId(id);
+    };
+
+    const handleConfirmDismiss = () => {
+        if (!dismissTargetId) return;
+        router.post(`/admin/trash-reports/${dismissTargetId}/dismiss`, {}, {
+            preserveScroll: true,
+            onFinish: () => setDismissTargetId(null),
+        });
     };
 
     const countPending = trashReports.filter((r) => r.status === 'pending').length;
@@ -356,6 +364,17 @@ export default function TrashReports({ trashReports = [], classrooms = [], teach
                     </form>
                 )}
             </Modal>
+
+            <ConfirmModal
+                isOpen={!!dismissTargetId}
+                onClose={() => setDismissTargetId(null)}
+                onConfirm={handleConfirmDismiss}
+                title="Arsipkan Laporan Sampah"
+                message="Apakah Anda yakin ingin mengarsipkan atau mengabaikan laporan sampah ini tanpa menerbitkan denda kebersihan kelas?"
+                confirmText="Arsipkan Laporan"
+                cancelText="Batal"
+                type="warning"
+            />
         </AdminLayout>
     );
 }

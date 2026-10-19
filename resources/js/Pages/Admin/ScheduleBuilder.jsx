@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import ConflictBanner from '@/Components/ConflictBanner';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import axios from 'axios';
 import {
@@ -108,6 +109,7 @@ export default function ScheduleBuilder({
     // Destructive Confirmation Modal states
     const [isWipeAllModalOpen, setIsWipeAllModalOpen] = useState(false);
     const [isPurgeClassModalOpen, setIsPurgeClassModalOpen] = useState(false);
+    const [isAutoGenerateModalOpen, setIsAutoGenerateModalOpen] = useState(false);
     const [slotToDelete, setSlotToDelete] = useState(null);
     const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
@@ -144,9 +146,17 @@ export default function ScheduleBuilder({
     };
 
     const handleAutoGenerate = () => {
-        if (confirm('Jalankan Algoritma Pemulihan Kurikulum? Sistem akan menyusun ulang jadwal dari master alokasi mata pelajaran bebas bentrok.')) {
-            router.post('/admin/schedules/auto-generate');
-        }
+        setIsAutoGenerateModalOpen(true);
+    };
+
+    const handleConfirmAutoGenerate = () => {
+        setIsSubmittingAction(true);
+        router.post('/admin/schedules/auto-generate', {}, {
+            onFinish: () => {
+                setIsSubmittingAction(false);
+                setIsAutoGenerateModalOpen(false);
+            },
+        });
     };
 
     // PDF Parser Engine handlers
@@ -366,9 +376,12 @@ export default function ScheduleBuilder({
         }
     };
 
-    const handleDeleteSlot = (id) => {
-        if (confirm('Hapus sesi jadwal ini?')) {
-            router.delete(`/admin/schedules/${id}`);
+    const handleDeleteSlot = (item) => {
+        if (typeof item === 'object' && item !== null) {
+            setSlotToDelete(item);
+        } else {
+            const found = (schedules || []).find((s) => s.id === item);
+            setSlotToDelete(found || { id: item, subject: { name: 'Sesi Jadwal' } });
         }
     };
 
@@ -1386,6 +1399,19 @@ export default function ScheduleBuilder({
                     </div>
                 </div>
             </Modal>
+
+            {/* Custom Designed Confirmation Modal for Auto-Generate */}
+            <ConfirmModal
+                isOpen={isAutoGenerateModalOpen}
+                onClose={() => setIsAutoGenerateModalOpen(false)}
+                onConfirm={handleConfirmAutoGenerate}
+                title="Jalankan Pemulihan Kurikulum Otomatis?"
+                message="Sistem akan menyusun ulang alokasi jadwal dari master alokasi mata pelajaran bebas bentrok sesuai dokumen kurikulum resmi."
+                confirmText="Jalankan Auto-Generate"
+                cancelText="Batal"
+                type="primary"
+                isLoading={isSubmittingAction}
+            />
         </AdminLayout>
     );
 }

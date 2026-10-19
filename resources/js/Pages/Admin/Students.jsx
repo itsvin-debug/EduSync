@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     GraduationCap,
     Search,
@@ -24,11 +26,38 @@ export default function Students({ students = [], classrooms = [], departments =
     const [selectedClassroom, setSelectedClassroom] = useState(filters.classroom_id || '');
     const [revealedPasswords, setRevealedPasswords] = useState({});
 
+    // Real-time online status tracking
+    const [onlineUserIds, setOnlineUserIds] = useState(() => {
+        return (students || []).filter((s) => s.is_online).map((s) => s.id);
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchOnlineStatus = async () => {
+            try {
+                const res = await axios.get('/admin/realtime-online-status');
+                if (isMounted && res.data?.online_user_ids) {
+                    setOnlineUserIds(res.data.online_user_ids);
+                }
+            } catch {
+                // Silently handle network polling
+            }
+        };
+
+        fetchOnlineStatus();
+        const interval = setInterval(fetchOnlineStatus, 5000);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, []);
+
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editStudent, setEditStudent] = useState(null);
     const [resetPassStudent, setResetPassStudent] = useState(null);
     const [newPassword, setNewPassword] = useState('password123');
+    const [confirmModalData, setConfirmModalData] = useState(null);
 
     // Forms
     const [formData, setFormData] = useState({
@@ -99,27 +128,43 @@ export default function Students({ students = [], classrooms = [], departments =
     };
 
     const handleApprove = (id, name) => {
-        if (confirm(`Setujui pendaftaran akun siswa "${name}"? Akun akan langsung aktif.`)) {
-            router.post(`/admin/users/${id}/approve`);
-        }
+        setConfirmModalData({
+            action: () => router.post(`/admin/users/${id}/approve`, {}, { preserveScroll: true }),
+            title: 'Setujui Pendaftaran Akun Siswa',
+            message: `Setujui pendaftaran akun siswa "${name}"? Akun akan langsung aktif dan dapat digunakan login ke portal siswa.`,
+            confirmText: 'Setujui Akun',
+            type: 'primary',
+        });
     };
 
     const handleReject = (id, name) => {
-        if (confirm(`Tolak pendaftaran akun siswa "${name}"?`)) {
-            router.post(`/admin/users/${id}/reject`);
-        }
+        setConfirmModalData({
+            action: () => router.post(`/admin/users/${id}/reject`, {}, { preserveScroll: true }),
+            title: 'Tolak Pendaftaran Akun Siswa',
+            message: `Apakah Anda yakin ingin menolak pendaftaran akun siswa "${name}"?`,
+            confirmText: 'Tolak Pendaftaran',
+            type: 'danger',
+        });
     };
 
     const handleDelete = (id, name) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus akun siswa ${name}?`)) {
-            router.delete(`/admin/students/${id}`);
-        }
+        setConfirmModalData({
+            action: () => router.delete(`/admin/students/${id}`, { preserveScroll: true }),
+            title: 'Hapus Data Akun Siswa',
+            message: `Apakah Anda yakin ingin menghapus data akun siswa "${name}" dari sistem?`,
+            confirmText: 'Hapus Akun',
+            type: 'danger',
+        });
     };
 
     const handleToggleClassLeader = (id, name) => {
-        if (confirm(`Ubah penugasan Ketua Kelas untuk siswa "${name}"? Perubahan akan langsung disinkronkan ke portal Guru dan Siswa.`)) {
-            router.post(`/admin/students/${id}/toggle-class-leader`, {}, { preserveScroll: true });
-        }
+        setConfirmModalData({
+            action: () => router.post(`/admin/students/${id}/toggle-class-leader`, {}, { preserveScroll: true }),
+            title: 'Ubah Penugasan Ketua Kelas',
+            message: `Ubah penugasan Ketua Kelas untuk siswa "${name}"? Perubahan akan langsung disinkronkan ke portal Guru dan Siswa.`,
+            confirmText: 'Ubah Penugasan',
+            type: 'primary',
+        });
     };
 
     return (
@@ -279,25 +324,33 @@ export default function Students({ students = [], classrooms = [], departments =
                                             </div>
                                         </td>
                                         <td className="py-3 px-4 text-center">
-                                            {s.status === 'pending_verification' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 uppercase tracking-wider">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                                    <span>Menunggu Verifikasi</span>
-                                                </span>
-                                            ) : s.status === 'rejected' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
-                                                    <span>Ditolak</span>
-                                                </span>
-                                            ) : s.status === 'inactive' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wider">
-                                                    <span>Non-Aktif</span>
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                    <span>Aktif</span>
-                                                </span>
-                                            )}
+                                            <div className="flex flex-col items-center gap-1">
+                                                {onlineUserIds.includes(s.id) ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                        <span>Online</span>
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                                        <span>Offline</span>
+                                                    </span>
+                                                )}
+
+                                                {s.status === 'pending_verification' ? (
+                                                    <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                                        Menunggu Verifikasi
+                                                    </span>
+                                                ) : s.status === 'rejected' ? (
+                                                    <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                                                        Ditolak
+                                                    </span>
+                                                ) : s.status === 'inactive' ? (
+                                                    <span className="text-[10px] font-medium text-slate-400">
+                                                        Non-Aktif
+                                                    </span>
+                                                ) : null}
+                                            </div>
                                         </td>
                                         <td className="py-3 px-4 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
@@ -626,6 +679,22 @@ export default function Students({ students = [], classrooms = [], departments =
                     </div>
                 </form>
             </Modal>
+
+            {confirmModalData && (
+                <ConfirmModal
+                    isOpen={Boolean(confirmModalData)}
+                    onClose={() => setConfirmModalData(null)}
+                    onConfirm={() => {
+                        confirmModalData.action?.();
+                        setConfirmModalData(null);
+                    }}
+                    title={confirmModalData.title}
+                    message={confirmModalData.message}
+                    confirmText={confirmModalData.confirmText}
+                    cancelText="Batal"
+                    type={confirmModalData.type}
+                />
+            )}
         </AdminLayout>
     );
 }

@@ -36,6 +36,8 @@ class TeacherController extends Controller
 
     public function dashboard(Request $request)
     {
+        \App\Services\AutoAttendanceService::checkAndAutoApproveLeaves();
+
         $user = auth()->user();
         $teacher = $this->getTeacher();
 
@@ -589,5 +591,48 @@ class TeacherController extends Controller
         ]);
 
         return back()->with('success', 'Kata sandi akun guru berhasil diperbarui.');
+    }
+
+    public function batchStoreClassAttendance(Request $request)
+    {
+        $teacher = $this->getTeacher();
+        $validated = $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+            'attendances' => 'required|array',
+            'attendances.*.user_id' => 'required|exists:users,id',
+            'attendances.*.status' => 'required|in:hadir,sakit,izin,dispensasi,alpha',
+            'attendances.*.notes' => 'nullable|string|max:255',
+        ]);
+
+        $classroom = Classroom::findOrFail($validated['classroom_id']);
+        $today = now()->toDateString();
+        $now = now();
+        $submittedTime = $now->format('H:i:s \W\I\B');
+
+        foreach ($validated['attendances'] as $att) {
+            StudentAttendance::updateOrCreate(
+                [
+                    'user_id' => $att['user_id'],
+                    'date' => $today,
+                ],
+                [
+                    'classroom_id' => $classroom->id,
+                    'submitted_by_user_id' => auth()->id(),
+                    'status' => $att['status'],
+                    'notes' => $att['notes'] ?? null,
+                    'submitted_time' => $submittedTime,
+                    'is_locked' => false,
+                ]
+            );
+        }
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'TEACHER_CLASS_ATTENDANCE_STORED',
+            'description' => "Guru {$teacher->name} memperbarui presensi harian kelas {$classroom->name} pada {$submittedTime}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Presensi kelas {$classroom->name} berhasil disimpan oleh Guru & tersinkronisasi ke portal Ketua Kelas!");
     }
 }

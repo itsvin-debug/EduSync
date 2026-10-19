@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { ShieldCheck, AlertTriangle, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 export default function ConflictBanner({ conflicts = [], onAutoFix }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const hasConflicts = conflicts && conflicts.length > 0;
 
-    const handleAutoGenerate = () => {
-        if (confirm('Jalankan Algoritma Pemulihan Jadwal Otomatis untuk menyusun ulang jadwal bebas bentrok sesuai dokumen kurikulum?')) {
-            router.post(route('admin.schedules.autogenerate'));
-        }
+    const handleConfirmAutoGenerate = () => {
+        setIsSubmitting(true);
+        router.post(route('admin.schedules.autogenerate'), {}, {
+            onFinish: () => {
+                setIsSubmitting(false);
+                setIsConfirmOpen(false);
+            },
+        });
     };
 
     if (!hasConflicts) {
@@ -64,15 +71,15 @@ export default function ConflictBanner({ conflicts = [], onAutoFix }) {
 
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={handleAutoGenerate}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
+                        onClick={() => setIsConfirmOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
                     >
                         <RefreshCw className="w-3.5 h-3.5" />
                         <span>Auto-Resolve AI</span>
                     </button>
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-medium text-amber-900 hover:bg-amber-100 transition-colors duration-200 ease-bouncy"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs font-medium text-amber-900 hover:bg-amber-100 transition-colors duration-200 ease-bouncy cursor-pointer"
                     >
                         <span>{isExpanded ? 'Tutup Rincian' : 'Lihat Rincian'}</span>
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -95,6 +102,19 @@ export default function ConflictBanner({ conflicts = [], onAutoFix }) {
                     ))}
                 </div>
             )}
+
+            {/* Custom Designed Confirmation Modal */}
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={handleConfirmAutoGenerate}
+                title="Jalankan Pemulihan Jadwal Otomatis?"
+                message="Sistem akan menyusun ulang alokasi jadwal mengajar guru dan ruangan agar 100% bebas dari tabrakan (conflict-free) sesuai kurikulum yang berlaku."
+                confirmText="Jalankan Pemulihan"
+                cancelText="Batal"
+                type="warning"
+                isLoading={isSubmitting}
+            />
         </div>
     );
 }

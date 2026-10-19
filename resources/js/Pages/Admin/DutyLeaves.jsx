@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Briefcase,
     CheckCircle2,
@@ -22,6 +23,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all'); // all, pending, approved, rejected
     const [selectedLeave, setSelectedLeave] = useState(null);
+    const [confirmAction, setConfirmAction] = useState(null);
 
     const filteredLeaves = dutyLeaves.filter((leave) => {
         const matchesSearch =
@@ -41,15 +43,34 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
     });
 
     const handleApprove = (id) => {
-        if (confirm('Setujui permohonan dinas luar ini? Status akan otomatis menjadi "Di Luar Dinas".')) {
-            router.post(`/admin/duty-leaves/${id}/approve`, {}, { preserveScroll: true });
-        }
+        setConfirmAction({
+            id,
+            type: 'approve',
+            title: 'Setujui Permohonan Dinas Luar',
+            message: 'Setujui permohonan dinas luar ini? Status kehadiran guru akan otomatis menjadi "Di Luar Dinas".',
+            confirmText: 'Setujui Permohonan',
+            variant: 'primary',
+        });
     };
 
     const handleReject = (id) => {
-        if (confirm('Tolak permohonan dinas luar ini?')) {
-            router.post(`/admin/duty-leaves/${id}/reject`, {}, { preserveScroll: true });
-        }
+        setConfirmAction({
+            id,
+            type: 'reject',
+            title: 'Tolak Permohonan Dinas Luar',
+            message: 'Apakah Anda yakin ingin menolak permohonan izin dinas luar pengajar ini?',
+            confirmText: 'Tolak Permohonan',
+            variant: 'danger',
+        });
+    };
+
+    const handleExecuteConfirm = () => {
+        if (!confirmAction) return;
+        const { id, type } = confirmAction;
+        router.post(`/admin/duty-leaves/${id}/${type}`, {}, {
+            preserveScroll: true,
+            onFinish: () => setConfirmAction(null),
+        });
     };
 
     const handleToggleDutyStatus = (id) => {
@@ -400,6 +421,19 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                     </div>
                 )}
             </Modal>
+
+            {confirmAction && (
+                <ConfirmModal
+                    isOpen={Boolean(confirmAction)}
+                    onClose={() => setConfirmAction(null)}
+                    onConfirm={handleExecuteConfirm}
+                    title={confirmAction.title}
+                    message={confirmAction.message}
+                    confirmText={confirmAction.confirmText}
+                    cancelText="Batal"
+                    type={confirmAction.variant}
+                />
+            )}
         </AdminLayout>
     );
 }

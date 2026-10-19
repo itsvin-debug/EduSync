@@ -188,6 +188,28 @@ class AdminController extends Controller
 
         // Teacher presence today
         $teacherAttendancesToday = TeacherAttendance::with('teacher')->where('date', $today)->get();
+        $totalTeacherSubmitted = $teacherAttendancesToday->count();
+        $countTeacherHadir = $teacherAttendancesToday->where('status', 'hadir')->count();
+        $countTeacherSakit = $teacherAttendancesToday->where('status', 'sakit')->count();
+        $countTeacherIzin = $teacherAttendancesToday->whereIn('status', ['izin', 'izin_dinas'])->count();
+        $countTeacherAlpha = $teacherAttendancesToday->where('status', 'alpha')->count();
+
+        $percentTeacherHadir = $totalTeacherSubmitted > 0 ? round(($countTeacherHadir / $totalTeacherSubmitted) * 100, 1) : 0;
+        $percentTeacherSakit = $totalTeacherSubmitted > 0 ? round(($countTeacherSakit / $totalTeacherSubmitted) * 100, 1) : 0;
+        $percentTeacherIzin = $totalTeacherSubmitted > 0 ? round(($countTeacherIzin / $totalTeacherSubmitted) * 100, 1) : 0;
+        $percentTeacherAlpha = $totalTeacherSubmitted > 0 ? round(($countTeacherAlpha / $totalTeacherSubmitted) * 100, 1) : 0;
+
+        $teacherAttendanceStats = [
+            'total_submitted' => $totalTeacherSubmitted,
+            'count_hadir' => $countTeacherHadir,
+            'count_sakit' => $countTeacherSakit,
+            'count_izin' => $countTeacherIzin,
+            'count_alpha' => $countTeacherAlpha,
+            'hadir_percent' => $percentTeacherHadir,
+            'sakit_percent' => $percentTeacherSakit,
+            'izin_percent' => $percentTeacherIzin,
+            'alpha_percent' => $percentTeacherAlpha,
+        ];
 
         // Metrics
         $totalTeachers = Teacher::distinct('name')->count();
@@ -219,6 +241,8 @@ class AdminController extends Controller
                 'total_schedules' => Schedule::count(),
             ],
             'attendanceStats' => $attendanceStats,
+            'studentAttendanceStats' => $attendanceStats,
+            'teacherAttendanceStats' => $teacherAttendanceStats,
             'studentAttendancesToday' => $studentAttendancesToday,
             'teacherAttendancesToday' => $teacherAttendancesToday,
             'conflicts' => $conflicts,
@@ -1090,10 +1114,29 @@ class AdminController extends Controller
     public function settings()
     {
         $user = auth()->user();
+        $appName = \App\Models\Setting::get('app_name', config('app.name', 'EDUSYNC'));
+        $schoolName = \App\Models\Setting::get('school_name', 'SMKN 1 Ciomas');
 
         return Inertia::render('Admin/Settings', [
             'adminUser' => $user,
+            'appName' => $appName,
+            'schoolName' => $schoolName,
         ]);
+    }
+
+    public function updateGeneralSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'app_name' => 'required|string|max:50',
+            'school_name' => 'required|string|max:100',
+        ]);
+
+        \App\Models\Setting::set('app_name', $validated['app_name']);
+        \App\Models\Setting::set('school_name', $validated['school_name']);
+
+        $this->logAction('SETTINGS_UPDATED', "Admin memperbarui identitas web & sekolah: {$validated['app_name']} - {$validated['school_name']}");
+
+        return back()->with('success', 'Nama web dan nama sekolah berhasil diperbarui.');
     }
 
     public function updateAdminProfile(Request $request)
@@ -1152,14 +1195,19 @@ class AdminController extends Controller
     public function toggleAdmin2FA(Request $request)
     {
         $user = auth()->user();
-        $newState = !$user->two_factor_enabled;
+        
+        $enable = $request->has('enable') ? $request->boolean('enable') : !$user->two_factor_enabled;
+
+        $code = $request->filled('two_factor_code')
+            ? trim($request->input('two_factor_code'))
+            : ($user->two_factor_code ?: '2FA-' . rand(100000, 999999));
 
         $user->update([
-            'two_factor_enabled' => $newState,
-            'two_factor_code' => $newState ? '2FA-' . rand(100000, 999999) : null,
+            'two_factor_enabled' => $enable,
+            'two_factor_code' => $enable ? $code : null,
         ]);
 
-        $statusText = $newState ? 'diaktifkan' : 'dinonaktifkan';
+        $statusText = $enable ? 'diaktifkan' : 'dinonaktifkan';
         $this->logAction('ADMIN_2FA_TOGGLED', "Verifikasi 2 Langkah (2FA) {$statusText} untuk akun {$user->email}");
 
         return back()->with('success', "Autentikasi dua faktor berhasil {$statusText}.");
@@ -1627,4 +1675,86 @@ class AdminController extends Controller
 
         return back()->with('success', "Penetapan Wali Kelas dan Ketua Kelas untuk {$classroom->name} berhasil disimpan.");
     }
+
+    public function realtimeOnlineStatus()
+    {
+        $activeThreshold = now()->subMinutes(5);
+        $timestampThreshold = $activeThreshold->getTimestamp();
+
+        $seenUserIds = User::where('last_seen_at', '>=', $activeThreshold)->pluck('id')->toArray();
+
+        $sessionUserIds = \Illuminate\Support\Facades\DB::table('sessions')
+            ->whereNotNull('user_id')
+            ->where('last_activity', '>=', $timestampThreshold)
+            ->pluck('user_id')
+            ->toArray();
+
+        $onlineUserIds = array_values(array_unique(array_merge($seenUserIds, $sessionUserIds)));
+
+        return response()->json([
+            'online_user_ids' => $onlineUserIds,
+            'count' => count($onlineUserIds),
+            'timestamp' => now('Asia/Jakarta')->format('H:i:s'),
+        ]);
+    }
+
+    public function sidebarCounters()
+    {
+        \App\Services\AutoAttendanceService::checkAndAutoApproveLeaves();
+
+        return response()->json([
+            'students' => User::where('role', 'siswa')->where('status', 'pending')->count(),
+            'teachers' => User::where('role', 'guru')->where('status', 'pending')->count(),
+            'inval' => InvalRequest::where('status', 'pending')->count(),
+            'teacher_presence' => LearningTask::where('is_verified', false)->count(),
+            'duty_leaves' => OfficialDutyLeave::where('status', 'pending')->count(),
+            'picket' => PicketReport::where('status', 'pending')->count(),
+            'trash_reports' => TrashReport::where('status', 'pending')->count(),
+            'class_fines' => ClassFine::where('status', 'pending_verification')->count(),
+            'student_leaves' => StudentLeaveRequest::where('status', 'pending')->count(),
+        ]);
+    }
+
+    public function approveStudentLeave($id)
+    {
+        $leave = StudentLeaveRequest::findOrFail($id);
+        $leave->update([
+            'status' => 'approved',
+            'verified_by' => auth()->id(),
+            'verified_at' => now(),
+        ]);
+
+        StudentAttendance::updateOrCreate(
+            [
+                'student_id' => $leave->student_id,
+                'date' => $leave->date ?? now()->toDateString(),
+            ],
+            [
+                'classroom_id' => $leave->student?->classroom_id,
+                'status' => $leave->type,
+                'notes' => 'Izin disetujui Administrator: ' . ($leave->reason ?? '-'),
+                'recorded_by' => auth()->id(),
+            ]
+        );
+
+        $this->logAction('STUDENT_LEAVE_APPROVED', "Admin menyetujui surat izin siswa ID: {$id}");
+
+        return back()->with('success', 'Surat izin siswa berhasil disetujui.');
+    }
+
+    public function rejectStudentLeave(Request $request, $id)
+    {
+        $leave = StudentLeaveRequest::findOrFail($id);
+        $leave->update([
+            'status' => 'rejected',
+            'rejection_note' => $request->input('rejection_note', 'Ditolak oleh Administrator'),
+            'verified_by' => auth()->id(),
+            'verified_at' => now(),
+        ]);
+
+        $this->logAction('STUDENT_LEAVE_REJECTED', "Admin menolak surat izin siswa ID: {$id}");
+
+        return back()->with('success', 'Surat izin siswa ditolak.');
+    }
 }
+

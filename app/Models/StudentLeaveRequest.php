@@ -32,6 +32,51 @@ class StudentLeaveRequest extends Model
         'reviewed_at' => 'datetime',
     ];
 
+    protected $appends = [
+        'verifier_label',
+        'proof_image_url',
+    ];
+
+    public function getProofImageUrlAttribute(): ?string
+    {
+        if (!$this->proof_image) {
+            return null;
+        }
+        if (str_starts_with($this->proof_image, 'http') || str_starts_with($this->proof_image, '/storage/')) {
+            return $this->proof_image;
+        }
+        return '/storage/' . $this->proof_image;
+    }
+
+    public function getVerifierLabelAttribute(): string
+    {
+        if ($this->status !== 'approved' && $this->status !== 'rejected') {
+            return 'Menunggu Verifikasi';
+        }
+
+        if (str_contains($this->rejection_note ?? '', 'Otomatis oleh Sistem') || (!$this->reviewed_by_user_id && !$this->reviewed_by_teacher_id && $this->status === 'approved')) {
+            return 'Disetujui Otomatis oleh Sistem (Batas 13:00 WIB)';
+        }
+
+        if ($this->reviewedByUser) {
+            $user = $this->reviewedByUser;
+            if ($user->role === 'guru') {
+                return 'Disetujui oleh Wali Kelas: ' . $user->name;
+            } elseif ($user->is_class_leader || $user->sub_role === 'Ketua Kelas') {
+                return 'Diverifikasi oleh Ketua Kelas: ' . $user->name;
+            } elseif ($user->role === 'admin') {
+                return 'Disetujui oleh Admin: ' . $user->name;
+            }
+            return 'Diverifikasi oleh: ' . $user->name;
+        }
+
+        if ($this->reviewedByTeacher) {
+            return 'Disetujui oleh Wali Kelas: ' . $this->reviewedByTeacher->name;
+        }
+
+        return 'Disetujui Otomatis oleh Sistem (Batas 13:00 WIB)';
+    }
+
     public function student(): BelongsTo
     {
         return $this->belongsTo(User::class, 'student_id');

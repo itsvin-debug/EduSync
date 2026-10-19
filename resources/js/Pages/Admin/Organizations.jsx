@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Award,
     Users,
@@ -25,6 +26,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editOrg, setEditOrg] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     // Form
     const [formData, setFormData] = useState({
@@ -99,9 +101,14 @@ export default function Organizations({ organizations = [], teachers = [], stude
     };
 
     const handleDelete = (org) => {
-        if (confirm(`Hapus data ${org.name}?`)) {
-            router.delete(`/admin/organizations/${org.id}`);
-        }
+        setDeleteTarget(org);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!deleteTarget) return;
+        router.delete(`/admin/organizations/${deleteTarget.id}`, {
+            onFinish: () => setDeleteTarget(null),
+        });
     };
 
     return (
@@ -618,6 +625,17 @@ export default function Organizations({ organizations = [], teachers = [], stude
                     </form>
                 )}
             </Modal>
+
+            <ConfirmModal
+                isOpen={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={handleConfirmDelete}
+                title="Hapus Data Organisasi / Ekskul"
+                message={`Apakah Anda yakin ingin menghapus data "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+                confirmText="Hapus Organisasi"
+                cancelText="Batal"
+                type="danger"
+            />
         </AdminLayout>
     );
 }

@@ -115,6 +115,55 @@ export default function Dashboard({
         });
     };
 
+    // Teacher Class Attendance Matrix (Synced with Ketua Kelas, editable until 23:59 WIB)
+    const [teacherAttendanceMatrix, setTeacherAttendanceMatrix] = useState(() => {
+        const initial = {};
+        (selectedClassStudents || []).forEach((st) => {
+            const att = (selectedClassAttendances || []).find((a) => a.user_id === st.id);
+            initial[st.id] = {
+                user_id: st.id,
+                status: att?.status || 'hadir',
+                notes: att?.notes || '',
+            };
+        });
+        return initial;
+    });
+
+    React.useEffect(() => {
+        const updated = {};
+        (selectedClassStudents || []).forEach((st) => {
+            const att = (selectedClassAttendances || []).find((a) => a.user_id === st.id);
+            updated[st.id] = {
+                user_id: st.id,
+                status: att?.status || 'hadir',
+                notes: att?.notes || '',
+            };
+        });
+        setTeacherAttendanceMatrix(updated);
+    }, [selectedClassStudents, selectedClassAttendances]);
+
+    const [savingClassAttendance, setSavingClassAttendance] = useState(false);
+
+    const handleTeacherClassAttendanceSubmit = (e) => {
+        e.preventDefault();
+        setSavingClassAttendance(true);
+        router.post(
+            '/guru/attendance/class-batch',
+            {
+                classroom_id: selectedClassroomId,
+                attendances: Object.values(teacherAttendanceMatrix),
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSavingClassAttendance(false);
+                    alert('Presensi harian kelas berhasil disimpan oleh Guru & disinkronkan ke Ketua Kelas!');
+                },
+                onError: () => setSavingClassAttendance(false),
+            }
+        );
+    };
+
     // Inval swap form
     const { data: swapData, setData: setSwapData, post: postSwap, reset: resetSwap, processing: swapProcessing, errors: swapErrors } = useForm({
         schedule_id: personalSchedules[0]?.id || '',
@@ -388,31 +437,55 @@ export default function Dashboard({
                 </>
             )}
 
-            {/* TAB: PRESENSI SISWA REAL-TIME (LIVE CLASS ATTENDANCE MONITORING) */}
+            {/* TAB: PRESENSI SISWA REAL-TIME (LIVE CLASS ATTENDANCE & TEACHER OVERRIDE) */}
             {activeTab === 'presensi_kelas' && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                         <div>
-                            <h3 className="font-bold text-slate-900 text-base">Monitoring Presensi Siswa per Rombel</h3>
+                            <h3 className="font-bold text-slate-900 text-base">Kelola & Sinkronkan Presensi Siswa per Rombel</h3>
                             <p className="text-xs text-slate-500 mt-0.5">
-                                Pantau daftar presensi live siswa sebelum dan sesudah diserahkan oleh Ketua Kelas
+                                Terhubung langsung dengan Ketua Kelas. Guru dapat mengubah dan menyimpan presensi hingga pukul 23:59 WIB.
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-500 font-medium">Pilih Kelas:</span>
-                            <select
-                                value={selectedClassroomId}
-                                onChange={(e) => handleLookupClassChange(e.target.value)}
-                                className="h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-500 font-medium">Pilih Kelas:</span>
+                                <select
+                                    value={selectedClassroomId}
+                                    onChange={(e) => handleLookupClassChange(e.target.value)}
+                                    className="h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                                >
+                                    {classrooms.map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name} ({c.department?.name || 'Kejuruan'})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleTeacherClassAttendanceSubmit}
+                                disabled={savingClassAttendance || selectedClassStudents.length === 0}
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer disabled:opacity-50"
                             >
-                                {classrooms.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name} ({c.department?.name || 'Kejuruan'})
-                                    </option>
-                                ))}
-                            </select>
+                                <Send className="w-3.5 h-3.5" />
+                                <span>{savingClassAttendance ? 'Menyimpan...' : 'Simpan Presensi Kelas'}</span>
+                            </button>
                         </div>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 text-indigo-900 text-xs flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+                            <span>
+                                <strong>Sinkronisasi Dua Arah:</strong> Data presensi ini terhubung langsung dengan Ketua Kelas. Perubahan yang Anda simpan akan otomatis memperbarui catatan presensi Ketua Kelas dan Admin.
+                            </span>
+                        </div>
+                        <span className="font-mono text-[11px] font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200 shrink-0">
+                            Batas Edit Guru: 23:59 WIB
+                        </span>
                     </div>
 
                     {selectedClassStudents.length === 0 ? (
@@ -420,65 +493,113 @@ export default function Dashboard({
                             Tidak ada siswa terdaftar pada rombel ini.
                         </div>
                     ) : (
-                        <div className="overflow-x-auto rounded-xl border border-slate-200">
-                            <table className="w-full text-left text-xs border-collapse min-w-[650px]">
-                                <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
-                                        <th className="py-3 px-3 w-12 text-center">No</th>
-                                        <th className="py-3 px-4">Nama Siswa & NISN</th>
-                                        <th className="py-3 px-4 text-center">Status Hari Ini</th>
-                                        <th className="py-3 px-4">Waktu Input & Petugas</th>
-                                        <th className="py-3 px-4">Keterangan</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {selectedClassStudents.map((st, idx) => {
-                                        const att = selectedClassAttendances.find((a) => a.user_id === st.id);
-                                        const status = att?.status || 'Belum Dicatat';
+                        <form onSubmit={handleTeacherClassAttendanceSubmit} className="space-y-4">
+                            <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                <table className="w-full text-left text-xs border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                                            <th className="py-3 px-3 w-12 text-center">No</th>
+                                            <th className="py-3 px-4 min-w-[180px]">Nama Siswa & NISN</th>
+                                            <th className="py-3 px-3 text-center">Status Kehadiran</th>
+                                            <th className="py-3 px-3 min-w-[160px]">Catatan / Keterangan</th>
+                                            <th className="py-3 px-3 text-center w-36">Catatan Terakhir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {selectedClassStudents.map((st, idx) => {
+                                            const att = selectedClassAttendances.find((a) => a.user_id === st.id);
+                                            const currentEntry = teacherAttendanceMatrix[st.id] || { status: att?.status || 'hadir', notes: att?.notes || '' };
 
-                                        return (
-                                            <tr key={st.id} className="hover:bg-slate-50/60 transition-colors duration-200 ease-bouncy">
-                                                <td className="py-3 px-3 text-center font-mono text-slate-400">{idx + 1}</td>
-                                                <td className="py-3 px-4">
-                                                    <div className="font-bold text-slate-900">{st.name}</div>
-                                                    <div className="text-[11px] font-mono text-slate-400">NISN: {st.nisn || '-'}</div>
-                                                </td>
-                                                <td className="py-3 px-4 text-center">
-                                                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${
-                                                        status === 'hadir'
-                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                            : status === 'sakit'
-                                                            ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                                            : status === 'izin'
-                                                            ? 'bg-sky-50 text-sky-700 border-sky-200'
-                                                            : status === 'dispensasi'
-                                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                                            : status === 'alpha'
-                                                            ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                                            : 'bg-slate-100 text-slate-500 border-slate-200'
-                                                    }`}>
-                                                        {status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    {att ? (
-                                                        <>
-                                                            <div className="font-mono text-slate-800">{att.submitted_time || 'Sebelum 13:00'}</div>
-                                                            <div className="text-[11px] text-slate-400">Ketua Kelas / Guru</div>
-                                                        </>
-                                                    ) : (
-                                                        <span className="text-slate-400 italic">Menunggu input Ketua Kelas</span>
-                                                    )}
-                                                </td>
-                                                <td className="py-3 px-4 text-slate-600">
-                                                    {att?.notes || '-'}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                            return (
+                                                <tr key={st.id} className="hover:bg-slate-50/60 transition-colors duration-200 ease-bouncy">
+                                                    <td className="py-3 px-3 text-center font-mono text-slate-400 font-semibold">{idx + 1}</td>
+                                                    <td className="py-3 px-4">
+                                                        <div className="font-bold text-slate-900">{st.name}</div>
+                                                        <div className="text-[11px] font-mono text-slate-400">NISN: {st.nisn || '-'}</div>
+                                                    </td>
+                                                    <td className="py-3 px-3">
+                                                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                                            {[
+                                                                { val: 'hadir', label: 'Hadir', activeClass: 'bg-emerald-600 text-white' },
+                                                                { val: 'sakit', label: 'Sakit', activeClass: 'bg-amber-600 text-white' },
+                                                                { val: 'izin', label: 'Izin', activeClass: 'bg-sky-600 text-white' },
+                                                                { val: 'dispensasi', label: 'Dispen', activeClass: 'bg-indigo-600 text-white' },
+                                                                { val: 'alpha', label: 'Alpa', activeClass: 'bg-rose-600 text-white' },
+                                                            ].map((opt) => (
+                                                                <button
+                                                                    key={opt.val}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setTeacherAttendanceMatrix((prev) => ({
+                                                                            ...prev,
+                                                                            [st.id]: {
+                                                                                ...prev[st.id],
+                                                                                user_id: st.id,
+                                                                                status: opt.val,
+                                                                            },
+                                                                        }));
+                                                                    }}
+                                                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all duration-200 ease-bouncy ${
+                                                                        currentEntry.status === opt.val
+                                                                            ? `${opt.activeClass} border-transparent shadow-xs`
+                                                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                                    }`}
+                                                                >
+                                                                    {opt.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3 px-3">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Keterangan opsional..."
+                                                            value={currentEntry.notes || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setTeacherAttendanceMatrix((prev) => ({
+                                                                    ...prev,
+                                                                    [st.id]: {
+                                                                        ...prev[st.id],
+                                                                        user_id: st.id,
+                                                                        notes: val,
+                                                                    },
+                                                                }));
+                                                            }}
+                                                            className="w-full h-8 px-2.5 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-indigo-500"
+                                                        />
+                                                    </td>
+                                                    <td className="py-3 px-3 text-center">
+                                                        {att ? (
+                                                            <div className="text-[11px]">
+                                                                <span className="font-mono text-slate-700">{att.submitted_time || 'Sebelum 13:00'}</span>
+                                                                <span className="block text-slate-400 text-[10px]">Ketua Kelas / Guru</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-slate-400 italic text-[11px]">Belum tersimpan</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2">
+                                <div className="text-xs text-slate-500">
+                                    Total <strong>{selectedClassStudents.length}</strong> siswa pada rombel terpilih.
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={savingClassAttendance}
+                                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer disabled:opacity-50"
+                                >
+                                    <Send className="w-4 h-4" />
+                                    <span>{savingClassAttendance ? 'Menyimpan...' : 'Simpan & Sinkronkan Presensi Kelas'}</span>
+                                </button>
+                            </div>
+                        </form>
                     )}
                 </div>
             )}

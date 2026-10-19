@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Users,
     Search,
@@ -28,11 +30,41 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
     const [selectedDept, setSelectedDept] = useState(filters.department_id || '');
     const [revealedPasswords, setRevealedPasswords] = useState({});
 
+    // Real-time online status tracking for teachers
+    const [onlineUserIds, setOnlineUserIds] = useState(() => {
+        return (teachers || [])
+            .filter((t) => t.user?.is_online)
+            .map((t) => t.user?.id)
+            .filter(Boolean);
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchOnlineStatus = async () => {
+            try {
+                const res = await axios.get('/admin/realtime-online-status');
+                if (isMounted && res.data?.online_user_ids) {
+                    setOnlineUserIds(res.data.online_user_ids);
+                }
+            } catch {
+                // Silently handle network polling
+            }
+        };
+
+        fetchOnlineStatus();
+        const interval = setInterval(fetchOnlineStatus, 5000);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, []);
+
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editTeacher, setEditTeacher] = useState(null);
     const [resetPassTeacher, setResetPassTeacher] = useState(null);
     const [newPassword, setNewPassword] = useState('password123');
+    const [confirmModalData, setConfirmModalData] = useState(null);
 
     // Forms
     const [formData, setFormData] = useState({
@@ -123,21 +155,33 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
     };
 
     const handleApprove = (userId, name) => {
-        if (confirm(`Setujui pendaftaran akun guru "${name}"? Akun akan langsung aktif.`)) {
-            router.post(`/admin/users/${userId}/approve`);
-        }
+        setConfirmModalData({
+            action: () => router.post(`/admin/users/${userId}/approve`, {}, { preserveScroll: true }),
+            title: 'Setujui Pendaftaran Guru',
+            message: `Setujui pendaftaran akun guru "${name}"? Akun akan langsung aktif dan dapat digunakan login ke sistem.`,
+            confirmText: 'Setujui Akun',
+            type: 'primary',
+        });
     };
 
     const handleReject = (userId, name) => {
-        if (confirm(`Tolak pendaftaran akun guru "${name}"?`)) {
-            router.post(`/admin/users/${userId}/reject`);
-        }
+        setConfirmModalData({
+            action: () => router.post(`/admin/users/${userId}/reject`, {}, { preserveScroll: true }),
+            title: 'Tolak Pendaftaran Akun',
+            message: `Apakah Anda yakin ingin menolak pendaftaran akun guru "${name}"?`,
+            confirmText: 'Tolak Akun',
+            type: 'danger',
+        });
     };
 
     const handleDelete = (t) => {
-        if (confirm(`Apakah Anda yakin ingin menghapus akun pengajar ${t.name}?`)) {
-            router.delete(`/admin/teachers/${t.id}`);
-        }
+        setConfirmModalData({
+            action: () => router.delete(`/admin/teachers/${t.id}`, { preserveScroll: true }),
+            title: 'Hapus Data Pengajar',
+            message: `Apakah Anda yakin ingin menghapus data dan akun pengajar ${t.name}?`,
+            confirmText: 'Hapus Guru',
+            type: 'danger',
+        });
     };
 
     return (
@@ -277,7 +321,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="font-mono text-xs text-slate-800 font-medium">
-                                                        {t.nip || '— (Non-PNS)'}
+                                                        {t.nip || '- (Non-PNS)'}
                                                     </div>
                                                     <div className="text-[11px] text-slate-500 mt-0.5">
                                                         {t.department ? (
@@ -308,7 +352,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                 <td className="px-6 py-4 space-y-1">
                                                     <div className="text-xs text-slate-600 flex items-center gap-1.5">
                                                         <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                                        <span className="truncate max-w-[160px]">{t.email || t.user?.email || '—'}</span>
+                                                        <span className="truncate max-w-[160px]">{t.email || t.user?.email || '-'}</span>
                                                     </div>
                                                     {t.phone && (
                                                         <div className="text-xs text-slate-500 flex items-center gap-1.5">
@@ -332,26 +376,29 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    {(t.user?.status === 'pending_verification' || t.status === 'pending_verification') ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                                            <span>Verifikasi</span>
-                                                        </span>
-                                                    ) : (t.user?.status === 'rejected' || t.status === 'rejected') ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                                            <span>Ditolak</span>
-                                                        </span>
-                                                    ) : t.status === 'active' ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                            <span>Aktif</span>
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                                            <span>Non-Aktif</span>
-                                                        </span>
-                                                    )}
+                                                    <div className="flex flex-col gap-1 items-start">
+                                                        {t.user?.id && onlineUserIds.includes(t.user.id) ? (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                                <span>Online</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                                                <span>Offline</span>
+                                                            </span>
+                                                        )}
+
+                                                        {(t.user?.status === 'pending_verification' || t.status === 'pending_verification') ? (
+                                                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                                                Menunggu Verifikasi
+                                                            </span>
+                                                        ) : (t.user?.status === 'rejected' || t.status === 'rejected') ? (
+                                                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                                                                Ditolak
+                                                            </span>
+                                                        ) : null}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-1.5">
                                                     {(t.user?.status === 'pending_verification' || t.status === 'pending_verification') && t.user_id && (
@@ -801,6 +848,22 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                     </form>
                 )}
             </Modal>
+
+            {confirmModalData && (
+                <ConfirmModal
+                    isOpen={Boolean(confirmModalData)}
+                    onClose={() => setConfirmModalData(null)}
+                    onConfirm={() => {
+                        confirmModalData.action?.();
+                        setConfirmModalData(null);
+                    }}
+                    title={confirmModalData.title}
+                    message={confirmModalData.message}
+                    confirmText={confirmModalData.confirmText}
+                    cancelText="Batal"
+                    type={confirmModalData.type}
+                />
+            )}
         </AdminLayout>
     );
 }

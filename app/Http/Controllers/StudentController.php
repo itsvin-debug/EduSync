@@ -23,6 +23,8 @@ class StudentController extends Controller
 {
     public function dashboard()
     {
+        \App\Services\AutoAttendanceService::checkAndAutoApproveLeaves();
+
         $user = auth()->user();
         $classroom = $user->classroom ?? Classroom::where('code', 'XI_PPLG_1')->first() ?? Classroom::first();
         $isClassLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas');
@@ -125,6 +127,15 @@ class StudentController extends Controller
 
         $cocurricularToday = CocurricularSchedule::whereDate('date', now()->format('Y-m-d'))->first();
 
+        $classLeaveRequests = [];
+        if ($isClassLeader) {
+            $classLeaveRequests = StudentLeaveRequest::where('classroom_id', $classroom->id)
+                ->with(['student', 'reviewedByUser'])
+                ->latest()
+                ->take(20)
+                ->get();
+        }
+
         return Inertia::render('Student/Dashboard', [
             'student' => $user,
             'isClassLeader' => $isClassLeader,
@@ -143,6 +154,7 @@ class StudentController extends Controller
             'myAttendances' => $myAttendances,
             'myAttendanceStats' => $myAttendanceStats,
             'myLeaveRequests' => $myLeaveRequests,
+            'classLeaveRequests' => $classLeaveRequests,
             'picketHistory' => $picketHistory,
             'classFines' => $classFines,
             'learningTasks' => $learningTasks,
@@ -158,8 +170,9 @@ class StudentController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'homeroom_teacher_id' => 'nullable|exists:teachers,id',
             'notes' => 'required|string|min:5',
-            'photo' => 'nullable|image|max:5120',
-            'proof_image' => 'nullable|image|max:5120',
+            'photo' => 'nullable',
+            'proof_image' => 'nullable',
+            'proof_image_base64' => 'nullable|string',
         ]);
 
         $user = auth()->user();
@@ -172,6 +185,16 @@ class StudentController extends Controller
         } elseif ($request->hasFile('proof_image')) {
             $path = $request->file('proof_image')->store('leave_proofs', 'public');
             $proofImage = '/storage/' . $path;
+        } elseif ($request->filled('proof_image_base64')) {
+            $base64Data = $request->input('proof_image_base64');
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+                $base64Clean = substr($base64Data, strpos($base64Data, ',') + 1);
+                $ext = strtolower($type[1]);
+                $decoded = base64_decode($base64Clean);
+                $fileName = 'leave_proofs/marki_' . uniqid() . '.' . $ext;
+                \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $decoded);
+                $proofImage = '/storage/' . $fileName;
+            }
         }
 
         $leave = StudentLeaveRequest::create([
@@ -193,7 +216,7 @@ class StudentController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        return back()->with('success', "Permohonan {$leave->type} berhasil dikirimkan ke Wali Kelas. Menunggu verifikasi.");
+        return back()->with('success', "Permohonan {$leave->type} berhasil dikirimkan. Menunggu verifikasi.");
     }
 
     public function batchStoreAttendance(Request $request)
@@ -601,5 +624,79 @@ class StudentController extends Controller
         ]);
 
         return back()->with('success', 'Kata sandi akun siswa berhasil diperbarui.');
+    }
+
+    public function approveStudentLeave(Request $request, $id)
+    {
+        $user = auth()->user();
+        $isLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas' || $user->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas yang berhak memverifikasi permohonan izin teman sekelas.');
+        }
+
+        $leave = StudentLeaveRequest::with(['student', 'classroom'])->findOrFail($id);
+
+        if ($user->role !== 'admin' && $leave->classroom_id !== $user->classroom_id) {
+            return back()->with('error', 'Anda hanya dapat memverifikasi permohonan izin dari kelas Anda.');
+        }
+
+        $leave->update([
+            'status' => 'approved',
+            'reviewed_by_user_id' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        $start = Carbon::parse($leave->start_date);
+        $end = Carbon::parse($leave->end_date);
+        $status = in_array($leave->type, ['sakit', 'izin', 'dispensasi']) ? $leave->type : 'izin';
+
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            if ($date->isWeekend()) continue;
+
+            StudentAttendance::updateOrCreate(
+                [
+                    'user_id' => $leave->student_id,
+                    'date' => $date->toDateString(),
+                ],
+                [
+                    'classroom_id' => $leave->classroom_id,
+                    'submitted_by_user_id' => $user->id,
+                    'status' => $status,
+                    'notes' => "Surat {$leave->type} diverifikasi oleh Ketua Kelas ({$user->name})",
+                    'submitted_time' => now()->format('H:i') . ' WIB',
+                    'is_locked' => true,
+                ]
+            );
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'CLASS_LEADER_APPROVED_LEAVE',
+            'description' => "Ketua Kelas {$user->name} memverifikasi permohonan {$leave->type} siswa {$leave->student?->name}",
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('success', "Permohonan {$leave->type} siswa {$leave->student?->name} berhasil diverifikasi & presensi otomatis sinkron.");
+    }
+
+    public function rejectStudentLeave(Request $request, $id)
+    {
+        $user = auth()->user();
+        $isLeader = (bool) ($user->is_class_leader || $user->sub_role === 'Ketua Kelas' || $user->role === 'admin');
+
+        if (!$isLeader) {
+            return back()->with('error', 'Hanya Ketua Kelas yang berhak menolak permohonan izin teman sekelas.');
+        }
+
+        $leave = StudentLeaveRequest::findOrFail($id);
+        $leave->update([
+            'status' => 'rejected',
+            'reviewed_by_user_id' => $user->id,
+            'rejection_note' => $request->input('notes', 'Bukti surat izin tidak memenuhi kriteria verifikasi Ketua Kelas.'),
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Permohonan izin siswa telah ditolak oleh Ketua Kelas.');
     }
 }

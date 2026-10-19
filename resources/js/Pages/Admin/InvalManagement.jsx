@@ -1,20 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import { UserCheck, CheckCircle2, XCircle, Clock, Calendar, ArrowRight, ShieldAlert } from 'lucide-react';
 
 export default function InvalManagement({ invalRequests = [], teachers = [] }) {
+    const [approveTargetId, setApproveTargetId] = useState(null);
+    const [rejectModal, setRejectModal] = useState(null);
+
     const handleApprove = (id) => {
-        if (confirm('Setujui pengajuan substitusi guru mengajar ini?')) {
-            router.post(`/admin/inval/${id}/approve`);
-        }
+        setApproveTargetId(id);
+    };
+
+    const handleConfirmApprove = () => {
+        if (!approveTargetId) return;
+        router.post(`/admin/inval/${approveTargetId}/approve`, {}, {
+            preserveScroll: true,
+            onFinish: () => setApproveTargetId(null),
+        });
     };
 
     const handleReject = (id) => {
-        const reason = prompt('Masukkan alasan penolakan substitusi:');
-        if (reason) {
-            router.post(`/admin/inval/${id}/reject`, { notes: reason });
-        }
+        setRejectModal({ id, reason: '' });
+    };
+
+    const handleConfirmReject = (e) => {
+        e.preventDefault();
+        if (!rejectModal) return;
+        router.post(`/admin/inval/${rejectModal.id}/reject`, { notes: rejectModal.reason }, {
+            preserveScroll: true,
+            onFinish: () => setRejectModal(null),
+        });
     };
 
     return (
@@ -117,6 +134,51 @@ export default function InvalManagement({ invalRequests = [], teachers = [] }) {
                     </div>
                 )}
             </div>
+
+            {/* Modal Konfirmasi ACC Inval */}
+            <ConfirmModal
+                isOpen={!!approveTargetId}
+                onClose={() => setApproveTargetId(null)}
+                onConfirm={handleConfirmApprove}
+                title="Setujui Substitusi Pengajar (Inval)"
+                message="Setujui permohonan substitusi guru mengajar ini? Jadwal KBM dan notifikasi akan diselaraskan ke guru pengganti."
+                confirmText="Setujui Inval"
+                cancelText="Batal"
+                type="primary"
+            />
+
+            {/* Modal Tolak Inval dengan Alasan */}
+            {rejectModal && (
+                <Modal isOpen={Boolean(rejectModal)} onClose={() => setRejectModal(null)} title="Tolak Pengajuan Inval Guru">
+                    <form onSubmit={handleConfirmReject} className="space-y-4 text-xs">
+                        <div>
+                            <label className="block font-semibold text-slate-700 mb-1">Alasan Penolakan</label>
+                            <textarea
+                                value={rejectModal.reason}
+                                onChange={(e) => setRejectModal({ ...rejectModal, reason: e.target.value })}
+                                placeholder="Contoh: Jadwal guru pengganti bentrok / tidak ada guru piket standby."
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 h-24 resize-none"
+                                required
+                            />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button
+                                type="button"
+                                onClick={() => setRejectModal(null)}
+                                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs"
+                            >
+                                Tolak Pengajuan
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            )}
         </AdminLayout>
     );
 }

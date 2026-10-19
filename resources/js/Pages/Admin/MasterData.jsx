@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import {
     Users,
     GraduationCap,
@@ -43,6 +44,7 @@ export default function MasterData({
     const [selectedRowIds, setSelectedRowIds] = useState([]);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isBatchDeleteModalOpen, setIsBatchDeleteModalOpen] = useState(false);
 
     // Tab 6: Kalender Tahun Ajaran
     const [academicYears, setAcademicYears] = useState([
@@ -107,10 +109,13 @@ export default function MasterData({
     };
 
     const handleBatchDelete = () => {
-        if (confirm(`Yakin ingin menghapus ${selectedRowIds.length} baris data terpilih dari sistem?`)) {
-            alert(`Berhasil menghapus ${selectedRowIds.length} data.`);
-            setSelectedRowIds([]);
-        }
+        if (selectedRowIds.length === 0) return;
+        setIsBatchDeleteModalOpen(true);
+    };
+
+    const handleConfirmBatchDelete = () => {
+        setSelectedRowIds([]);
+        setIsBatchDeleteModalOpen(false);
     };
 
     const handleToggleAcademicYear = (id) => {
@@ -860,6 +865,17 @@ export default function MasterData({
                     </div>
                 </form>
             </Modal>
+
+            <ConfirmModal
+                isOpen={isBatchDeleteModalOpen}
+                onClose={() => setIsBatchDeleteModalOpen(false)}
+                onConfirm={handleConfirmBatchDelete}
+                title="Hapus Data Terpilih"
+                message={`Apakah Anda yakin ingin menghapus ${selectedRowIds.length} baris data yang dipilih dari sistem? Tindakan ini tidak dapat dibatalkan.`}
+                confirmText={`Hapus ${selectedRowIds.length} Data`}
+                cancelText="Batal"
+                type="danger"
+            />
         </AdminLayout>
     );
 }
