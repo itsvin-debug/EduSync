@@ -57,6 +57,7 @@ import {
     Image as ImageIcon,
     Video,
     Trash2,
+    RefreshCw,
 } from 'lucide-react';
 
 export default function Dashboard({
@@ -261,7 +262,10 @@ export default function Dashboard({
     // 2. Student Leave Request Form (Direct Web Camera with MARKI Watermark)
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const streamRef = useRef(null);
+    const [cameraFacingMode, setCameraFacingMode] = useState('user');
     const [isCameraActive, setIsCameraActive] = useState(false);
+    const [isCameraStarting, setIsCameraStarting] = useState(false);
     const [cameraError, setCameraError] = useState(null);
     const [leavePhotoPreview, setLeavePhotoPreview] = useState(null);
 
@@ -281,36 +285,126 @@ export default function Dashboard({
         proof_image_base64: null,
     });
 
-    const startCamera = async () => {
+    const startCamera = async (targetFacingMode) => {
         setCameraError(null);
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
+        setIsCameraStarting(true);
+        const mode = targetFacingMode || cameraFacingMode;
+
+        // Stop any running stream first
+        if (streamRef.current) {
+            try {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+            } catch (err) {
+                console.warn('Gagal mematikan track kamera sebelumnya:', err);
+            }
+            streamRef.current = null;
+        }
+
+        const constraintsList = [
+            {
                 video: {
-                    facingMode: 'user',
+                    facingMode: { ideal: mode },
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                 },
                 audio: false,
-            });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                videoRef.current.play();
+            },
+            {
+                video: {
+                    facingMode: { ideal: mode },
+                },
+                audio: false,
+            },
+            {
+                video: {
+                    facingMode: mode,
+                },
+                audio: false,
+            },
+            {
+                video: true,
+                audio: false,
+            },
+        ];
+
+        let activeStream = null;
+        let lastError = null;
+
+        for (const constraints of constraintsList) {
+            try {
+                activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (activeStream) break;
+            } catch (err) {
+                lastError = err;
             }
-            setIsCameraActive(true);
-        } catch (err) {
-            console.error('Camera error:', err);
-            setCameraError('Kamera tidak dapat diakses. Pastikan izin akses kamera telah diizinkan di peramban.');
+        }
+
+        if (!activeStream) {
+            console.error('Semua konfigurasi kamera gagal:', lastError);
+            setIsCameraStarting(false);
+            setCameraError(
+                'Kamera tidak dapat diakses. Pastikan izin kamera aktif pada peramban peranti Anda (laptop atau ponsel).'
+            );
+            return;
+        }
+
+        streamRef.current = activeStream;
+        setIsCameraActive(true);
+        setIsCameraStarting(false);
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = activeStream;
+            videoRef.current.muted = true;
+            videoRef.current.playsInline = true;
+            videoRef.current.setAttribute('playsinline', '');
+            videoRef.current.setAttribute('webkit-playsinline', '');
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch((err) => {
+                    console.warn('Pemutaran video tertahan peramban:', err);
+                });
+            }
         }
     };
 
     const stopCamera = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const stream = videoRef.current.srcObject;
-            stream.getTracks().forEach((track) => track.stop());
+        if (streamRef.current) {
+            try {
+                streamRef.current.getTracks().forEach((track) => track.stop());
+            } catch (err) {
+                console.warn('Gagal menghentikan track kamera:', err);
+            }
+            streamRef.current = null;
+        }
+        if (videoRef.current) {
             videoRef.current.srcObject = null;
         }
         setIsCameraActive(false);
+        setIsCameraStarting(false);
     };
+
+    const switchCamera = () => {
+        const nextMode = cameraFacingMode === 'user' ? 'environment' : 'user';
+        setCameraFacingMode(nextMode);
+        if (isCameraActive) {
+            startCamera(nextMode);
+        }
+    };
+
+    useEffect(() => {
+        if (isCameraActive && videoRef.current && streamRef.current) {
+            if (videoRef.current.srcObject !== streamRef.current) {
+                videoRef.current.srcObject = streamRef.current;
+                videoRef.current.muted = true;
+                videoRef.current.playsInline = true;
+                videoRef.current.setAttribute('playsinline', '');
+                videoRef.current.setAttribute('webkit-playsinline', '');
+                videoRef.current.play().catch((err) => {
+                    console.warn('Pemutaran video pada effect tertahan:', err);
+                });
+            }
+        }
+    }, [isCameraActive]);
 
     useEffect(() => {
         return () => {
@@ -328,10 +422,16 @@ export default function Dashboard({
         canvas.height = height;
         const ctx = canvas.getContext('2d');
 
-        // Draw camera frame
+        // Draw camera frame with mirror support if front selfie camera is active
+        ctx.save();
+        if (cameraFacingMode === 'user') {
+            ctx.translate(width, 0);
+            ctx.scale(-1, 1);
+        }
         ctx.drawImage(video, 0, 0, width, height);
+        ctx.restore();
 
-        // Format real-time MARKI timestamp (Day, Date, Month, Year, and HH:mm:ss WIB)
+        // Format real-time MARKI timestamp (Indonesian standard)
         const now = new Date();
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = [
@@ -344,21 +444,25 @@ export default function Dashboard({
 
         const line1 = `${dayStr}, ${dateStr}`;
         const line2 = timeStr;
-        const line3 = 'APLIKASI MARKI - SMKN 1 CIOMAS';
+        const line3 = 'MARKI • SMKN 1 CIOMAS';
 
-        // Watermark badge at bottom right corner
-        const padding = 20;
-        const boxWidth = 330;
+        // Responsive watermark badge at bottom right corner
+        const padding = Math.max(16, Math.round(width * 0.02));
+        const boxWidth = Math.min(360, Math.round(width * 0.45));
         const boxHeight = 88;
         const boxX = width - boxWidth - padding;
         const boxY = height - boxHeight - padding;
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
         ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 14);
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 14);
+        } else {
+            ctx.rect(boxX, boxY, boxWidth, boxHeight);
+        }
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.65)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -1457,29 +1561,41 @@ export default function Dashboard({
                                 </label>
 
                                 <div className="relative w-full aspect-[4/3] rounded-2xl bg-slate-900 overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
-                                    {isCameraActive ? (
-                                        <>
-                                            <video
-                                                ref={videoRef}
-                                                autoPlay
-                                                playsInline
-                                                muted
-                                                className="w-full h-full object-cover"
-                                            />
-                                            {/* Live Watermark Overlay in Viewfinder */}
-                                            <div className="absolute bottom-3 right-3 bg-slate-950/80 border border-sky-400/50 backdrop-blur-xs text-white p-2.5 rounded-xl text-right pointer-events-none shadow-md">
-                                                <div className="text-[11px] font-bold text-white leading-tight">
-                                                    {clock.dayName}, {clock.dateFormatted}
-                                                </div>
-                                                <div className="text-xs font-mono font-bold text-sky-400 leading-tight mt-0.5">
-                                                    {clock.timeString} WIB
-                                                </div>
-                                                <div className="text-[9px] text-slate-400 font-medium tracking-tight mt-0.5 uppercase">
-                                                    MARKI • SMKN 1 CIOMAS
-                                                </div>
+                                    {/* Video element is permanently mounted to keep stream attached reliably on mobile and desktop */}
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        webkit-playsinline="true"
+                                        muted
+                                        onLoadedMetadata={(e) => {
+                                            e.target.play().catch((err) => console.warn('Video play on metadata:', err));
+                                        }}
+                                        className={`w-full h-full object-cover transition-opacity duration-200 ${
+                                            isCameraActive ? 'opacity-100 block' : 'opacity-0 hidden pointer-events-none'
+                                        }`}
+                                        style={{
+                                            transform: cameraFacingMode === 'user' ? 'scaleX(-1)' : 'none',
+                                        }}
+                                    />
+
+                                    {/* Live Watermark Overlay in Viewfinder */}
+                                    {isCameraActive && (
+                                        <div className="absolute bottom-3 right-3 bg-slate-950/85 border border-sky-400/60 backdrop-blur-xs text-white p-2.5 rounded-xl text-right pointer-events-none shadow-md z-10">
+                                            <div className="text-[11px] font-bold text-white leading-tight">
+                                                {clock.dateFormatted}
                                             </div>
-                                        </>
-                                    ) : leavePhotoPreview ? (
+                                            <div className="text-xs font-mono font-bold text-sky-400 leading-tight mt-0.5">
+                                                {clock.timeString} WIB
+                                            </div>
+                                            <div className="text-[9px] text-slate-400 font-medium tracking-tight mt-0.5 uppercase">
+                                                MARKI • SMKN 1 CIOMAS
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Captured Photo Preview */}
+                                    {leavePhotoPreview && !isCameraActive && (
                                         <div className="relative w-full h-full">
                                             <img
                                                 src={leavePhotoPreview}
@@ -1492,17 +1608,22 @@ export default function Dashboard({
                                                 <span>Foto Berhasil Diambil</span>
                                             </div>
                                         </div>
-                                    ) : (
+                                    )}
+
+                                    {/* Standby Placeholder */}
+                                    {!isCameraActive && !leavePhotoPreview && (
                                         <div className="p-6 text-center text-slate-400 max-w-sm">
                                             <div className="w-12 h-12 rounded-2xl bg-slate-800 text-sky-400 flex items-center justify-center mx-auto mb-3">
                                                 <Camera className="w-6 h-6" />
                                             </div>
-                                            <h4 className="font-bold text-slate-200 text-sm">Kamera Belum Aktif</h4>
+                                            <h4 className="font-bold text-slate-200 text-sm">
+                                                {isCameraStarting ? 'Menghubungkan Kamera...' : 'Kamera Belum Aktif'}
+                                            </h4>
                                             <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                                                 Sesuai ketentuan, foto tidak dapat diunggah dari galeri. Silakan buka kamera dan ambil foto bukti langsung di sini.
                                             </p>
                                             {cameraError && (
-                                                <div className="mt-3 p-2 rounded-xl bg-rose-500/20 text-rose-300 text-[11px] border border-rose-500/30">
+                                                <div className="mt-3 p-2.5 rounded-xl bg-rose-500/20 text-rose-300 text-[11px] border border-rose-500/30">
                                                     {cameraError}
                                                 </div>
                                             )}
@@ -1515,11 +1636,12 @@ export default function Dashboard({
                                     {!isCameraActive && !leavePhotoPreview && (
                                         <button
                                             type="button"
-                                            onClick={startCamera}
-                                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                            onClick={() => startCamera()}
+                                            disabled={isCameraStarting}
+                                            className="inline-flex items-center justify-center min-h-[44px] gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-[0.98] text-white font-semibold text-xs shadow-xs transition-all duration-200 ease-bouncy cursor-pointer disabled:opacity-60"
                                         >
                                             <Camera className="w-4 h-4" />
-                                            <span>Buka Kamera & Potret</span>
+                                            <span>{isCameraStarting ? 'Menyiapkan Kamera...' : 'Buka Kamera & Potret'}</span>
                                         </button>
                                     )}
 
@@ -1528,15 +1650,24 @@ export default function Dashboard({
                                             <button
                                                 type="button"
                                                 onClick={captureMarkiPhoto}
-                                                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                                className="inline-flex items-center justify-center min-h-[44px] gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-semibold text-xs shadow-xs transition-all duration-200 ease-bouncy cursor-pointer"
                                             >
                                                 <Camera className="w-4 h-4" />
                                                 <span>Ambil Foto (MARKI Snapshot)</span>
                                             </button>
                                             <button
                                                 type="button"
+                                                onClick={switchCamera}
+                                                className="inline-flex items-center justify-center min-h-[44px] gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 font-semibold text-xs transition-all duration-200 ease-bouncy cursor-pointer"
+                                                title="Ganti Kamera Depan / Belakang"
+                                            >
+                                                <RefreshCw className="w-4 h-4" />
+                                                <span>{cameraFacingMode === 'user' ? 'Kamera Belakang' : 'Kamera Depan'}</span>
+                                            </button>
+                                            <button
+                                                type="button"
                                                 onClick={stopCamera}
-                                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                                className="inline-flex items-center justify-center min-h-[44px] gap-1.5 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 active:scale-[0.98] text-slate-700 font-semibold text-xs transition-all duration-200 ease-bouncy cursor-pointer"
                                             >
                                                 <span>Tutup Kamera</span>
                                             </button>
@@ -1547,7 +1678,7 @@ export default function Dashboard({
                                         <button
                                             type="button"
                                             onClick={handleRetakePhoto}
-                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs transition-colors duration-200 ease-bouncy cursor-pointer"
+                                            className="inline-flex items-center justify-center min-h-[44px] gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-800 font-semibold text-xs transition-all duration-200 ease-bouncy cursor-pointer"
                                         >
                                             <Camera className="w-4 h-4" />
                                             <span>Ambil Ulang Foto</span>
@@ -1575,7 +1706,7 @@ export default function Dashboard({
                                                 key={opt.val}
                                                 type="button"
                                                 onClick={() => setLeaveData('type', opt.val)}
-                                                className={`py-2 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy ${
+                                                className={`min-h-[44px] py-2.5 rounded-xl border text-center font-semibold transition-all duration-200 ease-bouncy flex items-center justify-center ${
                                                     leaveData.type === opt.val
                                                         ? 'bg-sky-600 text-white border-transparent shadow-xs'
                                                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -1644,7 +1775,7 @@ export default function Dashboard({
                                 <button
                                     type="submit"
                                     disabled={leaveProcessing}
-                                    className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                                    className="w-full min-h-[44px] py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition-colors duration-200 ease-bouncy disabled:opacity-50 shadow-xs flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <Send className="w-4 h-4" />
                                     <span>{leaveProcessing ? 'Mengirimkan...' : 'Kirim Permohonan Izin'}</span>
