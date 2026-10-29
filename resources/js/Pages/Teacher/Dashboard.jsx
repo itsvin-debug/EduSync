@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import TeacherLayout from '@/Layouts/TeacherLayout';
 import Modal from '@/Components/Modal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import { useRealtimeClock } from '@/hooks/useRealtimeClock';
 import { useScheduleEngine } from '@/hooks/useScheduleEngine';
 import {
@@ -67,6 +68,20 @@ export default function Dashboard({
     const [selectedWeeklyDay, setSelectedWeeklyDay] = useState('Senin');
     const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
     const [selectedProofModal, setSelectedProofModal] = useState(null);
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'primary',
+        confirmText: 'Lanjutkan',
+        cancelText: 'Batal',
+        onConfirm: null,
+    });
+    const [rejectLeaveModal, setRejectLeaveModal] = useState({
+        isOpen: false,
+        leaveId: null,
+        notes: 'Bukti surat dokter tidak jelas atau tidak memenuhi kriteria.',
+    });
 
     const { errors } = usePage().props;
 
@@ -95,7 +110,14 @@ export default function Dashboard({
             preserveScroll: true,
             onSuccess: () => {
                 setProfileSaving(false);
-                alert('Profil guru berhasil diperbarui!');
+                setConfirmModal({
+                    isOpen: true,
+                    title: 'Profil Guru',
+                    message: 'Profil guru berhasil diperbarui.',
+                    type: 'success',
+                    confirmText: 'Selesai',
+                    cancelText: null,
+                });
             },
             onError: () => setProfileSaving(false),
         });
@@ -108,7 +130,14 @@ export default function Dashboard({
             preserveScroll: true,
             onSuccess: () => {
                 setPasswordSaving(false);
-                alert('Kata sandi guru berhasil diperbarui!');
+                setConfirmModal({
+                    isOpen: true,
+                    title: 'Kata Sandi Guru',
+                    message: 'Kata sandi guru berhasil diperbarui.',
+                    type: 'success',
+                    confirmText: 'Selesai',
+                    cancelText: null,
+                });
                 setPasswordData({ current_password: '', password: '', password_confirmation: '' });
             },
             onError: () => setPasswordSaving(false),
@@ -157,7 +186,14 @@ export default function Dashboard({
                 preserveScroll: true,
                 onSuccess: () => {
                     setSavingClassAttendance(false);
-                    alert('Presensi harian kelas berhasil disimpan oleh Guru & disinkronkan ke Ketua Kelas!');
+                    setConfirmModal({
+                        isOpen: true,
+                        title: 'Presensi Disimpan',
+                        message: 'Presensi harian kelas berhasil disimpan oleh Guru dan disinkronkan ke Ketua Kelas.',
+                        type: 'success',
+                        confirmText: 'Selesai',
+                        cancelText: null,
+                    });
                 },
                 onError: () => setSavingClassAttendance(false),
             }
@@ -216,7 +252,14 @@ export default function Dashboard({
         postTask('/guru/learning-tasks', {
             onSuccess: () => {
                 resetTask();
-                alert('Tugas mandiri berhasil didelegasikan langsung ke portal Ketua Kelas & tercatat di Admin.');
+                setConfirmModal({
+                    isOpen: true,
+                    title: 'Tugas Didelegasikan',
+                    message: 'Tugas mandiri berhasil didelegasikan langsung ke portal Ketua Kelas dan tercatat di Admin.',
+                    type: 'success',
+                    confirmText: 'Selesai',
+                    cancelText: null,
+                });
             },
         });
     };
@@ -265,7 +308,14 @@ export default function Dashboard({
         postTrash('/guru/trash-reports', {
             onSuccess: () => {
                 resetTrash();
-                alert('Laporan kebersihan & sampah berhasil dikirimkan ke Admin dan diteruskan ke sistem denda.');
+                setConfirmModal({
+                    isOpen: true,
+                    title: 'Laporan Kebersihan Terkirim',
+                    message: 'Laporan kebersihan dan sampah berhasil dikirimkan ke Admin dan diteruskan ke sistem denda.',
+                    type: 'success',
+                    confirmText: 'Selesai',
+                    cancelText: null,
+                });
             },
         });
     };
@@ -290,21 +340,57 @@ export default function Dashboard({
 
     // Student Leave Approval Actions (Auto-syncs student attendance!)
     const handleApproveLeave = (leaveId) => {
-        if (confirm('Setujui permohonan izin ini? Status kehadiran siswa pada kelas akan otomatis terisi (Auto-Sync).')) {
-            router.post(`/guru/student-leaves/${leaveId}/approve`, {}, {
-                preserveScroll: true,
-                onSuccess: () => alert('Permohonan izin disetujui & presensi siswa otomatis diperbarui!'),
-            });
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: 'Persetujuan Izin Siswa',
+            message: 'Setujui permohonan izin ini? Status kehadiran siswa pada kelas akan otomatis terisi secara tersinkronisasi.',
+            type: 'primary',
+            confirmText: 'Setujui Izin',
+            cancelText: 'Batal',
+            onConfirm: () => {
+                setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+                router.post(`/guru/student-leaves/${leaveId}/approve`, {}, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        setConfirmModal({
+                            isOpen: true,
+                            title: 'Izin Disetujui',
+                            message: 'Permohonan izin disetujui dan presensi siswa otomatis diperbarui.',
+                            type: 'success',
+                            confirmText: 'Selesai',
+                            cancelText: null,
+                        });
+                    },
+                });
+            },
+        });
     };
 
     const handleRejectLeave = (leaveId) => {
-        const note = prompt('Masukkan alasan penolakan izin (opsional):', 'Bukti surat dokter tidak jelas atau tidak memenuhi kriteria.');
-        if (note !== null) {
-            router.post(`/guru/student-leaves/${leaveId}/reject`, { notes: note }, {
-                preserveScroll: true,
-            });
-        }
+        setRejectLeaveModal({
+            isOpen: true,
+            leaveId,
+            notes: 'Bukti surat dokter tidak jelas atau tidak memenuhi kriteria.',
+        });
+    };
+
+    const handleConfirmRejectLeave = (e) => {
+        e.preventDefault();
+        if (!rejectLeaveModal.leaveId) return;
+        router.post(`/guru/student-leaves/${rejectLeaveModal.leaveId}/reject`, { notes: rejectLeaveModal.notes }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setRejectLeaveModal({ isOpen: false, leaveId: null, notes: '' });
+                setConfirmModal({
+                    isOpen: true,
+                    title: 'Izin Ditolak',
+                    message: 'Permohonan izin siswa telah ditolak.',
+                    type: 'info',
+                    confirmText: 'Mengerti',
+                    cancelText: null,
+                });
+            },
+        });
     };
 
     const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
@@ -322,18 +408,18 @@ export default function Dashboard({
             {/* TOP ACTIVE CLASS HERO BANNER & AGGREGATE METRICS (ONLY ON RUANG KERJA HARI INI) */}
             {activeTab === 'workspace' && (
                 <>
-                    <div className="bg-[#0B1727] text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
+                    <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div className="space-y-3">
                         <div className="flex items-center gap-2.5 flex-wrap">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                                 {clock.dayName}
                             </span>
                             <span className="font-mono font-bold text-amber-300 text-xs px-2.5 py-0.5 rounded-full bg-slate-800/90 border border-slate-700">
                                 {clock.timeString}
                             </span>
-                            <span className="text-xs text-slate-400 font-medium">
+                            <span className="text-xs text-slate-300 font-medium">
                                 {clock.dateFormatted} • TA {clock.academicYear} ({clock.semester})
                             </span>
                             <span className="text-xs text-indigo-300 font-medium">NIP: {teacher?.nip || '-'}</span>
@@ -342,7 +428,7 @@ export default function Dashboard({
                         {engineState.state === 'CLASS_ACTIVE' && engineState.activeSlot ? (
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-                                    {engineState.activeSlot.classroom?.name} — {engineState.activeSlot.subject?.name}
+                                    {engineState.activeSlot.classroom?.name} - {engineState.activeSlot.subject?.name}
                                 </h1>
                                 <p className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-2">
                                     <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -364,17 +450,17 @@ export default function Dashboard({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                         <button
                             onClick={() => setActiveTab('presensi_kelas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-semibold shadow-xs transition-all duration-200 cursor-pointer"
                         >
                             <Users className="w-4 h-4" />
                             <span>Pantau Presensi Siswa</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('tugas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-colors duration-200 ease-bouncy"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-white text-xs font-semibold border border-slate-700 transition-all duration-200 cursor-pointer"
                         >
                             <ClipboardList className="w-4 h-4 text-amber-300" />
                             <span>Delegasi Tugas Ketua Kelas</span>
@@ -384,53 +470,53 @@ export default function Dashboard({
             </div>
 
             {/* 1. REAL-TIME AGGREGATE CLASS ATTENDANCE METRICS CARD */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs mb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-2xs mb-6 transition-colors duration-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div>
-                        <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                        <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                             <span>Metrik Agregat Kehadiran Siswa Kelas Bimbingan Hari Ini</span>
                         </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                             Data terupdate otomatis saat Ketua Kelas menyetorkan presensi harian
                         </p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">
+                    <span className="text-xs font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800">
                         {attendanceMetrics.total} Total Siswa Terdata
                     </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-                        <span className="text-[10px] uppercase font-bold text-emerald-700">Hadir</span>
-                        <div className="text-2xl font-bold font-mono text-emerald-800 mt-0.5">{attendanceMetrics.hadir}</div>
-                        <span className="text-[10px] text-emerald-600">
+                    <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-center">
+                        <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">Hadir</span>
+                        <div className="text-2xl font-bold font-mono text-emerald-800 dark:text-emerald-200 mt-0.5">{attendanceMetrics.hadir}</div>
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
                             {attendanceMetrics.total ? Math.round((attendanceMetrics.hadir / attendanceMetrics.total) * 100) : 0}%
                         </span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
-                        <span className="text-[10px] uppercase font-bold text-amber-700">Sakit</span>
-                        <div className="text-2xl font-bold font-mono text-amber-800 mt-0.5">{attendanceMetrics.sakit}</div>
-                        <span className="text-[10px] text-amber-600">Surat Dokter</span>
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-center">
+                        <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Sakit</span>
+                        <div className="text-2xl font-bold font-mono text-amber-800 dark:text-amber-200 mt-0.5">{attendanceMetrics.sakit}</div>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">Surat Dokter</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 text-center">
-                        <span className="text-[10px] uppercase font-bold text-sky-700">Izin</span>
-                        <div className="text-2xl font-bold font-mono text-sky-800 mt-0.5">{attendanceMetrics.izin}</div>
-                        <span className="text-[10px] text-sky-600">Disetujui Guru</span>
+                    <div className="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/60 text-center">
+                        <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-sky-400">Izin</span>
+                        <div className="text-2xl font-bold font-mono text-sky-800 dark:text-sky-200 mt-0.5">{attendanceMetrics.izin}</div>
+                        <span className="text-[10px] text-sky-600 dark:text-sky-400">Disetujui Guru</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-center">
-                        <span className="text-[10px] uppercase font-bold text-indigo-700">Dispensasi</span>
-                        <div className="text-2xl font-bold font-mono text-indigo-800 mt-0.5">{attendanceMetrics.dispensasi}</div>
-                        <span className="text-[10px] text-indigo-600">Lomba / Dinas</span>
+                    <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 text-center">
+                        <span className="text-[10px] uppercase font-bold text-indigo-700 dark:text-indigo-400">Dispensasi</span>
+                        <div className="text-2xl font-bold font-mono text-indigo-800 dark:text-indigo-200 mt-0.5">{attendanceMetrics.dispensasi}</div>
+                        <span className="text-[10px] text-indigo-600 dark:text-indigo-400">Lomba / Dinas</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center col-span-2 sm:col-span-1">
-                        <span className="text-[10px] uppercase font-bold text-rose-700">Alpa</span>
-                        <div className="text-2xl font-bold font-mono text-rose-800 mt-0.5">{attendanceMetrics.alpha}</div>
-                        <span className="text-[10px] text-rose-600">Tanpa Keterangan</span>
+                    <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 text-center col-span-2 sm:col-span-1">
+                        <span className="text-[10px] uppercase font-bold text-rose-700 dark:text-rose-400">Alpa</span>
+                        <div className="text-2xl font-bold font-mono text-rose-800 dark:text-rose-200 mt-0.5">{attendanceMetrics.alpha}</div>
+                        <span className="text-[10px] text-rose-600 dark:text-rose-400">Tanpa Keterangan</span>
                     </div>
                 </div>
             </div>
@@ -1695,7 +1781,7 @@ export default function Dashboard({
                         >
                             {personalSchedules.map((s) => (
                                 <option key={s.id} value={s.id}>
-                                    {s.day} (JP {s.period_start}-{s.period_end}) — {s.classroom?.name} ({s.subject?.name})
+                                    {s.day} (JP {s.period_start}-{s.period_end}) - {s.classroom?.name} ({s.subject?.name})
                                 </option>
                             ))}
                         </select>
@@ -1955,6 +2041,65 @@ export default function Dashboard({
                     </div>
                 </div>
             )}
+
+            {/* General Confirmation / Notification Modal */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                confirmText={confirmModal.confirmText}
+                cancelText={confirmModal.cancelText}
+            />
+
+            {/* Modal Tolak Izin Siswa */}
+            <Modal
+                show={rejectLeaveModal.isOpen}
+                onClose={() => setRejectLeaveModal({ isOpen: false, leaveId: null, notes: '' })}
+                maxWidth="md"
+            >
+                <form onSubmit={handleConfirmRejectLeave} className="p-6">
+                    <div className="flex items-center gap-3 pb-3 border-b border-slate-100 mb-4">
+                        <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                            <XCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900">Tolak Permohonan Izin Siswa</h3>
+                            <p className="text-xs text-slate-500">Berikan catatan atau alasan penolakan untuk siswa.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                            Alasan Penolakan *
+                        </label>
+                        <textarea
+                            rows={3}
+                            required
+                            value={rejectLeaveModal.notes}
+                            onChange={(e) => setRejectLeaveModal((prev) => ({ ...prev, notes: e.target.value }))}
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-rose-500 focus:bg-white focus:outline-none"
+                            placeholder="Contoh: Bukti surat tidak valid atau tanggal tidak sesuai."
+                        />
+                    </div>
+                    <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setRejectLeaveModal({ isOpen: false, leaveId: null, notes: '' })}
+                            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-xs transition-colors"
+                        >
+                            Konfirmasi Tolak
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </TeacherLayout>
     );
 }

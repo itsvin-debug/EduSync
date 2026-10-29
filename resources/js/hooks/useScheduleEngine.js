@@ -94,7 +94,7 @@ export function useScheduleEngine(schedules = [], options = {}) {
 
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
-                label: 'Pending — Menunggu Waktu Sekolah',
+                label: 'Pending - Menunggu Waktu Sekolah',
                 sublabel: 'Menunggu Sesi Pembelajaran Dimulai Pukul 06:30',
                 activeSlot: null,
                 activePeriod: null,
@@ -181,7 +181,7 @@ export function useScheduleEngine(schedules = [], options = {}) {
         return {
             state: 'CLASS_ACTIVE',
             label: `Jam ke-${currentInterval.period} (${currentInterval.start} - ${currentInterval.end})`,
-            sublabel: activeSlot ? `${activeSlot.subject?.name} — ${activeSlot.teacher?.name}` : 'Jam Kosong / Belajar Mandiri Terbimbing',
+            sublabel: activeSlot ? `${activeSlot.subject?.name} - ${activeSlot.teacher?.name}` : 'Jam Kosong / Belajar Mandiri Terbimbing',
             activeSlot,
             activePeriod: currentInterval,
             isBreak: false,

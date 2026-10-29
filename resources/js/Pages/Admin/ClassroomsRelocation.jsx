@@ -61,7 +61,7 @@ export default function ClassroomsRelocation({
 
     return (
         <AdminLayout title="Relokasi Ruang Kelas">
-            <Head title="Relokasi Ruang Kelas — EDUSYNC Admin" />
+            <Head title="Relokasi Ruang Kelas - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -109,7 +109,7 @@ export default function ClassroomsRelocation({
                                 <option value="">Semua Jurusan</option>
                                 {departments.map((d) => (
                                     <option key={d.id} value={d.id}>
-                                        {d.code} — {d.name}
+                                        {d.code} - {d.name}
                                     </option>
                                 ))}
                             </select>
@@ -157,7 +157,7 @@ export default function ClassroomsRelocation({
 
                                     <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
                                         <Users className="w-3.5 h-3.5 text-slate-400" />
-                                        <span>Wali Kelas: <strong>{cls.homeroom_teacher?.name || '—'}</strong></span>
+                                        <span>Wali Kelas: <strong>{cls.homeroom_teacher?.name || '-'}</strong></span>
                                     </div>
 
                                     {/* Current Room Badge */}
@@ -230,7 +230,7 @@ export default function ClassroomsRelocation({
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Gedung / Lokasi:</span>
                                     <span className="text-slate-700">
-                                        {relocateClassroom.room?.building || '—'}
+                                        {relocateClassroom.room?.building || '-'}
                                     </span>
                                 </div>
                             </div>
@@ -248,7 +248,7 @@ export default function ClassroomsRelocation({
                                     <option value="">-- Pilih Ruangan & Gedung --</option>
                                     {rooms.map((rm) => (
                                         <option key={rm.id} value={rm.id}>
-                                            {rm.name} ({rm.building}) — Kapasitas {rm.capacity} Siswa [{rm.type.toUpperCase()}]
+                                            {rm.name} ({rm.building}) - Kapasitas {rm.capacity} Siswa [{rm.type.toUpperCase()}]
                                         </option>
                                     ))}
                                 </select>

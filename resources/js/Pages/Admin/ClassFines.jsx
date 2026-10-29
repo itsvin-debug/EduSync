@@ -85,7 +85,7 @@ export default function ClassFines({ classFines = [], classrooms = [], teachers 
 
     return (
         <AdminLayout title="Denda Kebersihan Kelas">
-            <Head title="Denda Kebersihan Kelas — EDUSYNC Admin" />
+            <Head title="Denda Kebersihan Kelas - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -255,7 +255,7 @@ export default function ClassFines({ classFines = [], classrooms = [], teachers 
                                                 </div>
                                                 <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
                                                     <User className="w-3 h-3 text-slate-400" />
-                                                    Wali Kelas: {fine.homeroom_teacher?.name || '—'}
+                                                    Wali Kelas: {fine.homeroom_teacher?.name || '-'}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -443,7 +443,7 @@ export default function ClassFines({ classFines = [], classrooms = [], teachers 
                                 <div className="flex justify-between">
                                     <span className="text-slate-500">Wali Kelas:</span>
                                     <span className="font-medium text-slate-800">
-                                        {settleModalFine.homeroom_teacher?.name || '—'}
+                                        {settleModalFine.homeroom_teacher?.name || '-'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">

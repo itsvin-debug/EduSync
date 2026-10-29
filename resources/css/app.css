@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source "../**/*.blade.php";
@@ -35,6 +37,9 @@
     * {
         border-color: #e2e8f0;
     }
+    .dark * {
+        border-color: #334155;
+    }
     html {
         scroll-behavior: smooth;
     }
@@ -46,6 +51,11 @@
         padding: 0;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .dark body {
+        color: #f8fafc;
+        background-color: #020617;
     }
 }
 
@@ -71,4 +81,154 @@
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* SINC-BOT Vector Robot Mascot & Visor Animations */
+@keyframes sinc-float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(-1deg);
+    }
+}
+
+@keyframes sinc-speak-bob {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    25% {
+        transform: translateY(-4px) scale(1.02);
+    }
+    50% {
+        transform: translateY(1px) scale(0.99);
+    }
+    75% {
+        transform: translateY(-3px) scale(1.01);
+    }
+}
+
+@keyframes sinc-shake {
+    0%, 100% {
+        transform: translateX(0) rotate(0deg);
+    }
+    15% {
+        transform: translateX(-6px) rotate(-5deg);
+    }
+    30% {
+        transform: translateX(6px) rotate(5deg);
+    }
+    50% {
+        transform: translateX(-4px) rotate(-3deg);
+    }
+    70% {
+        transform: translateX(4px) rotate(3deg);
+    }
+    85% {
+        transform: translateX(-2px) rotate(-1deg);
+    }
+}
+
+@keyframes sinc-thruster {
+    0%, 100% {
+        opacity: 0.55;
+        transform: scaleX(0.95);
+    }
+    50% {
+        opacity: 0.95;
+        transform: scaleX(1.1);
+    }
+}
+
+@keyframes sinc-wave {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-18deg);
+    }
+    50% {
+        transform: rotate(6deg);
+    }
+    75% {
+        transform: rotate(-14deg);
+    }
+}
+
+@keyframes sinc-blink {
+    0%, 88%, 94%, 100% {
+        transform: scaleY(1);
+    }
+    91% {
+        transform: scaleY(0.08);
+    }
+}
+
+@keyframes sinc-eq-1 {
+    0%, 100% {
+        height: 5px;
+        y: 73px;
+    }
+    50% {
+        height: 13px;
+        y: 65px;
+    }
+}
+
+@keyframes sinc-eq-2 {
+    0%, 100% {
+        height: 12px;
+        y: 66px;
+    }
+    50% {
+        height: 6px;
+        y: 72px;
+    }
+}
+
+@keyframes sinc-eq-3 {
+    0%, 100% {
+        height: 8px;
+        y: 70px;
+    }
+    50% {
+        height: 16px;
+        y: 62px;
+    }
+}
+
+.animate-sinc-float {
+    animation: sinc-float 3.4s ease-in-out infinite;
+}
+
+.animate-sinc-speak-bob {
+    animation: sinc-speak-bob 1s ease-in-out infinite;
+}
+
+.animate-sinc-shake {
+    animation: sinc-shake 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-sinc-thruster {
+    animation: sinc-thruster 1.8s ease-in-out infinite;
+}
+
+.animate-sinc-wave {
+    animation: sinc-wave 2s ease-in-out infinite;
+}
+
+.animate-sinc-blink {
+    animation: sinc-blink 4s ease-in-out infinite;
+}
+
+.animate-sinc-eq-1 {
+    animation: sinc-eq-1 0.45s ease-in-out infinite alternate;
+}
+
+.animate-sinc-eq-2 {
+    animation: sinc-eq-2 0.35s ease-in-out infinite alternate;
+}
+
+.animate-sinc-eq-3 {
+    animation: sinc-eq-3 0.5s ease-in-out infinite alternate;
 }

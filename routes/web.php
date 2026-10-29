@@ -6,9 +6,14 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SincBotController;
 
 // Public portal
 Route::get('/', [LandingController::class, 'index'])->name('home');
+
+// SINC-BOT Virtual Assistant API
+Route::post('/api/sinc-bot/chat', [SincBotController::class, 'chat'])->name('sinc-bot.chat');
+Route::post('/api/sinc-bot/reset', [SincBotController::class, 'reset'])->name('sinc-bot.reset');
 
 // Authentication & quick login
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

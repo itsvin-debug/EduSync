@@ -186,7 +186,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
 
     return (
         <AdminLayout title="Data Guru & NIP">
-            <Head title="Data Guru & NIP — EDUSYNC Admin" />
+            <Head title="Data Guru & NIP - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -242,7 +242,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                 <option value="">Semua Rumpun Jurusan</option>
                                 {departments.map((d) => (
                                     <option key={d.id} value={d.id}>
-                                        {d.code} — {d.name}
+                                        {d.code} - {d.name}
                                     </option>
                                 ))}
                             </select>
@@ -520,7 +520,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                     <option value="">-- Guru Umum / Normatif --</option>
                                     {departments.map((d) => (
                                         <option key={d.id} value={d.id}>
-                                            {d.code} — {d.name}
+                                            {d.code} - {d.name}
                                         </option>
                                     ))}
                                 </select>
@@ -691,7 +691,7 @@ export default function Teachers({ teachers = [], subjects = [], departments = [
                                         <option value="">-- Guru Umum / Normatif --</option>
                                         {departments.map((d) => (
                                             <option key={d.id} value={d.id}>
-                                                {d.code} — {d.name}
+                                                {d.code} - {d.name}
                                             </option>
                                         ))}
                                     </select>

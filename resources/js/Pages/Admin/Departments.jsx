@@ -131,7 +131,7 @@ export default function Departments({ departments = [], teachers = [] }) {
 
     return (
         <AdminLayout title="Jurusan & Kaprog">
-            <Head title="Jurusan & Kaprog — EDUSYNC Admin" />
+            <Head title="Jurusan & Kaprog - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -272,7 +272,7 @@ export default function Departments({ departments = [], teachers = [] }) {
                                                 {activeDepartment.head_teacher?.name || activeDepartment.head_teacher_name || 'Belum Ditugaskan'}
                                             </div>
                                             <div className="text-[11px] text-slate-500 mt-0.5">
-                                                NIP: {activeDepartment.head_teacher?.nip || '—'}
+                                                NIP: {activeDepartment.head_teacher?.nip || '-'}
                                             </div>
                                         </div>
 
@@ -353,7 +353,7 @@ export default function Departments({ departments = [], teachers = [] }) {
                                                                     <span className="font-medium text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded text-[11px]">
                                                                         {t.nickname || 'Pengajar'}
                                                                     </span>
-                                                                    <span>• NIP: {t.nip || '—'}</span>
+                                                                    <span>• NIP: {t.nip || '-'}</span>
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-3.5">

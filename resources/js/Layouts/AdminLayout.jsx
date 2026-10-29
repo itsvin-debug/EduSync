@@ -29,6 +29,7 @@ import {
     Building2,
 } from 'lucide-react';
 import Toast from '@/Components/Toast';
+import ThemeToggle from '@/Components/ThemeToggle';
 
 export default function AdminLayout({ children, title = 'Control Center' }) {
     const { url } = usePage();
@@ -258,7 +259,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased font-sans flex transition-colors duration-200">
             <Toast />
 
             {/* COLLAPSIBLE SIDEBAR */}
@@ -324,7 +325,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                                 href={item.href}
                                                 preserveScroll={true}
                                                 title={isCollapsed ? `${item.name}${item.badge ? ` (${item.badge} butuh verifikasi)` : ''}` : undefined}
-                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ease-bouncy group ${
+                                                className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 group cursor-pointer ${
                                                     item.active
                                                         ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
                                                         : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
@@ -332,7 +333,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                             >
                                                 <div className="relative flex items-center justify-center">
                                                     <Icon
-                                                        className={`w-4 h-4 shrink-0 transition-transform duration-200 ease-bouncy ${
+                                                        className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                                                             item.active ? 'text-white' : 'text-slate-400 group-hover:scale-105 active:scale-95'
                                                         }`}
                                                     />
@@ -364,7 +365,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                             <div className="p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/60 mb-2">
                                 <div className="flex items-center justify-between mb-1">
                                     <div className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                                         <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Online</span>
                                     </div>
                                     <span className="font-mono text-[10px] text-slate-400">Kurikulum</span>
@@ -380,7 +381,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
                         <button
                             onClick={handleLogout}
-                            className={`flex items-center w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-colors duration-200 ease-bouncy text-xs font-medium cursor-pointer ${
+                            className={`flex items-center w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 active:scale-[0.98] transition-all duration-200 text-xs font-medium cursor-pointer ${
                                 isCollapsed ? 'justify-center' : 'justify-between'
                             }`}
                             title="Keluar Akun"
@@ -402,33 +403,36 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                 }`}
             >
                 {/* Header */}
-                <header className="sticky top-0 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 z-40 px-6 sm:px-8 flex items-center justify-between">
+                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-40 px-6 sm:px-8 flex items-center justify-between transition-colors duration-200">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={toggleSidebar}
-                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform transition-colors duration-200 ease-bouncy cursor-pointer"
+                            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer"
                             title="Buka / Tutup Sidebar"
                         >
                             <Menu className="w-4 h-4" />
                         </button>
 
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                            <span className="font-bold text-indigo-600">{appName}</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                            <span className="font-bold text-indigo-600 dark:text-indigo-400">{appName}</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" />
                             <span className="hidden sm:inline">Kurikulum & Manajemen</span>
-                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 hidden sm:inline" />
-                            <span className="font-semibold text-slate-900">{title}</span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600 hidden sm:inline" />
+                            <span className="font-semibold text-slate-900 dark:text-white">{title}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold tracking-tight border border-slate-200">
-                            TA 2024/2025 Genap
+                        <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold tracking-tight border border-slate-200 dark:border-slate-700">
+                            TA 2026/2027 Ganjil
                         </span>
+
+                        {/* Dark Mode Toggle */}
+                        <ThemeToggle />
 
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors duration-200 ease-bouncy shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 shadow-2xs"
                         >
                             <span>Portal Publik</span>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -439,6 +443,25 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                 <main className="p-6 sm:p-8 flex-1">
                     <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
+
+                {/* INSTITUTIONAL ADMIN FOOTER */}
+                <footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 sm:px-8 text-xs text-slate-500 dark:text-slate-400 transition-colors duration-200">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                            <span className="font-bold text-slate-900 dark:text-white">{appName}</span>
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
+                            <span>Panel Manajemen Kurikulum & Akademik {schoolName}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-[11px] flex-wrap justify-center sm:justify-end">
+                            <span>Tahun Ajaran 2026/2027 Ganjil</span>
+                            <span>•</span>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span>Sinkronisasi Dapodik Aktif</span>
+                            </span>
+                        </div>
+                    </div>
+                </footer>
             </div>
         </div>
     );

@@ -113,7 +113,7 @@ export default function Organizations({ organizations = [], teachers = [], stude
 
     return (
         <AdminLayout title="Ekskul & Organisasi">
-            <Head title="Ekskul & Organisasi — EDUSYNC Admin" />
+            <Head title="Ekskul & Organisasi - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}

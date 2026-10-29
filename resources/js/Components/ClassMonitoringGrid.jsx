@@ -54,92 +54,93 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
 
     return (
         <section className="space-y-6">
-            {/* 1. SECTION HEADER & METRIC STRIP */}
+            {/* 1. Section Header & Metric Strip */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Monitoring Jadwal Kelas
                         </span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Live Temporal Monitor Matrix
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="font-mono text-xs font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-800 shadow-2xs">
                             {clock.timeString}
                         </span>
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                         {title}
                     </h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                         Monitoring serentak status KBM aktif, pengajar, dan alokasi ruang untuk seluruh {classrooms.length} rombel sekolah.
                     </p>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                    <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-xs flex items-center gap-2">
-                        <School className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Total Rombel: <strong className="text-slate-900 font-mono">{classrooms.length}</strong></span>
+                    <div className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs flex items-center gap-2">
+                        <School className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <span>Total Rombel: <strong className="text-slate-900 dark:text-white font-mono">{classrooms.length}</strong></span>
                     </div>
                 </div>
             </div>
 
-            {/* 2. FILTER & SEARCH TOOLBAR */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            {/* 2. Filter & Search Toolbar */}
+            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-3.5">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                     {/* Search Bar */}
                     <div className="relative w-full sm:w-80">
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
                             placeholder="Cari nama kelas atau jurusan..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 text-xs placeholder:text-slate-400 focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-slate-50/50"
+                            className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-950/50 bg-slate-50/70 dark:bg-slate-800/60 transition-all duration-200"
                         />
                     </div>
 
                     {/* Grade Level Filter Buttons */}
                     <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
                         <button
+                            type="button"
                             onClick={() => setSelectedGrade('all')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                                 selectedGrade === 'all'
-                                    ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
+                                    ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
+                                    : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200 dark:border-slate-700'
                             }`}
                         >
                             Semua Tingkat ({classrooms.length})
                         </button>
                         <button
+                            type="button"
                             onClick={() => setSelectedGrade('10')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                                 selectedGrade === '10'
-                                    ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
+                                    ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
+                                    : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200 dark:border-slate-700'
                             }`}
                         >
                             Kelas X
                         </button>
                         <button
+                            type="button"
                             onClick={() => setSelectedGrade('11')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                                 selectedGrade === '11'
-                                    ? 'bg-slate-900 text-white shadow-xs'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01] active:scale-[0.97] will-change-transform border border-slate-200/80'
+                                    ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-xs'
+                                    : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/70 border border-slate-200 dark:border-slate-700'
                             }`}
                         >
                             Kelas XI
                         </button>
                         <button
+                            type="button"
                             onClick={() => setSelectedGrade('pkl')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors duration-200 ease-bouncy ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                                 selectedGrade === 'pkl'
                                     ? 'bg-amber-600 text-white shadow-xs'
-                                    : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
+                                    : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200/80 dark:border-amber-800/60'
                             }`}
                         >
                             Kelas XII (PKL)
@@ -148,14 +149,15 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                 </div>
 
                 {/* Major / Department Filter Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-slate-100 no-scrollbar text-xs">
-                    <span className="text-slate-400 text-[11px] font-medium mr-1 shrink-0">Jurusan:</span>
+                <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 border-t border-slate-100 dark:border-slate-800 no-scrollbar text-xs">
+                    <span className="text-slate-400 dark:text-slate-500 text-[11px] font-semibold mr-1 shrink-0">Jurusan:</span>
                     <button
+                        type="button"
                         onClick={() => setSelectedDept('all')}
-                        className={`px-2.5 py-1 rounded-md font-semibold transition-colors duration-200 ease-bouncy ${
+                        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                             selectedDept === 'all'
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                ? 'bg-indigo-600 text-white shadow-2xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                         }`}
                     >
                         Semua
@@ -163,11 +165,12 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                     {departmentsList.map((d) => (
                         <button
                             key={d.code}
+                            type="button"
                             onClick={() => setSelectedDept(d.code)}
-                            className={`px-2.5 py-1 rounded-md font-semibold transition-colors duration-200 ease-bouncy ${
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                                 selectedDept === d.code
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                    ? 'bg-indigo-600 text-white shadow-2xs'
+                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                             }`}
                         >
                             {d.code}
@@ -176,11 +179,11 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                 </div>
             </div>
 
-            {/* 3. ALL-CLASSES RESPONSIVE GRID (gap-6) */}
+            {/* 3. Class Cards Responsive Grid */}
             {filteredClassrooms.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200 text-xs text-slate-400">
-                    <p className="font-semibold text-slate-600">Tidak ada rombel yang sesuai dengan filter pencarian.</p>
-                    <p className="text-[11px] mt-1">Coba sesuaikan kata kunci atau atur ulang opsi filter tingkat/jurusan.</p>
+                <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500">
+                    <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm">Tidak ada rombel yang sesuai dengan filter pencarian.</p>
+                    <p className="text-xs mt-1">Coba sesuaikan kata kunci atau atur ulang opsi filter tingkat/jurusan.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

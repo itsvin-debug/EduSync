@@ -102,7 +102,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
 
     return (
         <AdminLayout title="Pusat Verifikasi Kebersihan & Piket">
-            <Head title="Pusat Verifikasi Kebersihan & Piket — EDUSYNC Admin" />
+            <Head title="Pusat Verifikasi Kebersihan & Piket - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -468,7 +468,7 @@ export default function Picket({ picketReports = [], trashReports = [] }) {
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-900 leading-snug">
-                                    Inspeksi Piket — {selectedReport.classroom?.name}
+                                    Inspeksi Piket - {selectedReport.classroom?.name}
                                 </h3>
                                 <p className="text-[11px] text-slate-500">
                                     Disetor oleh {selectedReport.submitted_by?.name || selectedReport.student?.name} pada {selectedReport.date} ({selectedReport.delivery_time || '15:00 WIB'})

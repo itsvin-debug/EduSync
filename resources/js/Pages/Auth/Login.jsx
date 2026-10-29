@@ -120,10 +120,10 @@ export default function Login({ classrooms = [], departments = [], currentUser =
             <Head
                 title={
                     authMode === 'login'
-                        ? 'Masuk ke Portal — EDUSYNC'
+                        ? 'Masuk ke Portal - EDUSYNC'
                         : authMode === 'register'
-                        ? 'Daftar Akun Baru — EDUSYNC'
-                        : 'Reset Kata Sandi — EDUSYNC'
+                        ? 'Daftar Akun Baru - EDUSYNC'
+                        : 'Reset Kata Sandi - EDUSYNC'
                 }
             />
             <Toast />

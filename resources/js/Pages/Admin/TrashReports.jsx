@@ -69,7 +69,7 @@ export default function TrashReports({ trashReports = [], classrooms = [], teach
 
     return (
         <AdminLayout title="Laporan Sampah Pengajar">
-            <Head title="Laporan Sampah Pengajar — EDUSYNC Admin" />
+            <Head title="Laporan Sampah Pengajar - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -213,7 +213,7 @@ export default function TrashReports({ trashReports = [], classrooms = [], teach
                                                     {report.classroom?.name}
                                                 </div>
                                                 <div className="text-xs text-slate-500 mt-0.5">
-                                                    Wali Kelas: {report.classroom?.homeroom_teacher?.name || '—'}
+                                                    Wali Kelas: {report.classroom?.homeroom_teacher?.name || '-'}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

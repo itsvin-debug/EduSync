@@ -120,7 +120,7 @@ export default function Settings({ adminUser = {}, appName = 'EDUSYNC', schoolNa
 
     return (
         <AdminLayout title="Pengaturan Akun & 2FA">
-            <Head title="Pengaturan Akun & 2FA — EDUSYNC Admin" />
+            <Head title="Pengaturan Akun & 2FA - EDUSYNC Admin" />
 
             <div className="space-y-6 max-w-4xl pb-12">
                 {/* Header Card */}

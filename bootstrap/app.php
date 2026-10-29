@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackUserActivity::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'api/sinc-bot/*',
+        ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);

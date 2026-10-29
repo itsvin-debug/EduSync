@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AlertTriangle, AlertCircle, HelpCircle, RefreshCw, X, Loader2 } from 'lucide-react';
+import { AlertTriangle, AlertCircle, CheckCircle2, Info, RefreshCw, X, Loader2 } from 'lucide-react';
 
 export default function ConfirmModal({
     isOpen,
@@ -9,7 +9,7 @@ export default function ConfirmModal({
     message,
     confirmText = 'Lanjutkan',
     cancelText = 'Batal',
-    type = 'primary', // 'primary', 'warning', 'danger'
+    type = 'primary', // 'primary', 'warning', 'danger', 'success', 'info'
     isLoading = false,
 }) {
     useEffect(() => {
@@ -30,6 +30,16 @@ export default function ConfirmModal({
             iconBg: 'bg-indigo-50 text-indigo-600 border-indigo-200',
             buttonClass: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs',
         },
+        success: {
+            icon: CheckCircle2,
+            iconBg: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+            buttonClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs',
+        },
+        info: {
+            icon: Info,
+            iconBg: 'bg-sky-50 text-sky-600 border-sky-200',
+            buttonClass: 'bg-sky-600 hover:bg-sky-700 text-white shadow-xs',
+        },
         warning: {
             icon: AlertTriangle,
             iconBg: 'bg-amber-50 text-amber-600 border-amber-200',
@@ -44,6 +54,14 @@ export default function ConfirmModal({
 
     const currentConfig = typeConfig[type] || typeConfig.primary;
     const IconComponent = currentConfig.icon;
+
+    const handleConfirm = () => {
+        if (onConfirm) {
+            onConfirm();
+        } else {
+            onClose();
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -84,17 +102,19 @@ export default function ConfirmModal({
                     </div>
 
                     <div className="mt-6 flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+                        {cancelText && (
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={isLoading}
+                                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors duration-150"
+                            >
+                                {cancelText}
+                            </button>
+                        )}
                         <button
                             type="button"
-                            onClick={onClose}
-                            disabled={isLoading}
-                            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors duration-150"
-                        >
-                            {cancelText}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onConfirm}
+                            onClick={handleConfirm}
                             disabled={isLoading}
                             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-colors duration-150 ${currentConfig.buttonClass}`}
                         >

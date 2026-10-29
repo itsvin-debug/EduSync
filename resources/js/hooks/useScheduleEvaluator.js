@@ -66,7 +66,7 @@ export function useScheduleEvaluator(schedules = [], options = {}) {
 
             return {
                 state: 'OUT_OF_SCHOOL_HOURS',
-                label: 'Pending — Menunggu Waktu Sekolah',
+                label: 'Pending - Menunggu Waktu Sekolah',
                 badgeText: 'Pending',
                 badgeVariant: 'pending',
                 activeSlot: null,

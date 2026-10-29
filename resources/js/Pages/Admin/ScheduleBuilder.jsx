@@ -108,6 +108,7 @@ export default function ScheduleBuilder({
 
     // Destructive Confirmation Modal states
     const [isWipeAllModalOpen, setIsWipeAllModalOpen] = useState(false);
+    const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
     const [isPurgeClassModalOpen, setIsPurgeClassModalOpen] = useState(false);
     const [isAutoGenerateModalOpen, setIsAutoGenerateModalOpen] = useState(false);
     const [slotToDelete, setSlotToDelete] = useState(null);
@@ -233,7 +234,11 @@ export default function ScheduleBuilder({
                 },
                 onError: (err) => {
                     setIsImporting(false);
-                    alert('Gagal mengimpor jadwal: ' + (err.message || JSON.stringify(err)));
+                    setErrorModal({
+                        isOpen: true,
+                        title: 'Gagal Mengimpor Jadwal',
+                        message: err.message || 'Terjadi kendala saat memproses berkas jadwal PDF.',
+                    });
                 },
             }
         );
@@ -550,14 +555,14 @@ export default function ScheduleBuilder({
                                 <optgroup label="Kelas X (Tingkat 10)">
                                     {grade10Classes.map((c) => (
                                         <option key={c.id} value={c.id}>
-                                            {c.name} — {c.department?.name}
+                                            {c.name} - {c.department?.name}
                                         </option>
                                     ))}
                                 </optgroup>
                                 <optgroup label="Kelas XI (Tingkat 11)">
                                     {grade11Classes.map((c) => (
                                         <option key={c.id} value={c.id}>
-                                            {c.name} — {c.department?.name}
+                                            {c.name} - {c.department?.name}
                                         </option>
                                     ))}
                                 </optgroup>
@@ -1411,6 +1416,16 @@ export default function ScheduleBuilder({
                 cancelText="Batal"
                 type="primary"
                 isLoading={isSubmittingAction}
+            />
+
+            <ConfirmModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ ...errorModal, isOpen: false })}
+                title={errorModal.title}
+                message={errorModal.message}
+                type="danger"
+                confirmText="Mengerti"
+                cancelText={null}
             />
         </AdminLayout>
     );

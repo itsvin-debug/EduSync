@@ -84,7 +84,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
 
     return (
         <AdminLayout title="Izin Keluar Dinas">
-            <Head title="Izin Keluar Dinas — EDUSYNC Admin" />
+            <Head title="Izin Keluar Dinas - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -304,7 +304,7 @@ export default function DutyLeaves({ dutyLeaves = [], teachers = [] }) {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400 italic">—</span>
+                                                    <span className="text-xs text-slate-400 italic">-</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">

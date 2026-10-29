@@ -73,7 +73,7 @@ export default function RecapExport({
 
     return (
         <AdminLayout title="Rekap & Export Laporan">
-            <Head title="Rekap & Export Laporan — EDUSYNC Admin" />
+            <Head title="Rekap & Export Laporan - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
@@ -235,7 +235,7 @@ export default function RecapExport({
                                                     {row.submission_time || '07:15'}
                                                 </td>
                                                 <td className="px-6 py-4 text-xs text-slate-500">
-                                                    {row.notes || '—'}
+                                                    {row.notes || '-'}
                                                 </td>
                                             </tr>
                                         ))
@@ -293,7 +293,7 @@ export default function RecapExport({
                                                     {row.check_in_time || '06:45'}
                                                 </td>
                                                 <td className="px-6 py-4 text-xs text-slate-500">
-                                                    {row.notes || '—'}
+                                                    {row.notes || '-'}
                                                 </td>
                                             </tr>
                                         ))
@@ -336,7 +336,7 @@ export default function RecapExport({
                                                     {row.classroom?.name}
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-700 text-xs">
-                                                    {row.homeroom_teacher?.name || '—'}
+                                                    {row.homeroom_teacher?.name || '-'}
                                                 </td>
                                                 <td className="px-6 py-4 font-mono font-bold text-slate-900">
                                                     Rp {row.amount.toLocaleString('id-ID')}

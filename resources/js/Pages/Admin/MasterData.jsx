@@ -45,6 +45,7 @@ export default function MasterData({
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isBatchDeleteModalOpen, setIsBatchDeleteModalOpen] = useState(false);
+    const [feedbackModal, setFeedbackModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
 
     // Tab 6: Kalender Tahun Ajaran
     const [academicYears, setAcademicYears] = useState([
@@ -669,7 +670,12 @@ export default function MasterData({
                             className="hidden"
                             id="csvFileInput"
                             onChange={() => {
-                                alert('Berkas CSV berhasil divalidasi dan diimpor!');
+                                setFeedbackModal({
+                                    isOpen: true,
+                                    title: 'Impor Berhasil',
+                                    message: 'Berkas CSV berhasil divalidasi dan diimpor ke dalam basis data.',
+                                    type: 'success',
+                                });
                                 setIsImportModalOpen(false);
                             }}
                         />
@@ -720,7 +726,12 @@ export default function MasterData({
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        alert('Data baru berhasil ditambahkan!');
+                        setFeedbackModal({
+                            isOpen: true,
+                            title: 'Data Tersimpan',
+                            message: 'Entri data baru berhasil ditambahkan ke dalam sistem.',
+                            type: 'success',
+                        });
                         setIsAddModalOpen(false);
                     }}
                     className="space-y-4 text-xs"
@@ -875,6 +886,16 @@ export default function MasterData({
                 confirmText={`Hapus ${selectedRowIds.length} Data`}
                 cancelText="Batal"
                 type="danger"
+            />
+
+            <ConfirmModal
+                isOpen={feedbackModal.isOpen}
+                onClose={() => setFeedbackModal((prev) => ({ ...prev, isOpen: false }))}
+                title={feedbackModal.title}
+                message={feedbackModal.message}
+                type={feedbackModal.type}
+                confirmText="Mengerti"
+                cancelText={null}
             />
         </AdminLayout>
     );

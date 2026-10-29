@@ -39,10 +39,16 @@ class CleanDummyUsersSeeder extends Seeder
             'is_class_leader' => false,
         ]);
 
-        User::where('name', 'Siswa Izin Test')->update([
-            'name' => 'Gilang Ramadhan',
-            'sub_role' => 'Siswa',
-            'is_class_leader' => false,
-        ]);
+        User::where('name', 'like', 'Guru Terupdate%')
+            ->orWhere('email', 'guru@edusync.sch.id')
+            ->update([
+                'name' => 'Rian Hidayat, S.Kom',
+            ]);
+
+        \App\Models\Teacher::where('name', 'like', '%Terupdate%')
+            ->orWhere('email', 'guru@edusync.sch.id')
+            ->update([
+                'name' => 'Rian Hidayat, S.Kom',
+            ]);
     }
 }

@@ -1714,47 +1714,7 @@ class AdminController extends Controller
             'student_leaves' => StudentLeaveRequest::where('status', 'pending')->count(),
         ]);
     }
-
-    public function approveStudentLeave($id)
-    {
-        $leave = StudentLeaveRequest::findOrFail($id);
-        $leave->update([
-            'status' => 'approved',
-            'verified_by' => auth()->id(),
-            'verified_at' => now(),
-        ]);
-
-        StudentAttendance::updateOrCreate(
-            [
-                'student_id' => $leave->student_id,
-                'date' => $leave->date ?? now()->toDateString(),
-            ],
-            [
-                'classroom_id' => $leave->student?->classroom_id,
-                'status' => $leave->type,
-                'notes' => 'Izin disetujui Administrator: ' . ($leave->reason ?? '-'),
-                'recorded_by' => auth()->id(),
-            ]
-        );
-
-        $this->logAction('STUDENT_LEAVE_APPROVED', "Admin menyetujui surat izin siswa ID: {$id}");
-
-        return back()->with('success', 'Surat izin siswa berhasil disetujui.');
-    }
-
-    public function rejectStudentLeave(Request $request, $id)
-    {
-        $leave = StudentLeaveRequest::findOrFail($id);
-        $leave->update([
-            'status' => 'rejected',
-            'rejection_note' => $request->input('rejection_note', 'Ditolak oleh Administrator'),
-            'verified_by' => auth()->id(),
-            'verified_at' => now(),
-        ]);
-
-        $this->logAction('STUDENT_LEAVE_REJECTED', "Admin menolak surat izin siswa ID: {$id}");
-
-        return back()->with('success', 'Surat izin siswa ditolak.');
-    }
 }
+
+
 

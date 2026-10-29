@@ -105,7 +105,7 @@ export default function TeacherPresence({
 
     return (
         <AdminLayout title="Pantau Guru & Tugas KBM">
-            <Head title="Pantau Guru & Tugas KBM — EDUSYNC Admin" />
+            <Head title="Pantau Guru & Tugas KBM - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header & Live Clock Card */}
@@ -288,7 +288,7 @@ export default function TeacherPresence({
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
                                                     {item.isCurrentPeriod && (
-                                                        <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+                                                        <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
                                                     )}
                                                     <div className="font-mono text-xs font-bold text-slate-900">
                                                         Jam {item.period_start} - {item.period_end}

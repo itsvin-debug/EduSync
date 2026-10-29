@@ -49,7 +49,7 @@ export default function AuditLogs({ auditLogs = [] }) {
 
     return (
         <AdminLayout title="Histori Aktivitas Admin">
-            <Head title="Histori Aktivitas Admin — EDUSYNC Admin" />
+            <Head title="Histori Aktivitas Admin - EDUSYNC Admin" />
 
             <div className="space-y-6">
                 {/* Header Card */}
