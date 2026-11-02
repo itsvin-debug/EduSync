@@ -16,6 +16,7 @@ services:
         sync: false
       - key: APP_URL
         sync: false
+      # Database: Neon.tech PostgreSQL (gratis permanen)
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -23,7 +24,7 @@ services:
       - key: DB_PORT
         value: "5432"
       - key: DB_DATABASE
-        value: postgres
+        sync: false
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -38,3 +39,5 @@ services:
         value: cookie
       - key: CACHE_STORE
         value: file
+      - key: QUEUE_CONNECTION
+        value: sync

@@ -10,21 +10,21 @@ return new class extends Migration
     {
         // 1. Departments enhancements
         Schema::table('departments', function (Blueprint $table) {
-            $table->string('icon_image')->nullable()->after('icon');
-            $table->foreignId('head_teacher_id')->nullable()->after('head_teacher_name')->constrained('teachers')->nullOnDelete();
-            $table->text('description')->nullable()->after('icon_image');
+            $table->string('icon_image')->nullable();
+            $table->foreignId('head_teacher_id')->nullable()->constrained('teachers')->nullOnDelete();
+            $table->text('description')->nullable();
         });
 
         // 2. Classrooms: Physical Room Relocation support & indexes
         Schema::table('classrooms', function (Blueprint $table) {
-            $table->foreignId('room_id')->nullable()->after('homeroom_teacher_id')->constrained('rooms')->nullOnDelete();
+            $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
             $table->index(['department_id', 'grade']);
         });
 
         // 3. Teachers: Nickname & Major / Department connection
         Schema::table('teachers', function (Blueprint $table) {
-            $table->string('nickname')->nullable()->after('name');
-            $table->foreignId('department_id')->nullable()->after('user_id')->constrained('departments')->nullOnDelete();
+            $table->string('nickname')->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
         });
 
         // 4. Pivot Table: Teacher Assigned Subjects (Multi-select)
@@ -36,8 +36,8 @@ return new class extends Migration
 
         // 5. Users: Two-Factor Authentication (2FA) & Security
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('two_factor_enabled')->default(false)->after('status');
-            $table->string('two_factor_code')->nullable()->after('two_factor_enabled');
+            $table->boolean('two_factor_enabled')->default(false);
+            $table->string('two_factor_code')->nullable();
         });
 
         // 6. High-Performance Indexes

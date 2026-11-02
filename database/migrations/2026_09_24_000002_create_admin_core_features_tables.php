@@ -70,8 +70,8 @@ return new class extends Migration
 
         // 5. Enhance picket_reports with video_url and delivery_time if not present (Feature 7)
         Schema::table('picket_reports', function (Blueprint $table) {
-            $table->string('video_url')->nullable()->after('photo_url');
-            $table->string('delivery_time')->nullable()->after('notes');
+            $table->string('video_url')->nullable();
+            $table->string('delivery_time')->nullable();
         });
 
         // 6. Teacher Trash Reports / Laporan Sampah (Feature 8)
