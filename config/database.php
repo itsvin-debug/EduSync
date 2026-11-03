@@ -85,7 +85,16 @@ return [
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
+            'host' => (function () {
+                $host = env('DB_HOST', '127.0.0.1');
+                $endpoint = env('DB_ENDPOINT');
+                if (! $endpoint && str_contains($host, '.neon.tech')) {
+                    $endpoint = explode('.', str_replace('-pooler', '', $host))[0];
+                }
+                return $endpoint && ! str_contains($host, 'options=')
+                    ? $host . ";options='endpoint=" . $endpoint . "'"
+                    : $host;
+            })(),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),
             'username' => env('DB_USERNAME', 'root'),
