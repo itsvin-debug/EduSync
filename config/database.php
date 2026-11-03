@@ -86,8 +86,8 @@ return [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
             'host' => (function () {
-                $host = env('DB_HOST', '127.0.0.1');
-                $endpoint = env('DB_ENDPOINT');
+                $host = trim(env('DB_HOST', '127.0.0.1'));
+                $endpoint = trim(env('DB_ENDPOINT', ''));
                 if (! $endpoint && str_contains($host, '.neon.tech')) {
                     $endpoint = explode('.', str_replace('-pooler', '', $host))[0];
                 }
@@ -95,15 +95,15 @@ return [
                     ? $host . ";options='endpoint=" . $endpoint . "'"
                     : $host;
             })(),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
+            'port' => trim(env('DB_PORT', '5432')),
+            'database' => trim(env('DB_DATABASE', 'laravel')),
+            'username' => trim(env('DB_USERNAME', 'root')),
+            'password' => trim(env('DB_PASSWORD', '')),
+            'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => env('DB_SCHEMA', 'public'),
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslmode' => trim(env('DB_SSLMODE', 'prefer')),
         ],
 
         'sqlsrv' => [
