@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: edusync-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_CONNECTION: mysql
+      RUN_MIGRATIONS: "true"
+      RUN_SEEDER: "true"       # Set ke "false" setelah deploy pertama
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - edusync-net
+
+  db:
+    image: mysql:8.0
+    container_name: edusync-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: lerd
+      MYSQL_DATABASE: edusync_db
+      MYSQL_USER: edusync_user
+      MYSQL_PASSWORD: edusync_secret
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - edusync-net
+
+volumes:
+  db_data:
+
+networks:
+  edusync-net:

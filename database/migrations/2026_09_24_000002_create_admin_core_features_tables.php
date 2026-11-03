@@ -70,8 +70,8 @@ return new class extends Migration
 
         // Picket report attachments
         Schema::table('picket_reports', function (Blueprint $table) {
-            $table->string('video_url')->nullable()->after('photo_url');
-            $table->string('delivery_time')->nullable()->after('notes');
+            $table->string('video_url')->nullable();
+            $table->string('delivery_time')->nullable();
         });
 
         // Trash reports

@@ -32,9 +32,10 @@
    - [🪟 Panduan untuk Windows](#-panduan-instalasi-di-windows)
 8. [Rangkaian Pengujian Otomatis (Testing)](#-rangkaian-pengujian-otomatis-testing)
 9. [Panduan Deployment Lengkap](#-panduan-deployment-lengkap)
-   - [Deployment via Docker](#a-deployment-menggunakan-docker)
-   - [Deployment ke Render.com](#b-deployment-ke-rendercom--supabase)
-   - [Deployment ke Shared Hosting (cPanel)](#c-deployment-ke-shared-hosting--cpanel)
+   - [⚡ Deployment ke Vercel & Neon PostgreSQL (Gratis Tanpa Kartu Kredit)](#a-deployment-ke-vercel--neon-postgresql-gratis-permanen)
+   - [Deployment via Docker](#b-deployment-menggunakan-docker)
+   - [Deployment ke Render.com](#c-deployment-ke-rendercom--supabase)
+   - [Deployment ke Shared Hosting (cPanel)](#d-deployment-ke-shared-hosting--cpanel)
 10. [Struktur Database & Hubungan Model](#-struktur-database--hubungan-model)
 11. [Lisensi & Kontribusi](#-lisensi--kontribusi)
 
@@ -355,7 +356,19 @@ php artisan test
 
 EDUSYNC siap untuk dideploy ke lingkungan produksi (Production Ready). Berikut adalah beberapa metode deployment:
 
-### A. Deployment Menggunakan Docker
+### A. Deployment ke Vercel & Neon PostgreSQL (Gratis Permanen & No Credit Card) ⭐ Direkomendasikan
+
+Opsi termudah dan **100% gratis tanpa kartu kredit**. Panduan super lengkap dan langkah detail dapat dibaca langsung di:  
+👉 **[DEPLOY_VERCEL.md](DEPLOY_VERCEL.md)**
+
+**Ringkasan Cepat:**
+1. Buat database gratis di [Neon.tech](https://neon.tech) (Pilih Region Singapore).
+2. Isi kredensial database Neon di `.env` lokal, lalu jalankan `php artisan migrate --force && php artisan db:seed --force`.
+3. Buka [Vercel.com](https://vercel.com) dengan akun GitHub pemilik repo (`itsvin-debug`), klik **Add New Project** -> **Import EduSync**.
+4. Masukkan *Environment Variables* di Vercel (`DB_CONNECTION=pgsql`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `APP_KEY`, dll).
+5. Klik **Deploy**! Selesai dalam 1–2 menit.
+
+### B. Deployment Menggunakan Docker
 
 Proyek ini telah dilengkapi dengan `Dockerfile` dan konfigurasi `docker/` (Nginx + PHP-FPM + Supervisor).
 1. Pastikan **Docker** dan **Docker Compose** terinstal.
@@ -369,7 +382,7 @@ Proyek ini telah dilengkapi dengan `Dockerfile` dan konfigurasi `docker/` (Nginx
    docker run -d -p 80:80 --env-file .env edusync-app
    ```
 
-### B. Deployment ke Render.com & Supabase
+### C. Deployment ke Render.com & Supabase
 
 Metode paling mudah (1-Click Deployment) tanpa harus mengelola server (PaaS).
 
@@ -392,7 +405,7 @@ Metode paling mudah (1-Click Deployment) tanpa harus mengelola server (PaaS).
    - `RUN_SEEDER`: `true` (Hanya untuk instalasi pertama)
 - Klik **Apply**. Render akan melakukan build image dan menjalankan server secara otomatis.
 
-### C. Deployment ke Shared Hosting (cPanel)
+### D. Deployment ke Shared Hosting (cPanel)
 
 Jika menggunakan layanan shared hosting konvensional (Niagahoster, Hostinger, dll):
 
