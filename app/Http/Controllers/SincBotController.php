@@ -23,9 +23,9 @@ class SincBotController extends Controller
         $message = trim($validated['message']);
         $sessionId = $validated['session_id'] ?? session()->getId();
 
-        // 1. Try FastAPI microservice endpoint first (default port 8001)
+        // 1. Try FastAPI microservice endpoint first with fast connect timeout
         try {
-            $response = Http::timeout(15)->post('http://127.0.0.1:8001/chat', [
+            $response = Http::connectTimeout(1)->timeout(10)->post('http://127.0.0.1:8001/chat', [
                 'message' => $message,
                 'session_id' => $sessionId,
             ]);
@@ -40,19 +40,40 @@ class SincBotController extends Controller
                 ]);
             }
         } catch (\Throwable $e) {
-            // FastAPI service might not be running as a standalone daemon, use process fallback
+            // FastAPI service is offline or unreachable, fallback to direct python runner
         }
 
-        // 2. Direct Python process fallback for zero-downtime execution
+        // 2. Direct Python process fallback with base64 transport & Windows env inheritance
         try {
+            $pythonCandidates = [
+                'C:\\Users\\HYPE AMD\\AppData\\Local\\Python\\bin\\python.exe',
+                'python',
+                'py',
+            ];
             $pythonPath = 'python';
+            foreach ($pythonCandidates as $candidate) {
+                if (file_exists($candidate)) {
+                    $pythonPath = $candidate;
+                    break;
+                }
+            }
+
             $scriptPath = base_path('python/sinc_bot.py');
-            $payload = json_encode([
+            $payload = base64_encode(json_encode([
                 'message' => $message,
                 'session_id' => $sessionId,
-            ]);
+            ], JSON_UNESCAPED_UNICODE));
 
-            $process = Process::timeout(25)->run([$pythonPath, $scriptPath, '--json', $payload]);
+            // Ensure critical Windows environment variables are preserved for Winsock/Network DLLs
+            $env = [
+                'SystemRoot' => getenv('SystemRoot') ?: 'C:\\Windows',
+                'WINDIR' => getenv('WINDIR') ?: 'C:\\Windows',
+                'PATH' => getenv('PATH') ?: 'C:\\Windows\\system32;C:\\Windows',
+                'TEMP' => getenv('TEMP') ?: sys_get_temp_dir(),
+                'TMP' => getenv('TMP') ?: sys_get_temp_dir(),
+            ];
+
+            $process = Process::env($env)->timeout(30)->run([$pythonPath, $scriptPath, '--base64', $payload]);
 
             if ($process->successful()) {
                 $output = trim($process->output());
@@ -66,6 +87,12 @@ class SincBotController extends Controller
                         'session_id' => $sessionId,
                     ]);
                 }
+            } else {
+                Log::warning('SINC-BOT fallback exited with non-zero code', [
+                    'exit' => $process->exitCode(),
+                    'err' => $process->errorOutput(),
+                    'out' => $process->output(),
+                ]);
             }
         } catch (\Throwable $processErr) {
             Log::error('SINC-BOT fallback execution failed: ' . $processErr->getMessage());

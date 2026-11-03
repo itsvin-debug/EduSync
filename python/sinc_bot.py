@@ -7,8 +7,8 @@ Framework: FastAPI with Google Gemini API & School RAG Knowledge Engine.
 import os
 import sys
 import json
+import base64
 import argparse
-import uvicorn
 from typing import Optional, Dict, Any
 from pathlib import Path
 from pydantic import BaseModel
@@ -272,22 +272,8 @@ def generate_gemini_reply(user_message: str) -> Dict[str, Any]:
 
 
 # ==============================================================================
-# FASTAPI APPLICATION
+# FASTAPI APPLICATION (Lazy loaded for server mode)
 # ==============================================================================
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI(title="SINC-BOT API", version="1.0.0")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 class ChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = "default"
@@ -297,32 +283,46 @@ class ResetRequest(BaseModel):
     session_id: Optional[str] = "default"
 
 
-@app.get("/health")
-def health():
-    return {
-        "status": "ok",
-        "bot": "SINC-BOT",
-        "school": "SMKN 1 Ciomas",
-        "models_preferred": PREFERRED_MODELS,
-    }
+def create_app():
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
 
+    app = FastAPI(title="SINC-BOT API", version="1.0.0")
 
-@app.post("/chat")
-def chat(payload: ChatRequest):
-    result = generate_gemini_reply(payload.message)
-    return {
-        "reply": result["reply"],
-        "is_out_of_topic": result["is_out_of_topic"],
-        "session_id": payload.session_id,
-    }
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
+    @app.get("/health")
+    def health():
+        return {
+            "status": "ok",
+            "bot": "SINC-BOT",
+            "school": "SMKN 1 Ciomas",
+            "models_preferred": PREFERRED_MODELS,
+        }
 
-@app.post("/reset")
-def reset(payload: ResetRequest):
-    sess_id = payload.session_id or "default"
-    if sess_id in active_sessions:
-        del active_sessions[sess_id]
-    return {"status": "cleared", "session_id": sess_id}
+    @app.post("/chat")
+    def chat(payload: ChatRequest):
+        result = generate_gemini_reply(payload.message)
+        return {
+            "reply": result["reply"],
+            "is_out_of_topic": result["is_out_of_topic"],
+            "session_id": payload.session_id,
+        }
+
+    @app.post("/reset")
+    def reset(payload: ResetRequest):
+        sess_id = payload.session_id or "default"
+        if sess_id in active_sessions:
+            del active_sessions[sess_id]
+        return {"status": "cleared", "session_id": sess_id}
+
+    return app
 
 
 # ==============================================================================
@@ -332,6 +332,7 @@ def main():
     parser = argparse.ArgumentParser(description="SINC-BOT Service & CLI Runner")
     parser.add_argument("--query", type=str, help="Single query text")
     parser.add_argument("--json", type=str, help="JSON payload string")
+    parser.add_argument("--base64", type=str, help="Base64 encoded JSON payload string")
     parser.add_argument("--test", action="store_true", help="Run automated verification suite")
     parser.add_argument("--serve", action="store_true", help="Start FastAPI server daemon")
     parser.add_argument("--port", type=int, default=8001, help="FastAPI port")
@@ -339,6 +340,8 @@ def main():
     args = parser.parse_args()
 
     if args.serve:
+        import uvicorn
+        app = create_app()
         print(f"Starting SINC-BOT FastAPI server on port {args.port}...")
         uvicorn.run(app, host="127.0.0.1", port=args.port)
         return
@@ -360,6 +363,14 @@ def main():
         print("All verification tests PASSED successfully!")
         return
 
+    if args.base64:
+        raw_json = base64.b64decode(args.base64).decode("utf-8")
+        data = json.loads(raw_json)
+        message = data.get("message", "")
+        res = generate_gemini_reply(message)
+        print(json.dumps(res))
+        return
+
     if args.json:
         data = json.loads(args.json)
         message = data.get("message", "")
@@ -373,6 +384,8 @@ def main():
         return
 
     # Default to starting server
+    import uvicorn
+    app = create_app()
     uvicorn.run(app, host="127.0.0.1", port=args.port)
 
 
