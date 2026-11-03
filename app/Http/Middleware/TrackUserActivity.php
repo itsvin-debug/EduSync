@@ -11,11 +11,16 @@ class TrackUserActivity
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check()) {
-            $user = auth()->user();
-            if (!$user->last_seen_at || $user->last_seen_at->lt(now()->subSeconds(30))) {
-                \App\Models\User::where('id', $user->id)->update([
-                    'last_seen_at' => now(),
-                ]);
+            try {
+                $user = auth()->user();
+                if (!$user->last_seen_at || $user->last_seen_at->lt(now()->subSeconds(30))) {
+                    \App\Models\User::where('id', $user->id)->update([
+                        'last_seen_at' => now(),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                // Jangan gagalkan request utama jika pembaruan aktivitas pengguna bermasalah
+                report($e);
             }
         }
 

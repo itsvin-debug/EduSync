@@ -18,6 +18,7 @@ import {
     History,
     LogOut,
     Menu,
+    X,
     ChevronLeft,
     ChevronRight,
     ExternalLink,
@@ -38,10 +39,12 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
     const schoolName = app?.school_name || 'SMKN 1 Ciomas';
     const adminAvatar = app?.admin_avatar;
 
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
     const sidebarScrollRef = useRef(null);
 
     // Maintain sidebar scroll position across Inertia page transitions
     useLayoutEffect(() => {
+        setIsMobileOpen(false);
         const savedScroll = sessionStorage.getItem('edusync_admin_sidebar_scroll');
         if (savedScroll !== null && sidebarScrollRef.current) {
             sidebarScrollRef.current.scrollTop = Number(savedScroll);
@@ -262,16 +265,25 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased font-sans flex transition-colors duration-200">
             <Toast />
 
-            {/* COLLAPSIBLE SIDEBAR */}
+            {/* Mobile Backdrop Overlay */}
+            {isMobileOpen && (
+                <div
+                    onClick={() => setIsMobileOpen(false)}
+                    className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* COLLAPSIBLE SIDEBAR (Drawer on Mobile, Persistent on Desktop) */}
             <aside
                 className={`fixed left-0 top-0 bottom-0 bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-all duration-200 ease-in-out ${
-                    isCollapsed ? 'w-[76px]' : 'w-[264px]'
-                }`}
+                    isMobileOpen ? 'translate-x-0 w-[264px]' : '-translate-x-full lg:translate-x-0'
+                } ${isCollapsed ? 'lg:w-[76px]' : 'lg:w-[264px]'}`}
             >
-                {/* Central Floating Sidebar Toggle Button */}
+                {/* Central Floating Sidebar Toggle Button (Desktop Only) */}
                 <button
                     onClick={toggleSidebar}
-                    className="absolute top-1/2 -translate-y-1/2 -right-3.5 z-50 w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full border-2 border-[#0F172A] shadow-md flex items-center justify-center cursor-pointer transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="hidden lg:flex absolute top-1/2 -translate-y-1/2 -right-3.5 z-50 w-7 h-7 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full border-2 border-[#0F172A] shadow-md items-center justify-center cursor-pointer transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
                     aria-label="Toggle Sidebar"
                 >
@@ -281,7 +293,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                 <div className="flex flex-col h-full overflow-hidden">
                     {/* Brand Header */}
                     <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800/80 shrink-0">
-                        <Link href="/admin/dashboard" className="flex items-center gap-3 overflow-hidden">
+                        <Link href="/admin/dashboard" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-3 overflow-hidden">
                             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30 shrink-0 overflow-hidden">
                                 {adminAvatar ? (
                                     <img src={adminAvatar} alt="Admin Logo" className="w-full h-full object-cover" />
@@ -289,7 +301,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                     <span className="font-bold text-base">{appName.charAt(0)}</span>
                                 )}
                             </div>
-                            {!isCollapsed && (
+                            {(!isCollapsed || isMobileOpen) && (
                                 <div className="flex flex-col min-w-0 animate-in fade-in duration-200">
                                     <div className="flex items-center gap-1.5">
                                         <span className="font-bold text-white text-base tracking-tight truncate leading-none">{appName}</span>
@@ -301,6 +313,13 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                 </div>
                             )}
                         </Link>
+                        <button
+                            onClick={() => setIsMobileOpen(false)}
+                            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white"
+                            aria-label="Tutup Menu"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
 
                     {/* Nav Categories & Items with Scroll Position Retention */}
@@ -311,7 +330,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                     >
                         {navCategories.map((group, gIdx) => (
                             <div key={gIdx} className="space-y-1">
-                                {!isCollapsed && (
+                                {(!isCollapsed || isMobileOpen) && (
                                     <div className="px-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">
                                         {group.category}
                                     </div>
@@ -324,7 +343,8 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                                 key={item.href}
                                                 href={item.href}
                                                 preserveScroll={true}
-                                                title={isCollapsed ? `${item.name}${item.badge ? ` (${item.badge} butuh verifikasi)` : ''}` : undefined}
+                                                onClick={() => setIsMobileOpen(false)}
+                                                title={isCollapsed && !isMobileOpen ? `${item.name}${item.badge ? ` (${item.badge} butuh verifikasi)` : ''}` : undefined}
                                                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 group cursor-pointer ${
                                                     item.active
                                                         ? 'bg-indigo-600 text-white font-semibold shadow-xs shadow-indigo-600/30'
@@ -337,16 +357,16 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                                                             item.active ? 'text-white' : 'text-slate-400 group-hover:scale-105 active:scale-95'
                                                         }`}
                                                     />
-                                                    {isCollapsed && item.badge && (
+                                                    {isCollapsed && !isMobileOpen && item.badge && (
                                                         <span className="absolute -top-2 -right-2.5 min-w-[17px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center border-2 border-[#0F172A] shadow-xs">
                                                             {item.badge}
                                                         </span>
                                                     )}
                                                 </div>
-                                                {!isCollapsed && (
+                                                {(!isCollapsed || isMobileOpen) && (
                                                     <span className="truncate flex-1">{item.name}</span>
                                                 )}
-                                                {!isCollapsed && item.badge && (
+                                                {(!isCollapsed || isMobileOpen) && item.badge && (
                                                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white shadow-xs">
                                                         {item.badge}
                                                     </span>
@@ -361,7 +381,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
                     {/* Bottom User Card & "Keluar Akun" Logout Button */}
                     <div className="p-3 border-t border-slate-800/80 bg-[#0B1120] shrink-0">
-                        {!isCollapsed && (
+                        {(!isCollapsed || isMobileOpen) && (
                             <div className="p-2.5 rounded-xl bg-slate-800/50 border border-slate-700/60 mb-2">
                                 <div className="flex items-center justify-between mb-1">
                                     <div className="flex items-center gap-1.5">
@@ -382,15 +402,15 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                         <button
                             onClick={handleLogout}
                             className={`flex items-center w-full px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 active:scale-[0.98] transition-all duration-200 text-xs font-medium cursor-pointer ${
-                                isCollapsed ? 'justify-center' : 'justify-between'
+                                isCollapsed && !isMobileOpen ? 'justify-center' : 'justify-between'
                             }`}
                             title="Keluar Akun"
                         >
                             <span className="flex items-center gap-2">
                                 <LogOut className="w-4 h-4 shrink-0" />
-                                {!isCollapsed && <span>Keluar Akun</span>}
+                                {(!isCollapsed || isMobileOpen) && <span>Keluar Akun</span>}
                             </span>
-                            {!isCollapsed && <ChevronRight className="w-3.5 h-3.5 opacity-60" />}
+                            {(!isCollapsed || isMobileOpen) && <ChevronRight className="w-3.5 h-3.5 opacity-60" />}
                         </button>
                     </div>
                 </div>
@@ -398,17 +418,24 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
             {/* MAIN CONTENT AREA */}
             <div
-                className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out ${
-                    isCollapsed ? 'pl-[76px]' : 'pl-[264px]'
+                className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out pl-0 ${
+                    isCollapsed ? 'lg:pl-[76px]' : 'lg:pl-[264px]'
                 }`}
             >
                 {/* Header */}
-                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-40 px-6 sm:px-8 flex items-center justify-between transition-colors duration-200">
+                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 px-4 sm:px-8 flex items-center justify-between transition-colors duration-200">
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={toggleSidebar}
+                            onClick={() => {
+                                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                                    setIsMobileOpen(true);
+                                } else {
+                                    toggleSidebar();
+                                }
+                            }}
                             className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 cursor-pointer"
-                            title="Buka / Tutup Sidebar"
+                            title="Buka / Tutup Navigasi"
+                            aria-label="Buka Navigasi"
                         >
                             <Menu className="w-4 h-4" />
                         </button>
@@ -418,11 +445,11 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                             <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600" />
                             <span className="hidden sm:inline">Kurikulum & Manajemen</span>
                             <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600 hidden sm:inline" />
-                            <span className="font-semibold text-slate-900 dark:text-white">{title}</span>
+                            <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-none">{title}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold tracking-tight border border-slate-200 dark:border-slate-700">
                             TA 2026/2027 Ganjil
                         </span>
@@ -434,13 +461,13 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                             href="/"
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 shadow-2xs"
                         >
-                            <span>Portal Publik</span>
+                            <span className="hidden sm:inline">Portal Publik</span>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                         </Link>
                     </div>
                 </header>
 
-                <main className="p-6 sm:p-8 flex-1">
+                <main className="p-4 sm:p-6 lg:p-8 flex-1">
                     <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
 

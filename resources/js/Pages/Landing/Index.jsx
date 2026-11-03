@@ -23,6 +23,8 @@ import {
     Calendar,
     Award,
     Activity,
+    Menu,
+    X,
 } from 'lucide-react';
 import Logo from '@/Components/Logo';
 import ThemeToggle from '@/Components/ThemeToggle';
@@ -52,6 +54,7 @@ export default function Index({
     const [selectedGrade, setSelectedGrade] = useState('all');
     const [selectedDept, setSelectedDept] = useState('all');
     const [isKokuModalOpen, setIsKokuModalOpen] = useState(false);
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
     // Real-time schedule interval and live badge evaluator
     const getScheduleStatus = (sched) => {
@@ -150,19 +153,76 @@ export default function Index({
                             <a href="#kejuruan" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200">Konsentrasi Keahlian</a>
                         </nav>
 
-                        {/* Right Area: Dark/Light Mode Toggle & Login */}
-                        <div className="flex items-center gap-2.5">
+                        {/* Right Area: Dark/Light Mode Toggle, Login, & Mobile Menu Toggle */}
+                        <div className="flex items-center gap-2 sm:gap-2.5">
                             <ThemeToggle />
                             <Link
                                 href="/login"
-                                className="h-9 px-4 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-semibold text-xs transition-all duration-200 active:scale-95 flex items-center gap-1.5 shadow-xs"
+                                className="h-9 px-3.5 sm:px-4 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-semibold text-xs transition-all duration-200 active:scale-95 flex items-center gap-1.5 shadow-xs"
                             >
                                 <span>Log In</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                             </Link>
+                            <button
+                                type="button"
+                                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                                className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                aria-label="Toggle Menu Navigasi"
+                            >
+                                {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Navigation Dropdown */}
+                {isMobileNavOpen && (
+                    <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-3 space-y-1 text-xs font-semibold animate-in slide-in-from-top-2 duration-200">
+                        <a
+                            href="#beranda"
+                            onClick={() => setIsMobileNavOpen(false)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Beranda</span>
+                        </a>
+                        <a
+                            href="#fitur-web"
+                            onClick={() => setIsMobileNavOpen(false)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Fitur Portal</span>
+                        </a>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsMobileNavOpen(false);
+                                setIsKokuModalOpen(true);
+                            }}
+                            className="w-full flex items-center gap-2.5 p-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors cursor-pointer"
+                        >
+                            <CalendarDays className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Jadwal Kokurikuler 2.0</span>
+                        </button>
+                        <a
+                            href="#jadwal-instan"
+                            onClick={() => setIsMobileNavOpen(false)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Jadwal Pelajaran (KBM)</span>
+                        </a>
+                        <a
+                            href="#kejuruan"
+                            onClick={() => setIsMobileNavOpen(false)}
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                            <Building2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <span>Konsentrasi Keahlian</span>
+                        </a>
+                    </div>
+                )}
             </header>
 
             {/* 2. SUB-HEADER STATUS STRIP */}

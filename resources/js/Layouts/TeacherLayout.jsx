@@ -204,7 +204,8 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
 
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 flex flex-col min-w-0">
-                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 px-4 sm:px-8 flex items-center justify-between transition-colors duration-200">
+                {/* Desktop Top Header (Hidden on Mobile to Prevent Stacked Headers) */}
+                <header className="hidden md:flex sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 px-4 sm:px-8 items-center justify-between transition-colors duration-200">
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                             <span className="font-semibold text-slate-800 dark:text-slate-200">Ruang Kerja Guru</span>
@@ -241,9 +242,73 @@ export default function TeacherLayout({ children, title = 'Ruang Kerja Guru', te
                     </div>
                 </header>
 
-                <main className="p-4 sm:p-6 lg:p-8 flex-1">
+                <main className="p-4 sm:p-6 lg:p-8 flex-1 pb-24 md:pb-8">
                     <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
                 </main>
+
+                {/* Mobile Bottom Quick Navigation Bar for Teacher */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-1.5 flex items-center justify-around shadow-lg">
+                    <button
+                        type="button"
+                        onClick={() => handleItemClick('workspace')}
+                        className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
+                            activeTab === 'workspace'
+                                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <Clock className="w-4.5 h-4.5" />
+                        <span className="text-[10px]">Hari Ini</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => handleItemClick('personal')}
+                        className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
+                            activeTab === 'personal'
+                                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <CalendarDays className="w-4.5 h-4.5" />
+                        <span className="text-[10px]">Jadwal</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => handleItemClick('presensi_kelas')}
+                        className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
+                            activeTab === 'presensi_kelas'
+                                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <Users className="w-4.5 h-4.5" />
+                        <span className="text-[10px]">Presensi</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => handleItemClick('tugas')}
+                        className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-all duration-200 ${
+                            activeTab === 'tugas'
+                                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <ClipboardList className="w-4.5 h-4.5" />
+                        <span className="text-[10px]">Tugas</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+                    >
+                        <Menu className="w-4.5 h-4.5" />
+                        <span className="text-[10px]">Menu</span>
+                    </button>
+                </nav>
 
                 <footer className="px-4 sm:px-8 py-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left transition-colors duration-200">
                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">

@@ -55,10 +55,11 @@ class StudentController extends Controller
         $teachers = Teacher::whereIn('id', $teacherIds)->get();
         $allTeachers = Teacher::orderBy('name')->get();
 
-        // Class students roster (for Class Leader attendance management) ordered by attendance number
+        // Urutkan siswa berdasarkan nomor absen lalu nama (kompatibel multi-database)
         $classStudents = User::where('classroom_id', $classroom->id)
             ->where('role', 'siswa')
-            ->orderByRaw('CAST(attendance_number AS UNSIGNED) ASC, name ASC')
+            ->orderBy('attendance_number', 'asc')
+            ->orderBy('name', 'asc')
             ->get();
 
         // Today's attendance records for the class
@@ -520,7 +521,8 @@ class StudentController extends Controller
 
         $students = User::where('classroom_id', $classroom->id)
             ->where('role', 'siswa')
-            ->orderByRaw('CAST(attendance_number AS UNSIGNED) ASC, name ASC')
+            ->orderBy('attendance_number', 'asc')
+            ->orderBy('name', 'asc')
             ->get();
 
         $attendances = StudentAttendance::where('classroom_id', $classroom->id)
