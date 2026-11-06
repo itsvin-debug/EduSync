@@ -1266,29 +1266,29 @@ export default function Dashboard({
                             Tidak ada jadwal mengajar pada hari {selectedWeeklyDay}.
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                             {weeklyDaySchedules.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
+                                    className="p-3 sm:p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                                Jam ke-{s.period_start} s/d {s.period_end}
+                                        <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                                            <span className="font-mono text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 truncate">
+                                                Jam {s.period_start}-{s.period_end}
                                             </span>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase">
+                                            <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase truncate">
                                                 {s.subject?.category}
                                             </span>
                                         </div>
-                                        <h4 className="font-bold text-sm text-slate-900">{s.classroom?.name}</h4>
-                                        <p className="text-xs text-slate-700 font-semibold mt-1">{s.subject?.name}</p>
+                                        <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-snug line-clamp-1">{s.classroom?.name}</h4>
+                                        <p className="text-[11px] sm:text-xs text-slate-700 font-semibold mt-1 truncate">{s.subject?.name}</p>
                                     </div>
 
-                                    <div className="mt-4 pt-2.5 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                            <span>{s.room?.name || 'Ruang Teori'}</span>
+                                    <div className="mt-3 sm:mt-4 pt-2 sm:pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex items-center justify-between">
+                                        <div className="flex items-center gap-1 truncate">
+                                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                                            <span className="truncate">{s.room?.name || 'Ruang Teori'}</span>
                                         </div>
                                     </div>
                                 </div>

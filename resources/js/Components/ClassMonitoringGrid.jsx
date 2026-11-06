@@ -8,6 +8,8 @@ import {
     Sparkles,
     CheckCircle2,
     CalendarDays,
+    LayoutGrid,
+    Square,
 } from 'lucide-react';
 import ClassCard from './ClassCard';
 import ClassDetailModal from './ClassDetailModal';
@@ -19,6 +21,7 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
     const [selectedGrade, setSelectedGrade] = useState('all');
     const [selectedDept, setSelectedDept] = useState('all');
     const [activeModalClass, setActiveModalClass] = useState(null);
+    const [mobileColumns, setMobileColumns] = useState('2'); // '2' (default compact grid) | '1' (full width)
 
     // Filter logic
     const filteredClassrooms = useMemo(() => {
@@ -148,34 +151,58 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                     </div>
                 </div>
 
-                {/* Major / Department Filter Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 border-t border-slate-100 dark:border-slate-800 no-scrollbar text-xs">
-                    <span className="text-slate-400 dark:text-slate-500 text-[11px] font-semibold mr-1 shrink-0">Jurusan:</span>
-                    <button
-                        type="button"
-                        onClick={() => setSelectedDept('all')}
-                        className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                            selectedDept === 'all'
-                                ? 'bg-indigo-600 text-white shadow-2xs'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
-                    >
-                        Semua
-                    </button>
-                    {departmentsList.map((d) => (
+                {/* Major / Department Filter Chips & Mobile View Toggle */}
+                <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+                        <span className="text-slate-400 dark:text-slate-500 text-[11px] font-semibold mr-1 shrink-0">Jurusan:</span>
                         <button
-                            key={d.code}
                             type="button"
-                            onClick={() => setSelectedDept(d.code)}
+                            onClick={() => setSelectedDept('all')}
                             className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                                selectedDept === d.code
+                                selectedDept === 'all'
                                     ? 'bg-indigo-600 text-white shadow-2xs'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                             }`}
                         >
-                            {d.code}
+                            Semua
                         </button>
-                    ))}
+                        {departmentsList.map((d) => (
+                            <button
+                                key={d.code}
+                                type="button"
+                                onClick={() => setSelectedDept(d.code)}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                                    selectedDept === d.code
+                                        ? 'bg-indigo-600 text-white shadow-2xs'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                }`}
+                            >
+                                {d.code}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Mobile Grid Layout Toggle (Compact 2-col vs Full 1-col) */}
+                    <div className="flex sm:hidden items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setMobileColumns('2')}
+                            title="Tampilan 2 Kolom"
+                            aria-label="Tampilan 2 Kolom"
+                            className={`p-1 rounded transition-colors ${mobileColumns === '2' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            <LayoutGrid className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMobileColumns('1')}
+                            title="Tampilan 1 Kolom"
+                            aria-label="Tampilan 1 Kolom"
+                            className={`p-1 rounded transition-colors ${mobileColumns === '1' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            <Square className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -186,7 +213,7 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
                     <p className="text-xs mt-1">Coba sesuaikan kata kunci atau atur ulang opsi filter tingkat/jurusan.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className={`grid ${mobileColumns === '1' ? 'grid-cols-1' : 'grid-cols-2'} sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6`}>
                     {filteredClassrooms.map((c) => (
                         <ClassCard
                             key={c.id}

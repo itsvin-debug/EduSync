@@ -372,45 +372,53 @@ export default function Index({
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200/80 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
-                                    <Calendar className="w-5 h-5" />
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+                            <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200 flex flex-col justify-between">
+                                <div>
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200/80 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2.5 sm:mb-4">
+                                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">Penjadwalan KBM & Rotasi Lab</h3>
+                                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1.5 sm:mt-2 leading-relaxed">
+                                        Akses instan susunan mata pelajaran per jam pelajaran (JP), guru pengampu, serta alokasi lab praktik kejuruan.
+                                    </p>
                                 </div>
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Penjadwalan KBM & Rotasi Lab</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                                    Akses instan susunan mata pelajaran per jam pelajaran (JP), nama guru pengampu, serta alokasi ruang teori dan laboratorium praktik kejuruan tanpa potensi bentrok.
-                                </p>
                             </div>
 
-                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
-                                <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/80 border border-teal-200/80 dark:border-teal-800/60 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-4">
-                                    <Sparkles className="w-5 h-5" />
+                            <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200 flex flex-col justify-between">
+                                <div>
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-teal-50 dark:bg-teal-950/80 border border-teal-200/80 dark:border-teal-800/60 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-2.5 sm:mb-4">
+                                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">Jadwal Kokurikuler 2.0</h3>
+                                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1.5 sm:mt-2 leading-relaxed">
+                                        Kalender rotasi petugas Pentas Kreasi, Makan Bersama, dan Jumat Taqwa yang sinkron otomatis.
+                                    </p>
                                 </div>
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Jadwal Kokurikuler 2.0 Otomatis</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                                    Kalender rotasi petugas harian Pentas Kreasi (Selasa & Kamis), Makan Bersama (Rabu), dan Jumat Taqwa (Jumat) yang sinkron otomatis mengikuti kalender nyata semester ganjil.
-                                </p>
                             </div>
 
-                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
-                                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
-                                    <Users className="w-5 h-5" />
+                            <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200 flex flex-col justify-between">
+                                <div>
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-4">
+                                        <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">Monitoring KBM & Presensi</h3>
+                                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1.5 sm:mt-2 leading-relaxed">
+                                        Pemantauan sesi KBM secara transparan, status kehadiran siswa per kelas, hingga piket harian.
+                                    </p>
                                 </div>
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Monitoring KBM & Presensi Harian</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                                    Pemantauan sesi KBM secara transparan, status kehadiran siswa per kelas, presensi kehadiran guru mengajar, hingga verifikasi piket kebersihan kelas.
-                                </p>
                             </div>
 
-                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
-                                <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/80 border border-amber-200/80 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
-                                    <ShieldCheck className="w-5 h-5" />
+                            <div className="p-3.5 sm:p-6 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200 flex flex-col justify-between">
+                                <div>
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-950/80 border border-amber-200/80 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2.5 sm:mb-4">
+                                        <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-snug">Portal Terpadu Multi-Role</h3>
+                                    <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1.5 sm:mt-2 leading-relaxed">
+                                        Ruang kerja khusus Siswa & Ketua Kelas, Guru Pengampu, dan Administrator kurikulum.
+                                    </p>
                                 </div>
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Portal Terpadu Multi-Role</h3>
-                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                                    Ruang kerja khusus untuk Siswa & Ketua Kelas (ruang belajar & input absensi), Guru (rekap jam mengajar), dan Administrator (kelola jurusan, kelas, & jadwal).
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -551,70 +559,72 @@ export default function Index({
                             </div>
                         </div>
 
-                        {/* Schedule Cards 3-Column Grid */}
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                        {/* Schedule Cards 2-Col Mobile / 3-Col Desktop Grid */}
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6 mt-6 sm:mt-8">
                             {filteredSchedules.map((sched) => (
                                 <div
                                     key={sched.id}
-                                    className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between hover:border-indigo-300 dark:hover:border-indigo-600/50 hover:-translate-y-0.5 transition-all duration-200"
+                                    className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xs hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600/50 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
                                 >
                                     <div>
-                                        <div className="flex items-center justify-between gap-3">
-                                            <span className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 font-bold text-xs">
+                                        <div className="flex items-center justify-between gap-1.5 sm:gap-3">
+                                            <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 font-bold text-[10px] sm:text-xs">
                                                 {sched.classroom?.name}
                                             </span>
                                             {(() => {
                                                 const status = engine.getPeriodStatus(sched.period_start);
                                                 if (status === 'berlangsung') {
                                                     return (
-                                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center gap-1.5">
+                                                        <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center gap-1">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                            <span>Berlangsung</span>
+                                                            <span className="hidden sm:inline">Berlangsung</span>
+                                                            <span className="sm:hidden">Aktif</span>
                                                         </span>
                                                     );
                                                 }
                                                 if (status === 'selesai') {
                                                     return (
-                                                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                                        <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                                                             Selesai
                                                         </span>
                                                     );
                                                 }
                                                 return (
-                                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
-                                                        Mendatang
+                                                    <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60">
+                                                        Nanti
                                                     </span>
                                                 );
                                             })()}
                                         </div>
 
-                                        <h3 className="font-bold text-slate-900 dark:text-white text-sm mt-3 leading-snug line-clamp-2">
+                                        <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mt-2 sm:mt-3 leading-snug line-clamp-2">
                                             {sched.subject?.name}
                                         </h3>
 
-                                        <div className="mt-3 flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-                                            <div className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-medium">
-                                                <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                                                <span className="font-mono">
-                                                    Jam ke-{sched.period_start} - {sched.period_end} ({sched.day})
+                                        <div className="mt-2 sm:mt-3 flex flex-col gap-1 sm:gap-1.5 text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">
+                                            <div className="flex items-center gap-1.5 sm:gap-2 text-slate-900 dark:text-slate-200 font-medium truncate">
+                                                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                                                <span className="font-mono truncate">
+                                                    Jam {sched.period_start}-{sched.period_end} ({sched.day})
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Users className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                                                <span className="font-medium text-slate-700 dark:text-slate-300">{sched.teacher?.name}</span>
+                                            <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+                                                <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                                                <span className="font-medium text-slate-700 dark:text-slate-300 truncate">{sched.teacher?.name}</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                                                <span>Ruang: {sched.room?.name || 'Ruang Teori'}</span>
+                                            <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+                                                <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                                                <span className="truncate">{sched.room?.name || 'Ruang Teori'}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
-                                        <span>Alokasi {sched.period_end - sched.period_start + 1} JP</span>
+                                    <div className="mt-3.5 sm:mt-5 pt-2 sm:pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
+                                        <span>{sched.period_end - sched.period_start + 1} JP</span>
                                         <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Sinkron Dapodik
+                                            <span className="hidden sm:inline">Sinkron Dapodik</span>
+                                            <span className="sm:hidden">Dapodik</span>
                                         </span>
                                     </div>
                                 </div>
@@ -638,35 +648,35 @@ export default function Index({
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
                         {departments.map((dept) => {
                             const Icon = getDeptIcon(dept.code);
                             return (
                                 <div
                                     key={dept.id}
-                                    className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col justify-between hover:border-indigo-300 dark:hover:border-indigo-700/60 transition-all duration-200"
+                                    className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700/60 transition-all duration-200 flex flex-col justify-between"
                                 >
                                     <div>
-                                        <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold mb-3 overflow-hidden p-2">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold mb-2 sm:mb-3 overflow-hidden p-1.5 sm:p-2">
                                             {dept.icon_image ? (
                                                 <img src={dept.icon_image} alt={dept.code} className="w-full h-full object-contain" />
                                             ) : (
-                                                <Icon className="w-5 h-5 text-indigo-400" />
+                                                <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
                                             )}
                                         </div>
-                                        <h3 className="font-bold text-slate-900 dark:text-white text-sm leading-tight">
+                                        <h3 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm leading-tight line-clamp-2">
                                             {dept.name}
                                         </h3>
-                                        <span className="font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-1 block">
+                                        <span className="font-mono text-[11px] sm:text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-1 block">
                                             [{dept.code}]
                                         </span>
                                         {dept.head_teacher_name && (
-                                            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
                                                 Kaprog: {dept.head_teacher_name}
                                             </div>
                                         )}
                                     </div>
-                                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                                    <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
                                         <span>{dept.classrooms_count || 4} Rombel</span>
                                         <span className="text-emerald-600 dark:text-emerald-400 font-medium">Aktif</span>
                                     </div>

@@ -1011,92 +1011,93 @@ export default function Dashboard({
                         </div>
                     </div>
 
-                    {/* 2. STATS & METRICS GRID (Full Dark Mode & Refined Spacing) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                    {/* 2. STATS & METRICS GRID (2-Col Mobile / 4-Col Desktop) */}
+                    <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
                         {/* Metric 1: Kehadiran Pribadi Siswa */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Kehadiran Saya (30 Hari)
+                        <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
+                            <div className="flex items-center justify-between gap-1">
+                                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                    Kehadiran Saya
                                 </span>
-                                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
-                                    <ShieldCheck className="w-4 h-4" />
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50 shrink-0">
+                                    <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
-                            <div className="my-3">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
+                            <div className="my-2 sm:my-3">
+                                <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2">
+                                    <span className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
                                         {myAttendanceStats.hadir || 0} Hari
                                     </span>
-                                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                        {personalAttendanceRate}% Kehadiran
+                                    <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                        {personalAttendanceRate}% Hadir
                                     </span>
                                 </div>
-                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2.5">
+                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1.5 sm:mt-2.5">
                                     <div
                                         className="bg-emerald-500 h-full rounded-full transition-all duration-200"
                                         style={{ width: `${personalAttendanceRate}%` }}
                                     ></div>
                                 </div>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span>{myAttendanceStats.sakit || 0} Sakit • {myAttendanceStats.izin || 0} Izin</span>
-                                <span className="font-semibold text-rose-600 dark:text-rose-400">{myAttendanceStats.alpha || 0} Alpa</span>
+                            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <span>{myAttendanceStats.sakit || 0}S • {myAttendanceStats.izin || 0}I</span>
+                                <span className="font-semibold text-rose-600 dark:text-rose-400">{myAttendanceStats.alpha || 0}A</span>
                             </div>
                         </div>
 
                         {/* Metric 2: Surat Izin / Sakit Saya */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Pengajuan Izin / Sakit
+                        <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
+                            <div className="flex items-center justify-between gap-1">
+                                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                    Izin / Sakit
                                 </span>
-                                <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
-                                    <Calendar className="w-4 h-4" />
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50 shrink-0">
+                                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
-                            <div className="my-3">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
-                                        {myLeaveRequests.length} Pengajuan
+                            <div className="my-2 sm:my-3">
+                                <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2">
+                                    <span className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
+                                        {myLeaveRequests.length} Surat
                                     </span>
-                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Personal</span>
+                                    <span className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">Personal</span>
                                 </div>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
-                                    {myLeaveRequests[0] ? `Terakhir: ${myLeaveRequests[0].type.toUpperCase()} (${myLeaveRequests[0].status})` : 'Belum ada surat izin/sakit'}
+                                <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
+                                    {myLeaveRequests[0] ? `Terakhir: ${myLeaveRequests[0].type.toUpperCase()}` : 'Belum ada pengajuan'}
                                 </p>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span>Ditinjau Wali Kelas</span>
+                            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <span className="hidden sm:inline">Ditinjau Wali</span>
+                                <span className="sm:hidden">Wali</span>
                                 <button onClick={() => setActiveTab('izin')} className="text-sky-600 dark:text-sky-400 font-semibold hover:underline cursor-pointer">
-                                    + Ajukan Izin ›
+                                    + Ajukan ›
                                 </button>
                             </div>
                         </div>
 
                         {/* Metric 3: Sesi Belajar Hari Ini */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Sesi Hari Ini ({todayName})
+                        <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
+                            <div className="flex items-center justify-between gap-1">
+                                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                    Sesi Hari Ini
                                 </span>
-                                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
-                                    <Clock className="w-4 h-4" />
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50 shrink-0">
+                                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
-                            <div className="my-3">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
+                            <div className="my-2 sm:my-3">
+                                <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2">
+                                    <span className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
                                         {todayTimeline.length} Sesi
                                     </span>
-                                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Jam 1 - 10</span>
+                                    <span className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400">{todayName}</span>
                                 </div>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
-                                    {classroom?.name} • {classroom?.department?.name || 'Kejuruan'}
+                                <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
+                                    {classroom?.name}
                                 </p>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span>{todayTimeline.length > 0 ? 'Jadwal Aktif' : 'Hari Libur'}</span>
+                            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <span>{todayTimeline.length > 0 ? 'KBM Aktif' : 'Libur'}</span>
                                 <button onClick={() => setActiveTab('today')} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer">
                                     Linimasa ›
                                 </button>
@@ -1104,30 +1105,30 @@ export default function Dashboard({
                         </div>
 
                         {/* Metric 4: Tugas Mandiri / Jamkos */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
-                            <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Tugas Mandiri / Jamkos
+                        <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-5 shadow-2xs flex flex-col justify-between transition-colors duration-200">
+                            <div className="flex items-center justify-between gap-1">
+                                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                                    Tugas Jamkos
                                 </span>
-                                <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900/50">
-                                    <FileText className="w-4 h-4" />
+                                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900/50 shrink-0">
+                                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
-                            <div className="my-3">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
+                            <div className="my-2 sm:my-3">
+                                <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2">
+                                    <span className="text-lg sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
                                         {learningTasks.length} Tugas
                                     </span>
-                                    <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Aktif</span>
+                                    <span className="text-[10px] sm:text-xs font-semibold text-amber-600 dark:text-amber-400">Aktif</span>
                                 </div>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
-                                    {learningTasks[0] ? learningTasks[0].title : 'Tidak ada tugas jam kosong'}
+                                <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 mt-1 truncate">
+                                    {learningTasks[0] ? learningTasks[0].title : 'Tidak ada tugas'}
                                 </p>
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <span>Delegasi Pengajar</span>
+                            <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <span>Mandiri</span>
                                 <button onClick={() => setActiveTab('tugas')} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer">
-                                    Lihat Modul ›
+                                    Modul ›
                                 </button>
                             </div>
                         </div>
@@ -2577,29 +2578,29 @@ export default function Dashboard({
                             Tidak ada jadwal pelajaran pada hari {selectedWeeklyDay}.
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                             {weeklyDaySchedules.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
+                                    className="p-3 sm:p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy flex flex-col justify-between"
                                 >
                                     <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                                Jam ke-{s.period_start} s/d {s.period_end}
+                                        <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                                            <span className="font-mono text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 truncate">
+                                                Jam {s.period_start}-{s.period_end}
                                             </span>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase">
+                                            <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase truncate">
                                                 {s.subject?.category}
                                             </span>
                                         </div>
-                                        <h4 className="font-bold text-sm text-slate-900">{s.subject?.name}</h4>
-                                        <p className="text-xs text-slate-600 mt-1">{s.teacher?.name}</p>
+                                        <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-snug line-clamp-2">{s.subject?.name}</h4>
+                                        <p className="text-[11px] sm:text-xs text-slate-600 mt-1 truncate">{s.teacher?.name}</p>
                                     </div>
 
-                                    <div className="mt-4 pt-2.5 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                            <span>{s.room?.name || 'Ruang Teori'}</span>
+                                    <div className="mt-3 sm:mt-4 pt-2 sm:pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex items-center justify-between">
+                                        <div className="flex items-center gap-1 truncate">
+                                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                                            <span className="truncate">{s.room?.name || 'Ruang Teori'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2843,44 +2844,44 @@ export default function Dashboard({
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                         {organizations.map((org) => (
                             <div
                                 key={org.id}
-                                className="p-5 rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
                             >
                                 <div>
-                                    <div className="flex items-center justify-between gap-2 mb-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                            {org.type === 'osis_mpk' ? 'OSIS / MPK' : org.type === 'vokasi' ? 'Komunitas Vokasi' : 'Ekstrakurikuler'}
+                                    <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 truncate">
+                                            {org.type === 'osis_mpk' ? 'OSIS/MPK' : org.type === 'vokasi' ? 'Vokasi' : 'Ekskul'}
                                         </span>
-                                        <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
-                                            <Users className="w-3.5 h-3.5 text-slate-400" />
-                                            {org.member_count || 0} Anggota
+                                        <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 flex items-center gap-1 shrink-0">
+                                            <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
+                                            <span>{org.member_count || 0}</span>
                                         </span>
                                     </div>
 
-                                    <h4 className="font-bold text-slate-900 text-base mb-1">{org.name}</h4>
-                                    <p className="text-xs text-slate-500 mb-3 line-clamp-2">
+                                    <h4 className="font-bold text-slate-900 text-xs sm:text-base mb-1 leading-snug line-clamp-1">{org.name}</h4>
+                                    <p className="text-[11px] sm:text-xs text-slate-500 mb-2 sm:mb-3 line-clamp-2">
                                         {org.description || 'Pengembangan kompetensi dan soft skill siswa kejuruan.'}
                                     </p>
 
-                                    <div className="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                            <span>{org.schedule_day || 'Jumat'}, {org.schedule_time || '15.30 - 17.00 WIB'}</span>
+                                    <div className="space-y-1 text-[10px] sm:text-xs text-slate-600 bg-slate-50 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-slate-100">
+                                        <div className="flex items-center gap-1.5 truncate">
+                                            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                                            <span className="truncate">{org.schedule_day || 'Jumat'}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                            <span>{org.location || 'Lapangan Utama / Lab'}</span>
+                                        <div className="flex items-center gap-1.5 truncate">
+                                            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
+                                            <span className="truncate">{org.location || 'Lapangan / Lab'}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                                    <span className="text-slate-400 text-[11px]">Pembina:</span>
-                                    <span className="font-semibold text-slate-800 text-[11px]">
-                                        {org.supervisor_teacher?.name || 'Guru Pembina'}
+                                <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-xs truncate">
+                                    <span className="text-slate-400 text-[10px] sm:text-[11px] shrink-0">Pembina:</span>
+                                    <span className="font-semibold text-slate-800 text-[10px] sm:text-[11px] truncate ml-1">
+                                        {org.supervisor_teacher?.name || 'Guru'}
                                     </span>
                                 </div>
                             </div>
@@ -2902,37 +2903,37 @@ export default function Dashboard({
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                         {teachers.map((t) => (
                             <div
                                 key={t.id}
-                                className="p-4 rounded-xl border border-slate-200 hover:border-indigo-200 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
+                                className="p-3 sm:p-4 rounded-xl border border-slate-200 hover:border-indigo-200 hover:shadow-xs transition-all duration-200 ease-bouncy bg-white flex flex-col justify-between"
                             >
                                 <div>
-                                    <div className="flex items-center justify-between gap-2 mb-2">
-                                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                                            Tenaga Pendidik
+                                    <div className="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                                        <span className="text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 truncate">
+                                            Pengajar
                                         </span>
-                                        <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                                        <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider font-semibold truncate">
                                             {t.title || 'Guru'}
                                         </span>
                                     </div>
 
-                                    <h4 className="font-bold text-slate-900 text-sm leading-tight">{t.name}</h4>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-1">
+                                    <h4 className="font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2">{t.name}</h4>
+                                    <p className="text-[10px] sm:text-xs text-slate-500 mt-1 line-clamp-1">
                                         {t.subjects?.map((s) => s.name).join(', ') || 'Tenaga Pendidik Vokasi'}
                                     </p>
                                 </div>
 
-                                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                    <span className="font-mono text-xs text-slate-500">{t.phone || '0812-3456-7890'}</span>
+                                <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5">
+                                    <span className="font-mono text-[10px] sm:text-xs text-slate-500 truncate hidden sm:inline">{t.phone || '0812-3456-7890'}</span>
                                     <a
                                         href={`https://wa.me/${(t.phone || '081234567890').replace(/[^0-9]/g, '')}?text=Halo%20${encodeURIComponent(t.name)}%2C%20saya%20siswa%20${encodeURIComponent(classroom?.name)}`}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
+                                        className="inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-semibold shadow-xs transition-colors duration-200 ease-bouncy"
                                     >
-                                        <MessageCircle className="w-3.5 h-3.5" />
+                                        <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                         <span>Chat WA</span>
                                     </a>
                                 </div>
