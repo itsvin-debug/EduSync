@@ -408,8 +408,8 @@ export default function Dashboard({
             {/* TOP ACTIVE CLASS HERO BANNER & AGGREGATE METRICS (ONLY ON RUANG KERJA HARI INI) */}
             {activeTab === 'workspace' && (
                 <>
-                    <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white rounded-2xl p-6 sm:p-7 shadow-sm mb-6 border border-slate-800">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white rounded-2xl p-4 sm:p-7 shadow-sm mb-6 border border-slate-800">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
                     <div className="space-y-3">
                         <div className="flex items-center gap-2.5 flex-wrap">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
@@ -427,7 +427,7 @@ export default function Dashboard({
 
                         {engineState.state === 'CLASS_ACTIVE' && engineState.activeSlot ? (
                             <div>
-                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                                <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
                                     {engineState.activeSlot.classroom?.name} - {engineState.activeSlot.subject?.name}
                                 </h1>
                                 <p className="text-xs sm:text-sm text-slate-300 mt-1 flex items-center gap-2">
@@ -440,7 +440,7 @@ export default function Dashboard({
                             </div>
                         ) : (
                             <div>
-                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                                <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
                                     {engineState.label}
                                 </h1>
                                 <p className="text-xs sm:text-sm text-slate-300 mt-1">
@@ -450,17 +450,17 @@ export default function Dashboard({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto">
                         <button
                             onClick={() => setActiveTab('presensi_kelas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-semibold shadow-xs transition-all duration-200 cursor-pointer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white text-xs font-semibold shadow-xs transition-all duration-200 cursor-pointer"
                         >
                             <Users className="w-4 h-4" />
                             <span>Pantau Presensi Siswa</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('tugas')}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-white text-xs font-semibold border border-slate-700 transition-all duration-200 cursor-pointer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-white text-xs font-semibold border border-slate-700 transition-all duration-200 cursor-pointer"
                         >
                             <ClipboardList className="w-4 h-4 text-amber-300" />
                             <span>Delegasi Tugas Ketua Kelas</span>

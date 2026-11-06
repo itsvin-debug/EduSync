@@ -2548,22 +2548,22 @@ export default function Dashboard({
 
             {/* TAB: JADWAL MINGGUAN LENGKAP */}
             {activeTab === 'weekly' && (
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-5 sm:space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
                         <div>
-                            <h3 className="font-bold text-slate-900 text-base">Jadwal Pelajaran Mingguan</h3>
-                            <p className="text-xs text-slate-500 mt-0.5">Alokasi seluruh jam KBM kelas {classroom?.name} dari Senin sampai Jumat</p>
+                            <h3 className="font-bold text-slate-900 dark:text-white text-base">Jadwal Pelajaran Mingguan</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Alokasi seluruh jam KBM kelas {classroom?.name} dari Senin sampai Jumat</p>
                         </div>
 
-                        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto no-scrollbar w-full sm:w-auto">
                             {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map((d) => (
                                 <button
                                     key={d}
                                     onClick={() => setSelectedWeeklyDay(d)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ease-bouncy ${
+                                    className={`px-3 py-2 sm:py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 ease-bouncy cursor-pointer flex-1 sm:flex-none text-center ${
                                         selectedWeeklyDay === d
-                                            ? 'bg-white text-indigo-700 shadow-xs'
-                                            : 'text-slate-600 hover:text-slate-900'
+                                            ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                                     }`}
                                 >
                                     {d}

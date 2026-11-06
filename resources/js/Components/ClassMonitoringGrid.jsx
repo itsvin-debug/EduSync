@@ -181,12 +181,12 @@ export default function ClassMonitoringGrid({ classrooms = [], title = "Matrix M
 
             {/* 3. Class Cards Responsive Grid */}
             {filteredClassrooms.length === 0 ? (
-                <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500">
+                <div className="p-8 sm:p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500">
                     <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm">Tidak ada rombel yang sesuai dengan filter pencarian.</p>
                     <p className="text-xs mt-1">Coba sesuaikan kata kunci atau atur ulang opsi filter tingkat/jurusan.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {filteredClassrooms.map((c) => (
                         <ClassCard
                             key={c.id}

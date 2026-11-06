@@ -278,8 +278,8 @@ export default function Index({
 
             <main className="w-full flex-1">
                 {/* 3. HERO SECTION */}
-                <section id="beranda" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                    <div className="grid lg:grid-cols-12 gap-10 items-center">
+                <section id="beranda" className="py-8 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                    <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                         {/* Left Column */}
                         <div className="lg:col-span-7 flex flex-col items-start">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200/80 dark:border-indigo-800/60">
@@ -287,15 +287,15 @@ export default function Index({
                                 <span>Portal Akademik & Penjadwalan Terintegrasi • {schoolName}</span>
                             </div>
 
-                            <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] mt-5">
+                            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18] sm:leading-[1.15] mt-4 sm:mt-5">
                                 Portal Informasi & Penjadwalan {schoolName}
                             </h1>
 
-                            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mt-4 max-w-xl">
+                            <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mt-3 sm:mt-4 max-w-xl">
                                 Pusat informasi resmi manajemen jadwal kegiatan belajar mengajar (KBM), rotasi bengkel dan laboratorium praktik, jadwal harian kokurikuler 2.0 (Pentas Kreasi, Makan Bersama, Jumat Taqwa), serta pemantauan presensi siswa dan guru {schoolName} secara akurat dan transparan.
                             </p>
 
-                            <div className="flex flex-wrap items-center gap-3 mt-7 w-full sm:w-auto">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 mt-6 sm:mt-7 w-full sm:w-auto">
                                 <a
                                     href="#jadwal-instan"
                                     className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 text-white font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-2.5 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95 group"
@@ -321,27 +321,27 @@ export default function Index({
                             </div>
 
                             {/* Key Metrics Bar */}
-                            <div className="mt-10 pt-7 border-t border-slate-200 dark:border-slate-800 grid grid-cols-3 gap-6 w-full">
+                            <div className="mt-8 sm:mt-10 pt-6 sm:pt-7 border-t border-slate-200 dark:border-slate-800 grid grid-cols-3 gap-2.5 sm:gap-6 w-full">
                                 <div>
-                                    <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-mono tracking-tight">
+                                    <div className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white font-mono tracking-tight">
                                         {stats.total_classrooms || 31}
                                     </div>
                                     <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">Rombel Terjadwal</div>
-                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Tingkat X, XI, XII</div>
+                                    <div className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Tingkat X, XI, XII</div>
                                 </div>
                                 <div>
-                                    <div className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-mono tracking-tight">
+                                    <div className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-white font-mono tracking-tight">
                                         12
                                     </div>
                                     <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">Lab & Ruang Praktik</div>
-                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Standar Praktik Kejuruan</div>
+                                    <div className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Standar Praktik Kejuruan</div>
                                 </div>
                                 <div>
-                                    <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
+                                    <div className="text-xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
                                         100%
                                     </div>
                                     <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">Bebas Bentrok</div>
-                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Validasi Kurikulum</div>
+                                    <div className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Validasi Kurikulum</div>
                                 </div>
                             </div>
                         </div>
@@ -358,9 +358,9 @@ export default function Index({
                 </section>
 
                 {/* 3.5 FITUR UTAMA PORTAL WEB SMKN 1 CIOMAS */}
-                <section id="fitur-web" className="py-16 bg-white dark:bg-slate-900 border-y border-slate-200/90 dark:border-slate-800 transition-colors duration-200 w-full">
+                <section id="fitur-web" className="py-10 sm:py-16 bg-white dark:bg-slate-900 border-y border-slate-200/90 dark:border-slate-800 transition-colors duration-200 w-full">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center max-w-2xl mx-auto mb-12">
+                        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
                             <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-1">
                                 Informasi & Fitur Terintegrasi
                             </span>
@@ -372,8 +372,8 @@ export default function Index({
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
                                 <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200/80 dark:border-indigo-800/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
                                     <Calendar className="w-5 h-5" />
                                 </div>
@@ -383,7 +383,7 @@ export default function Index({
                                 </p>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
+                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
                                 <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/80 border border-teal-200/80 dark:border-teal-800/60 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-4">
                                     <Sparkles className="w-5 h-5" />
                                 </div>
@@ -393,7 +393,7 @@ export default function Index({
                                 </p>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
+                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
                                 <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
                                     <Users className="w-5 h-5" />
                                 </div>
@@ -403,7 +403,7 @@ export default function Index({
                                 </p>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
+                            <div className="p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700/80 hover:border-indigo-300 dark:hover:border-indigo-600/50 transition-all duration-200">
                                 <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/80 border border-amber-200/80 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
                                     <ShieldCheck className="w-5 h-5" />
                                 </div>
@@ -417,8 +417,8 @@ export default function Index({
                 </section>
 
                 {/* 4. CLASS SCHEDULE QUICK LOOKUP SECTION */}
-                <section id="jadwal-instan" className="py-16 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-200 w-full">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+                <section id="jadwal-instan" className="py-10 sm:py-16 bg-slate-50 dark:bg-slate-950 border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-200 w-full">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-16">
                         {/* Live Class Matrix Monitoring */}
                         <ClassMonitoringGrid
                             classrooms={classrooms}
@@ -625,8 +625,8 @@ export default function Index({
                 </section>
 
                 {/* 5. 5 KONSENTRASI KEAHLIAN */}
-                <section id="kejuruan" className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-2xl mx-auto mb-10">
+                <section id="kejuruan" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
                         <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block mb-1">
                             Pendidikan Kejuruan Unggulan
                         </span>
@@ -638,7 +638,7 @@ export default function Index({
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
                         {departments.map((dept) => {
                             const Icon = getDeptIcon(dept.code);
                             return (
@@ -678,8 +678,8 @@ export default function Index({
             </main>
 
             {/* INSTITUTIONAL FOOTER */}
-            <footer className="w-full bg-white dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 mt-12 text-slate-600 dark:text-slate-400 text-xs transition-colors duration-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <footer className="w-full bg-white dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 mt-8 sm:mt-12 text-slate-600 dark:text-slate-400 text-xs transition-colors duration-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
                         {/* Col 1: Brand & School Profile */}
                         <div className="flex flex-col gap-3">

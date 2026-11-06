@@ -15,7 +15,7 @@ export default function ClassCard({ classroom, onOpenDetail }) {
     const isPkl = classroom.is_pkl;
 
     return (
-        <div className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700/60 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
+        <div className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700/60 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
             <div>
                 {/* 1. Card Header */}
                 <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100 dark:border-slate-800/80">
@@ -153,7 +153,7 @@ export default function ClassCard({ classroom, onOpenDetail }) {
                 <button
                     onClick={() => onOpenDetail(classroom)}
                     type="button"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-semibold transition-all duration-200 active:scale-95 group/btn cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-semibold transition-all duration-200 active:scale-95 group/btn cursor-pointer"
                 >
                     <span>Lihat Detail</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform duration-200" />

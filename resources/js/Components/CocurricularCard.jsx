@@ -170,10 +170,10 @@ export default function CocurricularCard({
                         </div>
 
                         {/* Duty Class Showcase */}
-                        <div className="flex items-baseline justify-between gap-3 mt-1.5">
+                        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 sm:gap-3 mt-1.5">
                             <div>
                                 <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Kelas Pelaksana:</div>
-                                <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 flex items-center gap-2">
+                                <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 flex items-center gap-2">
                                     <span>{spotlightItem.class_name}</span>
                                     {isSpotlightToday && (
                                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-emerald-600 text-white rounded-md shadow-2xs">
@@ -183,13 +183,13 @@ export default function CocurricularCard({
                                 </div>
                             </div>
 
-                            <div className="text-right">
+                            <div className="text-left sm:text-right">
                                 <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                                     {formatIndoDate(spotlightItem.date)}
                                 </div>
-                                <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-end gap-1 mt-0.5">
-                                    <MapPin className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                                    <span className="truncate max-w-[180px]">{spotlightItem.location}</span>
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center sm:justify-end gap-1 mt-0.5">
+                                    <MapPin className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                                    <span className="truncate max-w-[220px] sm:max-w-[180px]">{spotlightItem.location}</span>
                                 </div>
                             </div>
                         </div>
