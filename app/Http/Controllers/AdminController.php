@@ -876,12 +876,44 @@ class AdminController extends Controller
     }
 
     // Admin activity audit logs
-    public function auditLogs()
+    public function auditLogs(Request $request)
     {
-        $logs = AuditLog::with('user')->latest()->take(50)->get();
+        $search = trim((string) $request->input('search', ''));
+        $category = trim((string) $request->input('category', 'all'));
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 5 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        $query = AuditLog::with('user')->latest();
+
+        if ($category !== 'all' && !empty($category)) {
+            $lowerCategory = strtolower($category);
+            $query->whereRaw('LOWER(action) LIKE ?', ["%{$lowerCategory}%"]);
+        }
+
+        if (!empty($search)) {
+            $lowerSearch = strtolower($search);
+            $query->where(function ($q) use ($lowerSearch) {
+                $q->whereRaw('LOWER(action) LIKE ?', ["%{$lowerSearch}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$lowerSearch}%"])
+                  ->orWhere('ip_address', 'LIKE', "%{$lowerSearch}%")
+                  ->orWhereHas('user', function ($uq) use ($lowerSearch) {
+                      $uq->whereRaw('LOWER(name) LIKE ?', ["%{$lowerSearch}%"])
+                         ->orWhereRaw('LOWER(email) LIKE ?', ["%{$lowerSearch}%"]);
+                  });
+            });
+        }
+
+        $auditLogs = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/AuditLogs', [
-            'auditLogs' => $logs,
+            'auditLogs' => $auditLogs,
+            'filters' => [
+                'search' => $search,
+                'category' => $category,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

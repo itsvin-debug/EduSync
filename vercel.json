@@ -38,7 +38,7 @@
         "VIEW_COMPILED_PATH": "/tmp/views",
         "CACHE_STORE": "array",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie",
+        "SESSION_DRIVER": "database",
         "QUEUE_CONNECTION": "sync",
         "INERTIA_SSR_ENABLED": "false"
     }

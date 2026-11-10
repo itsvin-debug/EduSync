@@ -239,11 +239,19 @@ class AuthController extends Controller
     public function quickLogin($role)
     {
         $user = match($role) {
-            'admin' => User::where('role', 'admin')->where('status', 'active')->first(),
-            'guru' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', '!=', 'Wali Kelas')->first() ?? User::where('role', 'guru')->where('status', 'active')->first(),
-            'wali' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', 'Wali Kelas')->first() ?? User::where('role', 'guru')->where('status', 'active')->first(),
-            'siswa', 'ketua-kelas' => User::where('role', 'siswa')->where('is_class_leader', true)->where('status', 'active')->first() ?? User::where('email', 'siswa@edusync.sch.id')->first(),
-            'siswa-biasa' => User::where('role', 'siswa')->where('is_class_leader', false)->where('status', 'active')->first() ?? User::where('email', 'siswabiasa@edusync.sch.id')->first(),
+            'admin' => User::where('role', 'admin')->where('status', 'active')->first()
+                ?? User::where('email', 'admin@edusync.sch.id')->first(),
+            'guru' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', '!=', 'Wali Kelas')->first()
+                ?? User::where('email', 'guru@edusync.sch.id')->first()
+                ?? User::where('role', 'guru')->where('status', 'active')->first(),
+            'wali' => User::where('role', 'guru')->where('status', 'active')->where('sub_role', 'Wali Kelas')->first()
+                ?? User::where('email', 'wali@edusync.sch.id')->first()
+                ?? User::where('role', 'guru')->where('status', 'active')->first(),
+            'siswa', 'ketua-kelas' => User::where('role', 'siswa')->where('is_class_leader', true)->where('status', 'active')->first()
+                ?? User::where('email', 'siswa@edusync.sch.id')->first(),
+            'siswa-biasa' => User::where('role', 'siswa')->where('is_class_leader', false)->where('status', 'active')->first()
+                ?? User::where('email', 'bintang.aditya.kusuma@edusync.sch.id')->first()
+                ?? User::where('email', 'siswabiasa@edusync.sch.id')->first(),
             default => null,
         };
 

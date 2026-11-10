@@ -1642,7 +1642,7 @@ export default function Dashboard({
                         <form onSubmit={handleLeaveSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                             {/* Left Column: MARKI Web Camera Viewfinder */}
                             <div className="lg:col-span-7 flex flex-col space-y-3">
-                                <label className="font-semibold text-slate-700 text-xs block flex items-center justify-between">
+                                <label className="font-semibold text-slate-700 text-xs flex items-center justify-between">
                                     <span>Bukti Foto Langsung Kamera Web</span>
                                     <span className="text-[10px] text-sky-600 font-bold uppercase tracking-wider">MARKI Real-Time</span>
                                 </label>
@@ -2295,7 +2295,7 @@ export default function Dashboard({
 
                                 {/* 3. Custom Dropzone / Upload Box for Photos & Videos (MARKI App Specs) */}
                                 <div>
-                                    <label className="font-semibold text-slate-700 block mb-1.5 flex items-center justify-between">
+                                    <label className="font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
                                         <span>Unggah Dokumentasi Kebersihan (Foto & Video)</span>
                                         <span className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">Aplikasi MARKI</span>
                                     </label>

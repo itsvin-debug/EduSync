@@ -511,7 +511,7 @@ export default function Login({ classrooms = [], departments = [], currentUser =
                                             <KeyRound className="w-4 h-4 text-indigo-500 absolute left-3 top-1/2 -translate-y-1/2" />
                                         </div>
                                         {loginErrors.two_factor_code && (
-                                            <span className="text-rose-600 text-[11px] font-semibold block flex items-center gap-1">
+                                            <span className="text-rose-600 text-[11px] font-semibold flex items-center gap-1">
                                                 <AlertCircle className="w-3 h-3 shrink-0" />
                                                 <span>{loginErrors.two_factor_code}</span>
                                             </span>
