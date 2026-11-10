@@ -276,7 +276,7 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
             {/* COLLAPSIBLE SIDEBAR (Drawer on Mobile, Persistent on Desktop) */}
             <aside
-                className={`fixed left-0 top-0 bottom-0 bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-all duration-200 ease-in-out ${
+                className={`fixed left-0 top-0 bottom-0 bg-[#0F172A] text-slate-300 z-50 flex flex-col justify-between border-r border-slate-800 select-none transition-all duration-200 ease-in-out print:hidden ${
                     isMobileOpen ? 'translate-x-0 w-[264px]' : '-translate-x-full lg:translate-x-0'
                 } ${isCollapsed ? 'lg:w-[76px]' : 'lg:w-[264px]'}`}
             >
@@ -418,12 +418,12 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
 
             {/* MAIN CONTENT AREA */}
             <div
-                className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out pl-0 ${
+                className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out pl-0 print:pl-0 print:m-0 print:w-full ${
                     isCollapsed ? 'lg:pl-[76px]' : 'lg:pl-[264px]'
                 }`}
             >
                 {/* Header */}
-                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 px-4 sm:px-8 flex items-center justify-between transition-colors duration-200">
+                <header className="sticky top-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 z-30 px-4 sm:px-8 flex items-center justify-between transition-colors duration-200 print:hidden">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => {
@@ -467,12 +467,12 @@ export default function AdminLayout({ children, title = 'Control Center' }) {
                     </div>
                 </header>
 
-                <main className="p-4 sm:p-6 lg:p-8 flex-1">
-                    <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform">{children}</div>
+                <main className="p-4 sm:p-6 lg:p-8 flex-1 print:p-0 print:m-0 print:w-full">
+                    <div key={usePage().url.split('?')[0]} className="animate-fade-in-up will-change-transform print:animate-none">{children}</div>
                 </main>
 
                 {/* INSTITUTIONAL ADMIN FOOTER */}
-                <footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 sm:px-8 text-xs text-slate-500 dark:text-slate-400 transition-colors duration-200">
+                <footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 sm:px-8 text-xs text-slate-500 dark:text-slate-400 transition-colors duration-200 print:hidden">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
                         <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                             <span className="font-bold text-slate-900 dark:text-white">{appName}</span>

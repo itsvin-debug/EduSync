@@ -21,13 +21,12 @@ export default function RecapExport({
 }) {
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
-    const [activeTab, setActiveTab] = useState(filters.type || 'siswa'); // siswa, guru, denda
+    const [activeTab, setActiveTab] = useState(filters.type || 'siswa'); // 'siswa', 'guru', 'denda'
 
-    // Pagination State (15 items per page on web view)
+    // Pagination State (15 data per halaman di tampilan web)
     const [currentPage, setCurrentPage] = useState(1);
     const perPage = 15;
 
-    // Reset pagination when tab or dates change
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(1);
@@ -51,7 +50,7 @@ export default function RecapExport({
         window.print();
     };
 
-    // Client-side CSV export across entire date range
+    // Client-side CSV export
     const handleExportCSV = () => {
         let csvContent = 'data:text/csv;charset=utf-8,';
         const fileName = `Rekap_${activeTab.toUpperCase()}_${startDate}_sd_${endDate}.csv`;
@@ -85,7 +84,7 @@ export default function RecapExport({
         document.body.removeChild(link);
     };
 
-    // Slice current dataset for on-screen pagination
+    // Data set aktif
     const currentDataset = useMemo(() => {
         if (activeTab === 'siswa') return studentRecap;
         if (activeTab === 'guru') return teacherRecap;
@@ -102,25 +101,210 @@ export default function RecapExport({
         return currentDataset.slice(start, start + perPage);
     }, [currentDataset, currentPage, perPage]);
 
+    const printDateFormatted = useMemo(() => {
+        return new Date().toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    }, []);
+
     return (
         <AdminLayout title="Rekap & Export Laporan">
             <Head title="Rekap & Export Laporan - EDUSYNC Admin" />
 
-            <div className="space-y-6">
+            {/* ========================================================= */}
+            {/* 1. DOKUMEN CETAK RESMI (HANYA MUNCUL SAAT CETAK / PRINT)  */}
+            {/* ========================================================= */}
+            <div className="hidden print:block text-black bg-white font-serif">
+                {/* Kop Surat Resmi SMKN 1 Ciomas */}
+                <div className="pb-3 border-b-4 border-double border-black text-center relative">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="w-16 h-16 border border-black flex items-center justify-center text-[10px] font-bold uppercase text-center p-1 shrink-0">
+                            LOGO JABAR
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-black m-0">
+                                Pemerintah Daerah Provinsi Jawa Barat
+                            </h4>
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-black m-0">
+                                Dinas Pendidikan • Cabang Dinas Pendidikan Wilayah I
+                            </h4>
+                            <h2 className="text-lg font-black uppercase tracking-tight text-black mt-1 mb-0.5">
+                                SMK NEGERI 1 CIOMAS
+                            </h2>
+                            <p className="text-[10px] text-black leading-tight m-0">
+                                Jl. Raya Laladon No. 01, Ciomas, Kabupaten Bogor, Jawa Barat 16610 | Telp: (0251) 7520933
+                            </p>
+                            <p className="text-[10px] text-black leading-tight m-0">
+                                Website: smkn1ciomas.sch.id • Surat Elektronik: info@smkn1ciomas.sch.id
+                            </p>
+                        </div>
+                        <div className="w-16 h-16 border border-black flex items-center justify-center text-[10px] font-bold uppercase text-center p-1 shrink-0">
+                            SMKN 1 CIOMAS
+                        </div>
+                    </div>
+                </div>
+
+                {/* Judul Dokumen Cetak */}
+                <div className="text-center my-4">
+                    <h3 className="text-sm font-bold uppercase underline tracking-wide text-black m-0">
+                        {activeTab === 'siswa'
+                            ? 'Laporan Rekapitulasi Presensi Harian Siswa'
+                            : activeTab === 'guru'
+                            ? 'Laporan Rekapitulasi Kehadiran & Fingerprint Guru'
+                            : 'Laporan Rekapitulasi Sanksi Denda Kebersihan Kelas'}
+                    </h3>
+                    <p className="text-xs text-black mt-1 font-sans">
+                        Periode: <strong>{formatDisplayDate(startDate)}</strong> s/d <strong>{formatDisplayDate(endDate)}</strong> • Tahun Ajaran 2026/2027 Ganjil
+                    </p>
+                </div>
+
+                {/* Tabel Cetak Lengkap (Seluruh Data Periode) */}
+                <table className="w-full text-left text-xs border-collapse border border-black font-sans">
+                    {activeTab === 'siswa' && (
+                        <>
+                            <thead>
+                                <tr className="bg-slate-100 border-b border-black text-black uppercase font-bold text-[11px]">
+                                    <th className="border border-black px-2 py-1.5 text-center w-10">No.</th>
+                                    <th className="border border-black px-3 py-1.5">Tanggal</th>
+                                    <th className="border border-black px-3 py-1.5">Nama Siswa</th>
+                                    <th className="border border-black px-3 py-1.5">Kelas</th>
+                                    <th className="border border-black px-3 py-1.5 text-center">Status</th>
+                                    <th className="border border-black px-3 py-1.5 text-center">Waktu</th>
+                                    <th className="border border-black px-3 py-1.5">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {studentRecap.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="border border-black px-3 py-4 text-center">
+                                            Tidak ada data presensi pada rentang tanggal tersebut.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    studentRecap.map((row, idx) => (
+                                        <tr key={row.id} className="border-b border-black">
+                                            <td className="border border-black px-2 py-1 text-center font-mono">{idx + 1}</td>
+                                            <td className="border border-black px-3 py-1 font-mono whitespace-nowrap">{formatDisplayDate(row.date)}</td>
+                                            <td className="border border-black px-3 py-1 font-semibold">{row.student?.name || '-'}</td>
+                                            <td className="border border-black px-3 py-1">{row.classroom?.name || '-'}</td>
+                                            <td className="border border-black px-3 py-1 text-center font-bold uppercase">{row.status}</td>
+                                            <td className="border border-black px-3 py-1 text-center font-mono">{formatDisplayTime(row.submission_time) || '07:15'}</td>
+                                            <td className="border border-black px-3 py-1 text-[11px]">{row.notes || '-'}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </>
+                    )}
+
+                    {activeTab === 'guru' && (
+                        <>
+                            <thead>
+                                <tr className="bg-slate-100 border-b border-black text-black uppercase font-bold text-[11px]">
+                                    <th className="border border-black px-2 py-1.5 text-center w-10">No.</th>
+                                    <th className="border border-black px-3 py-1.5">Tanggal</th>
+                                    <th className="border border-black px-3 py-1.5">Nama Guru</th>
+                                    <th className="border border-black px-3 py-1.5">NIP</th>
+                                    <th className="border border-black px-3 py-1.5 text-center">Status Kehadiran</th>
+                                    <th className="border border-black px-3 py-1.5 text-center">Jam Masuk</th>
+                                    <th className="border border-black px-3 py-1.5">Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {teacherRecap.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="border border-black px-3 py-4 text-center">
+                                            Tidak ada data kehadiran guru pada rentang tanggal tersebut.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    teacherRecap.map((row, idx) => (
+                                        <tr key={row.id} className="border-b border-black">
+                                            <td className="border border-black px-2 py-1 text-center font-mono">{idx + 1}</td>
+                                            <td className="border border-black px-3 py-1 font-mono whitespace-nowrap">{formatDisplayDate(row.date)}</td>
+                                            <td className="border border-black px-3 py-1 font-semibold">{row.teacher?.name || '-'}</td>
+                                            <td className="border border-black px-3 py-1 font-mono text-[11px]">{row.teacher?.nip || 'Non-PNS'}</td>
+                                            <td className="border border-black px-3 py-1 text-center font-bold uppercase">{String(row.status || '').replace('_', ' ')}</td>
+                                            <td className="border border-black px-3 py-1 text-center font-mono">{formatDisplayTime(row.check_in_time) || '06:45'}</td>
+                                            <td className="border border-black px-3 py-1 text-[11px]">{row.notes || '-'}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </>
+                    )}
+
+                    {activeTab === 'denda' && (
+                        <>
+                            <thead>
+                                <tr className="bg-slate-100 border-b border-black text-black uppercase font-bold text-[11px]">
+                                    <th className="border border-black px-2 py-1.5 text-center w-10">No.</th>
+                                    <th className="border border-black px-3 py-1.5">Tanggal Terbit</th>
+                                    <th className="border border-black px-3 py-1.5">Kelas</th>
+                                    <th className="border border-black px-3 py-1.5">Wali Kelas</th>
+                                    <th className="border border-black px-3 py-1.5 text-right">Nominal (Rp)</th>
+                                    <th className="border border-black px-3 py-1.5 text-center">Status</th>
+                                    <th className="border border-black px-3 py-1.5">Alasan Pelanggaran</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {finesRecap.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="border border-black px-3 py-4 text-center">
+                                            Tidak ada data denda pada rentang tanggal tersebut.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    finesRecap.map((row, idx) => (
+                                        <tr key={row.id} className="border-b border-black">
+                                            <td className="border border-black px-2 py-1 text-center font-mono">{idx + 1}</td>
+                                            <td className="border border-black px-3 py-1 font-mono whitespace-nowrap">{formatDisplayDate(row.created_at)}</td>
+                                            <td className="border border-black px-3 py-1 font-bold">{row.classroom?.name || '-'}</td>
+                                            <td className="border border-black px-3 py-1">{row.homeroom_teacher?.name || '-'}</td>
+                                            <td className="border border-black px-3 py-1 text-right font-mono font-bold">
+                                                {(Number(row.amount) || 0).toLocaleString('id-ID')}
+                                            </td>
+                                            <td className="border border-black px-3 py-1 text-center font-bold uppercase">{String(row.payment_status || '').replace('_', ' ')}</td>
+                                            <td className="border border-black px-3 py-1 text-[11px]">{row.reason}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </>
+                    )}
+                </table>
+
+                {/* Kolom Tanda Tangan Pengesahan (Print Only) */}
+                <div className="mt-8 flex justify-end font-sans">
+                    <div className="text-center w-64 text-xs">
+                        <p className="m-0">Ciomas, {printDateFormatted}</p>
+                        <p className="font-semibold mt-0.5 mb-14">Operator Kurikulum & Dapodik,</p>
+                        <p className="font-bold underline uppercase m-0">Didin Sahrudin, M.Kom</p>
+                        <p className="text-[11px] font-mono text-black m-0">NIP. 198205142008011009</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* ========================================================= */}
+            {/* 2. TAMPILAN WEB INTERAKTIF (DISEMBUNYIKAN SAAT CETAK)     */}
+            {/* ========================================================= */}
+            <div className="space-y-6 print:hidden">
                 {/* Header Card */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs print:hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-6 shadow-xs">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-semibold text-sm">
+                            <div className="flex items-center gap-2.5">
+                                <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 font-semibold text-sm shadow-2xs">
                                     <FileSpreadsheet className="w-4 h-4" />
                                 </span>
                                 <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                    Engine Rekapitulasi Data & Ekspor Dokumen
+                                    Rekapitulasi Data & Ekspor Dokumen
                                 </h1>
                             </div>
                             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                Unduh rekapitulasi presensi harian siswa, absensi guru, serta catatan denda kebersihan ke format Excel (CSV) dan PDF Siap Cetak.
+                                Rekapitulasi presensi harian rombel siswa, absensi guru, dan catatan denda kebersihan siap cetak atau ekspor ke Spreadsheet.
                             </p>
                         </div>
 
@@ -129,7 +313,7 @@ export default function RecapExport({
                             <button
                                 type="button"
                                 onClick={handleExportCSV}
-                                className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors duration-150 cursor-pointer"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all duration-150 cursor-pointer"
                             >
                                 <Download className="w-4 h-4" />
                                 <span>Unduh Spreadsheet (CSV)</span>
@@ -137,15 +321,15 @@ export default function RecapExport({
                             <button
                                 type="button"
                                 onClick={handlePrint}
-                                className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors duration-150 cursor-pointer"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] dark:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all duration-150 cursor-pointer"
                             >
                                 <Printer className="w-4 h-4" />
-                                <span>Cetak PDF</span>
+                                <span>Cetak PDF Resmi</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Filter Form */}
+                    {/* Filter Rentang Tanggal */}
                     <form
                         onSubmit={handleFilterDate}
                         className="mt-5 pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3"
@@ -176,7 +360,7 @@ export default function RecapExport({
 
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium rounded-lg transition-colors duration-150 flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold rounded-lg transition-colors duration-150 flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                             <Filter className="w-3.5 h-3.5" />
                             <span>Terapkan Rentang Tanggal</span>
@@ -184,19 +368,8 @@ export default function RecapExport({
                     </form>
                 </div>
 
-                {/* Print Title Header (Only visible on print) */}
-                <div className="hidden print:block mb-6 text-center border-b-2 border-slate-900 pb-4">
-                    <h2 className="text-xl font-bold text-black uppercase tracking-tight">SMK NEGERI 1 CIOMAS</h2>
-                    <h3 className="text-sm font-bold text-slate-800 uppercase mt-1">
-                        Laporan Rekapitulasi {activeTab === 'siswa' ? 'Presensi Siswa' : activeTab === 'guru' ? 'Kehadiran Guru' : 'Sanksi Denda Kas'}
-                    </h3>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                        Periode: {formatDisplayDate(startDate)} s/d {formatDisplayDate(endDate)}
-                    </p>
-                </div>
-
                 {/* Tabs Switcher */}
-                <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar print:hidden">
+                <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
                     <button
                         type="button"
                         onClick={() => handleTabChange('siswa')}
@@ -235,13 +408,14 @@ export default function RecapExport({
                     </button>
                 </div>
 
-                {/* Tab 1: Rekap Presensi Siswa */}
+                {/* Tabel Web Tab 1: Rekap Presensi Siswa */}
                 {activeTab === 'siswa' && (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden print:border print:border-slate-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm print:text-xs">
-                                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 print:bg-slate-100 text-[11px] font-bold text-slate-600 dark:text-slate-300 print:text-slate-900 uppercase tracking-wider">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                                     <tr>
+                                        <th className="px-3.5 py-3.5 text-center w-12">No.</th>
                                         <th className="px-4 sm:px-6 py-3.5">Tanggal</th>
                                         <th className="px-4 sm:px-6 py-3.5">Nama Siswa</th>
                                         <th className="px-4 sm:px-6 py-3.5">Kelas</th>
@@ -250,17 +424,19 @@ export default function RecapExport({
                                         <th className="px-4 sm:px-6 py-3.5">Catatan</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-300">
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                     {totalItems === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                                 Tidak ada data presensi siswa pada rentang tanggal yang dipilih.
                                             </td>
                                         </tr>
                                     ) : (
-                                        // On print preview, show full dataset; on web view, show paginatedData
-                                        (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('print').matches ? studentRecap : paginatedData).map((row) => (
+                                        paginatedData.map((row, idx) => (
                                             <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors duration-150">
+                                                <td className="px-3.5 py-3.5 text-center font-mono text-xs text-slate-500 dark:text-slate-400">
+                                                    {(currentPage - 1) * perPage + idx + 1}
+                                                </td>
                                                 <td className="px-4 sm:px-6 py-3.5 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap font-medium">
                                                     {formatDisplayDate(row.date)}
                                                 </td>
@@ -272,10 +448,10 @@ export default function RecapExport({
                                                 </td>
                                                 <td className="px-4 sm:px-6 py-3.5">
                                                     <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase ${
-                                                        row.status === 'hadir' ? 'bg-emerald-100 text-emerald-800' :
-                                                        row.status === 'sakit' ? 'bg-amber-100 text-amber-800' :
-                                                        row.status === 'izin' ? 'bg-indigo-100 text-indigo-800' :
-                                                        'bg-rose-100 text-rose-800'
+                                                        row.status === 'hadir' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300' :
+                                                        row.status === 'sakit' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300' :
+                                                        row.status === 'izin' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-300' :
+                                                        'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300'
                                                     }`}>
                                                         {row.status}
                                                     </span>
@@ -294,26 +470,25 @@ export default function RecapExport({
                         </div>
 
                         {/* Pagination Bar */}
-                        <div className="print:hidden">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                totalItems={totalItems}
-                                from={fromIndex}
-                                to={toIndex}
-                                onPageChange={(p) => setCurrentPage(p)}
-                            />
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            from={fromIndex}
+                            to={toIndex}
+                            onPageChange={(p) => setCurrentPage(p)}
+                        />
                     </div>
                 )}
 
-                {/* Tab 2: Rekap Kehadiran Guru */}
+                {/* Tabel Web Tab 2: Rekap Kehadiran Guru */}
                 {activeTab === 'guru' && (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden print:border print:border-slate-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm print:text-xs">
-                                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 print:bg-slate-100 text-[11px] font-bold text-slate-600 dark:text-slate-300 print:text-slate-900 uppercase tracking-wider">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                                     <tr>
+                                        <th className="px-3.5 py-3.5 text-center w-12">No.</th>
                                         <th className="px-4 sm:px-6 py-3.5">Tanggal</th>
                                         <th className="px-4 sm:px-6 py-3.5">Nama Guru</th>
                                         <th className="px-4 sm:px-6 py-3.5">NIP</th>
@@ -322,16 +497,19 @@ export default function RecapExport({
                                         <th className="px-4 sm:px-6 py-3.5">Keterangan</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-300">
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                     {totalItems === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                                 Tidak ada data kehadiran guru pada rentang tanggal yang dipilih.
                                             </td>
                                         </tr>
                                     ) : (
-                                        (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('print').matches ? teacherRecap : paginatedData).map((row) => (
+                                        paginatedData.map((row, idx) => (
                                             <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors duration-150">
+                                                <td className="px-3.5 py-3.5 text-center font-mono text-xs text-slate-500 dark:text-slate-400">
+                                                    {(currentPage - 1) * perPage + idx + 1}
+                                                </td>
                                                 <td className="px-4 sm:px-6 py-3.5 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap font-medium">
                                                     {formatDisplayDate(row.date)}
                                                 </td>
@@ -343,9 +521,9 @@ export default function RecapExport({
                                                 </td>
                                                 <td className="px-4 sm:px-6 py-3.5">
                                                     <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase ${
-                                                        row.status === 'hadir' ? 'bg-emerald-100 text-emerald-800' :
-                                                        row.status === 'dinas_luar' ? 'bg-indigo-100 text-indigo-800' :
-                                                        'bg-amber-100 text-amber-800'
+                                                        row.status === 'hadir' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300' :
+                                                        row.status === 'dinas_luar' ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-300' :
+                                                        'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300'
                                                     }`}>
                                                         {String(row.status || '').replace('_', ' ')}
                                                     </span>
@@ -364,44 +542,46 @@ export default function RecapExport({
                         </div>
 
                         {/* Pagination Bar */}
-                        <div className="print:hidden">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                totalItems={totalItems}
-                                from={fromIndex}
-                                to={toIndex}
-                                onPageChange={(p) => setCurrentPage(p)}
-                            />
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            from={fromIndex}
+                            to={toIndex}
+                            onPageChange={(p) => setCurrentPage(p)}
+                        />
                     </div>
                 )}
 
-                {/* Tab 3: Rekap Denda Kas */}
+                {/* Tabel Web Tab 3: Rekap Denda Kas */}
                 {activeTab === 'denda' && (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden print:border print:border-slate-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm print:text-xs">
-                                <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 print:bg-slate-100 text-[11px] font-bold text-slate-600 dark:text-slate-300 print:text-slate-900 uppercase tracking-wider">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                                     <tr>
+                                        <th className="px-3.5 py-3.5 text-center w-12">No.</th>
                                         <th className="px-4 sm:px-6 py-3.5">Tanggal Terbit</th>
                                         <th className="px-4 sm:px-6 py-3.5">Kelas</th>
                                         <th className="px-4 sm:px-6 py-3.5">Wali Kelas</th>
-                                        <th className="px-4 sm:px-6 py-3.5">Nominal Denda</th>
+                                        <th className="px-4 sm:px-6 py-3.5 text-right">Nominal Denda</th>
                                         <th className="px-4 sm:px-6 py-3.5">Status Pembayaran</th>
                                         <th className="px-4 sm:px-6 py-3.5">Alasan Pelanggaran</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-300">
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                     {totalItems === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
+                                            <td colSpan="7" className="px-6 py-12 text-center text-slate-400 dark:text-slate-500">
                                                 Tidak ada data denda pada rentang tanggal yang dipilih.
                                             </td>
                                         </tr>
                                     ) : (
-                                        (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('print').matches ? finesRecap : paginatedData).map((row) => (
+                                        paginatedData.map((row, idx) => (
                                             <tr key={row.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors duration-150">
+                                                <td className="px-3.5 py-3.5 text-center font-mono text-xs text-slate-500 dark:text-slate-400">
+                                                    {(currentPage - 1) * perPage + idx + 1}
+                                                </td>
                                                 <td className="px-4 sm:px-6 py-3.5 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-nowrap font-medium">
                                                     {formatDisplayDate(row.created_at)}
                                                 </td>
@@ -411,14 +591,14 @@ export default function RecapExport({
                                                 <td className="px-4 sm:px-6 py-3.5 text-slate-700 dark:text-slate-300 text-xs">
                                                     {row.homeroom_teacher?.name || '-'}
                                                 </td>
-                                                <td className="px-4 sm:px-6 py-3.5 font-mono font-bold text-slate-900 dark:text-slate-100">
+                                                <td className="px-4 sm:px-6 py-3.5 font-mono font-bold text-slate-900 dark:text-slate-100 text-right">
                                                     Rp {(Number(row.amount) || 0).toLocaleString('id-ID')}
                                                 </td>
                                                 <td className="px-4 sm:px-6 py-3.5">
                                                     <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase ${
-                                                        row.payment_status === 'lunas' ? 'bg-emerald-100 text-emerald-800' :
-                                                        row.payment_status === 'menunggu_konfirmasi' ? 'bg-amber-100 text-amber-800' :
-                                                        'bg-rose-100 text-rose-800'
+                                                        row.payment_status === 'lunas' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300' :
+                                                        row.payment_status === 'menunggu_konfirmasi' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300' :
+                                                        'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300'
                                                     }`}>
                                                         {String(row.payment_status || '').replace('_', ' ')}
                                                     </span>
@@ -434,16 +614,14 @@ export default function RecapExport({
                         </div>
 
                         {/* Pagination Bar */}
-                        <div className="print:hidden">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                totalItems={totalItems}
-                                from={fromIndex}
-                                to={toIndex}
-                                onPageChange={(p) => setCurrentPage(p)}
-                            />
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            from={fromIndex}
+                            to={toIndex}
+                            onPageChange={(p) => setCurrentPage(p)}
+                        />
                     </div>
                 )}
             </div>

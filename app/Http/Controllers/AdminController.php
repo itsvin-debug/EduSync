@@ -880,6 +880,8 @@ class AdminController extends Controller
     {
         $search = trim((string) $request->input('search', ''));
         $category = trim((string) $request->input('category', 'all'));
+        $dateFrom = trim((string) $request->input('date_from', ''));
+        $dateTo = trim((string) $request->input('date_to', ''));
         $perPage = (int) $request->input('per_page', 15);
         if ($perPage < 5 || $perPage > 100) {
             $perPage = 15;
@@ -890,6 +892,22 @@ class AdminController extends Controller
         if ($category !== 'all' && !empty($category)) {
             $lowerCategory = strtolower($category);
             $query->whereRaw('LOWER(action) LIKE ?', ["%{$lowerCategory}%"]);
+        }
+
+        if (!empty($dateFrom)) {
+            try {
+                $query->where('created_at', '>=', Carbon::parse($dateFrom));
+            } catch (\Throwable) {
+                // Ignore invalid date format
+            }
+        }
+
+        if (!empty($dateTo)) {
+            try {
+                $query->where('created_at', '<=', Carbon::parse($dateTo));
+            } catch (\Throwable) {
+                // Ignore invalid date format
+            }
         }
 
         if (!empty($search)) {
@@ -912,6 +930,8 @@ class AdminController extends Controller
             'filters' => [
                 'search' => $search,
                 'category' => $category,
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
                 'per_page' => $perPage,
             ],
         ]);
