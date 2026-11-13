@@ -1,298 +1,218 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" width="80" alt="EDUSYNC Logo">
-</p>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/graduation-cap.svg" width="84" height="84" alt="EDUSYNC Logo" />
 
-<h1 align="center">📚 EDUSYNC — Enterprise School Management & Scheduling System</h1>
+  # 📚 EDUSYNC — Enterprise School Management & Scheduling System
 
-<p align="center">
-  Sistem Informasi Manajemen Sekolah, Jadwal Pelajaran Dinamis, dan Monitoring KBM Real-time Berbasis Standar Kurikulum Merdeka & Dapodik SMK Kejuruan.
-</p>
+  <p>
+    <em>Sistem Informasi Manajemen Sekolah, Jadwal Pelajaran Dinamis, dan Monitoring KBM Real-time Berbasis Standar Kurikulum Merdeka & Dapodik SMK Kejuruan.</em>
+  </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12">
-  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+">
-  <img src="https://img.shields.io/badge/Inertia.js-3.3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia.js">
-  <img src="https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19">
-  <img src="https://img.shields.io/badge/TailwindCSS-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
-  <img src="https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
-</p>
+  <p>
+    <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12" />
+    <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+" />
+    <img src="https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
+    <img src="https://img.shields.io/badge/Inertia.js-3.x-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia.js" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 6" />
+    <img src="https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+    <img src="https://img.shields.io/badge/PHPUnit-11.x-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit" />
+    <img src="https://img.shields.io/badge/Vercel-Ready-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+    <img src="https://img.shields.io/badge/Render-Ready-46E3B7?style=for-the-badge&logo=render&logoColor=black" alt="Render" />
+  </p>
+</div>
 
 ---
 
 ## 📌 Daftar Isi
-1. [Tentang EDUSYNC](#-tentang-edusync)
+1. [Tentang EduSync](#-tentang-edusync)
 2. [Fitur Unggulan Sistem](#-fitur-unggulan-sistem)
 3. [Arsitektur & Tech Stack](#-arsitektur--tech-stack)
-4. [Struktur Portal & Hak Akses](#-struktur-portal--hak-akses)
-5. [Integritas Data & Logika Bisnis](#-integritas-data--logika-bisnis)
-6. [Akun Demo & Kredensial](#-akun-demo--kredensial)
-7. [Panduan Instalasi & Menjalankan Aplikasi](#-panduan-instalasi--menjalankan-aplikasi)
-   - [🐧 Panduan untuk Linux (Native)](#-panduan-instalasi-di-linux-ubuntudebian)
-   - [🐧 Panduan untuk Linux (Menggunakan Lerd)](#-panduan-instalasi-di-linux-menggunakan-lerd)
-   - [🪟 Panduan untuk Windows](#-panduan-instalasi-di-windows)
-8. [Rangkaian Pengujian Otomatis (Testing)](#-rangkaian-pengujian-otomatis-testing)
-9. [Panduan Deployment Lengkap](#-panduan-deployment-lengkap)
-   - [⚡ Deployment ke Vercel & Neon PostgreSQL (Gratis Tanpa Kartu Kredit)](#a-deployment-ke-vercel--neon-postgresql-gratis-permanen)
-   - [Deployment via Docker](#b-deployment-menggunakan-docker)
-   - [Deployment ke Render.com](#c-deployment-ke-rendercom--supabase)
-   - [Deployment ke Shared Hosting (cPanel)](#d-deployment-ke-shared-hosting--cpanel)
-10. [Struktur Database & Hubungan Model](#-struktur-database--hubungan-model)
-11. [Lisensi & Kontribusi](#-lisensi--kontribusi)
+4. [Struktur Direktori Proyek](#-struktur-direktori-proyek)
+5. [Akun Bawaan & Kredensial Demo](#-akun-bawaan--kredensial-demo)
+6. [Panduan Instalasi Lokal](#-panduan-instalasi-lokal)
+7. [Pengujian Otomatis (Testing)](#-pengujian-otomatis-testing)
+8. [Panduan Deployment Cloud](#-panduan-deployment-cloud)
+9. [Kontribusi & Lisensi](#-kontribusi--lisensi)
 
 ---
 
-## 🌟 Tentang EDUSYNC
+## 📖 Tentang EduSync
 
-**EDUSYNC** adalah platform enterprise modern pengelolaan operasional satuan pendidikan kejuruan (SMK) yang mengintegrasikan penyusunan jadwal pelajaran (*dynamic matrix scheduling*), presensi kehadiran siswa & guru harian, penugasan KBM mandiri (jamkos terarah), manajemen izin dinas luar guru, rekap denda kebersihan 5R, hingga verifikasi bukti piket siswa secara terpusat dan *real-time*.
+**EduSync** adalah platform tata kelola operasional dan akademik sekolah tingkat enterprise yang dirancang khusus untuk mengatasi kompleksitas penjadwalan pelajaran dan pemantauan pembelajaran pada institusi pendidikan kejuruan (SMK) maupun sekolah menengah atas.
 
----
+Mengacu pada regulasi struktur kurikulum nasional (**Kurikulum Merdeka**) dan integrasi data **Dapodik Kejuruan**, EduSync menyederhanakan siklus operasional harian yang sebelumnya rawan kesalahan manual:
 
-## 🚀 Fitur Unggulan Sistem
-
-### 1. 🛡️ Admin Curriculum Control Center
-- **Real-time Attendance Analytics**: Dashboard statistik kehadiran terhitung otomatis dan ter-reset setiap pukul 00:00 WIB.
-- **KBM Live Monitor & Radar Kelas**: Matriks visual status seluruh ruang kelas.
-- **Schedule Builder & Conflict Engine**: Manajemen alokasi JP dengan deteksi tabrakan otomatis.
-- **Manajemen Siswa & Guru**: CRUD terpadu dengan sinkronisasi NISN, NIP.
-- **Verifikasi Akun Registrasi**: Skema verifikasi (Approve/Reject) bagi pendaftaran akun.
-- **Manajemen Inval Guru**: Persetujuan pertukaran guru pengampu.
-- **Izin Keluar Dinas Resmi**: Penerbitan disposisi tugas dinas.
-
-### 2. 👨‍🏫 Teacher Workspace (Ruang Kerja Guru)
-- **Timeline Mengajar Hari Ini**: Penanda visual jam mengajar.
-- **Presensi Harian Mandiri**: Check-in kehadiran harian langsung dari gawai.
-- **Pengajuan Inval / Tukar Jam Mengajar**: Pengajuan tukar jam dengan validasi bentrok.
-- **Penerbitan Tugas KBM Mandiri**: Publikasi materi terarah.
-- **Laporan Kebersihan Ruang Kelas**: Pelaporan kebersihan kepada tim piket.
-- **Verifikasi Bukti Piket Siswa**: Pemeriksaan dan ACC bukti foto piket.
-
-### 3. 📱 Student Mobile-First Portal (Ruang Belajar Siswa)
-- **Jadwal KBM Real-time**: Tampilan jadwal ramah seluler.
-- **Pengunggahan Bukti Piket**: Unggah foto bukti kebersihan harian.
-- **Status Denda & Konfirmasi Pelunasan**: Informasi transparansi denda kelas.
-- **Akses Tugas KBM Mandiri**: Akses ke tugas dari guru.
+* **Pencegahan Bentrok Jadwal Otomatis (Anti-Clash Engine):** Menghindari tabrakan guru ganda pada jam pelajaran yang sama serta memastikan kapasitas ruang teori atau bengkel praktik vokasi tidak melebihi kuota.
+* **Monitoring KBM Real-time (Radar Kelas):** Memberikan visibilitas langsung terhadap status kehadiran guru, keterisian ruang kelas, jam kosong terarah (*inval*), dan aktivitas pembelajaran harian.
+* **Rekapitulasi Cepat & Legalitas Cetak:** Mengotomatiskan laporan presensi siswa, guru, serta denda kas kebersihan dalam format cetak PDF berstandar resmi (Kop Surat Sekolah & NIP legal) dan ekspor CSV/Excel.
+* **Arsitektur Tanpa Reload (Single Page Application):** Memanfaatkan kombinasi Laravel 12 dan React 19 via Inertia.js untuk perpindahan halaman yang instan tanpa membebani server.
 
 ---
 
-## 🛠 Arsitektur & Tech Stack
+## ✨ Fitur Unggulan
 
-Sistem EDUSYNC dikembangkan menggunakan teknologi terkini (Modern Stack) untuk memastikan skalabilitas dan performa tinggi.
+### 1. 🎛️ Admin Dashboard & Manajemen Master Data
+* **Pusat Kendali Kurikulum:** Ringkasan metrik sekolah secara langsung meliputi total guru aktif, jumlah siswa terdaftar rombel, bengkel/lab, dan rasio kehadiran harian.
+* **Sinkronisasi Master Dapodik:** Pengelolaan data guru, siswa, kelas/rombel, kompetensi keahlian/jurusan SMK, mata pelajaran, dan slot jam pelajaran (JP).
+* **Manajemen Ruang & Relokasi Kelas:** Pemetaan alokasi ruang kelas teori dan laboratorium vokasi secara fleksibel.
+* **Verifikasi Akun Baru:** Sistem persetujuan (*Approve/Reject*) pendaftaran akun mandiri guru dan siswa sebelum diberikan akses ke portal.
+
+### 2. 📅 Penjadwalan Dinamis (Dynamic Scheduling)
+* **Schedule Builder Interaktif:** Penyusunan matriks jadwal mingguan per kelas dan per guru berbasis drag-and-drop atau input terstruktur.
+* **Conflict Detector:** Deteksi instan jika seorang guru dijadwalkan mengajar di dua kelas berbeda pada hari dan jam yang sama.
+* **Auto-Generate Jadwal:** Generator jadwal terotomatisasi berdasarkan beban jam linear guru dan ketersediaan ruangan.
+* **Import & Ekspor PDF Jadwal:** Kemampuan memindai (*parsing*) jadwal dari dokumen PDF serta mencetak jadwal resmi per kelas.
+
+### 3. 📡 Monitoring KBM Real-time & Inval Guru
+* **KBM Live Radar:** Pemantauan langsung status tiap kelas (KBM Aktif, Istirahat, Jam Kosong, atau Guru Piket Pengganti).
+* **Alur Pengajuan Inval & Tukar Jadwal:** Guru yang berhalangan dapat mengajukan pertukaran jam mengajar secara transparan dengan persetujuan admin kurikulum.
+* **Surat Tugas Keluar Dinas:** Manajemen disposisi izin dinas luar guru lengkap dengan pelacakan status bertugas.
+* **Penugasan Mandiri (Jamkos Terarah):** Guru berhalangan dapat menyematkan instruksi tugas belajar mandiri agar siswa tetap produktif di kelas.
+
+### 4. 📊 Rekapitulasi & Ekspor Laporan (Recap Export)
+* **Kop Surat Kedinasan:** Format cetak PDF resmi lengkap dengan Kop Surat Provinsi Jawa Barat, Cabang Dinas Pendidikan, identitas SMKN 1 Ciomas, serta blok tanda tangan Kepala Sekolah.
+* **Isolasi Cetak Otomatis:** Antarmuka web otomatis menyembunyikan sidebar, navbar, dan tombol aksi saat mode cetak (`Ctrl + P`) aktif.
+* **Format Tanggal Baku:** Menampilkan tanggal dalam format lokal Indonesia (`DD MMMM YYYY`), bukan format ISO mentah.
+* **Dukungan Multi-Dataset:** Rekapitulasi presensi siswa, kehadiran guru, dan rekap denda kebersihan 5R dengan filter rentang tanggal.
+
+### 5. 🛡️ Keamanan & Audit Logs
+* **Audit Trail Lengkap:** Pencatatan otomatis setiap aksi penting di sistem (login demo, penyesuaian status presensi, mutasi kelas, persetujuan izin, dan cetak laporan) lengkap dengan alamat IP dan stempel waktu presisi (hingga detik WIB).
+* **Filter Log Presisi:** Filter riwayat aktivitas menggunakan pemilih tanggal dan waktu (`datetime-local`) beserta tombol preset (*Hari Ini*, *7 Hari*, *30 Hari*).
+* **Keamanan Akses Berjenjang:** Pembatasan akses berbasis peran (`admin`, `guru`, `siswa`) melalui middleware Laravel.
+
+### 6. ⚡ UX Modern, Responsif & Anti-Slop
+* **Navigasi SPA Ringan:** Transisi halaman tanpa kedip berkat Inertia.js dan React 19.
+* **Penomoran Urut & Pagination:** Komponen pagination terpadu yang membatasi beban memori per halaman (15 baris per halaman) dengan nomor urut berkesinambungan.
+* **Dukungan Mode Gelap (Dark Mode):** Tampilan otomatis menyesuaikan preferensi sistem operasi atau pengaturan tema pengguna.
+* **Responsif Seluler:** Seluruh tata letak tabel, kartu monitoring, dan form dioptimalkan untuk kenyamanan navigasi layar ponsel.
+
+---
+
+## 🛠️ Arsitektur & Tech Stack
 
 ```mermaid
-flowchart TD
-    User([Pengguna: Siswa / Guru / Admin]) -->|HTTPS / Port 80| Nginx[Web Server Nginx]
-    Nginx -->|FastCGI| PHP[PHP 8.5 FPM - Laravel 12]
-    PHP -->|Middleware| CheckRole[CheckRole & HandleInertiaRequests]
-    CheckRole -->|Inertia Hydration| React[React 19 Frontend SPA]
-    PHP -->|Eloquent ORM| MySQL[(MySQL 8.4 Enterprise)]
-    PHP -->|Audit Logging| AuditLog[(Audit Logs Engine)]
+flowchart LR
+    Client["Browser / Mobile Client (React 19 SPA)"]
+    Inertia["Inertia.js Bridge (Zero-API REST Overhead)"]
+    Laravel["Laravel 12 Core (PHP 8.2+)"]
+    DB[("MySQL 8.0+ / Neon PostgreSQL")]
+    Vercel["Serverless Storage (/tmp/storage)"]
+
+    Client <-->|Hydration / JSON Props| Inertia
+    Inertia <--> Laravel
+    Laravel <-->|Eloquent ORM| DB
+    Laravel -.->|Vercel Runtime| Vercel
 ```
 
-### 🔹 Backend (Server-Side)
-- **Framework:** Laravel 12.x
-- **Language:** PHP 8.2+ (Direkomendasikan PHP 8.5)
-- **Bridge API:** Inertia.js (Menjembatani Laravel dengan React tanpa REST API yang rumit)
-- **Authentication:** Laravel Session & Middleware
-- **PDF Generation:** `barryvdh/laravel-dompdf`
-
-### 🔹 Frontend (Client-Side)
-- **Library Utama:** React 19.x (Modern Hooks, Server Components support)
-- **Framework UI:** Tailwind CSS 4.x
-- **Build Tool:** Vite 6.x (Super cepat, Hot Module Replacement)
-- **State & Data Management:** `@inertiajs/react`
-- **Tabel & Grafik:** `@tanstack/react-table`, `chart.js`, `react-chartjs-2`
-- **Drag and Drop:** `@dnd-kit/core`
-- **Ikonografi:** `lucide-react`
-
-### 🔹 Database & Infrastruktur
-- **RDBMS:** MySQL 8.x atau PostgreSQL 15+ (Didukung penuh via Eloquent)
-- **Containerization:** Docker & Docker Compose
-- **Web Server:** Nginx (via Docker/Production) atau Artisan Serve (Development)
+| Kategori | Teknologi | Versi | Peran & Kegunaan dalam Sistem |
+|---|---|---|---|
+| **Backend Framework** | Laravel | `12.x` | Routing, ORM Eloquent, otentikasi sesi, middleware otorisasi, dan penjadwalan cron. |
+| **Bahasa Backend** | PHP | `^8.2` | Engine runtime server-side berkemampuan tinggi. |
+| **Frontend Framework** | React | `^19.3` | Pembangunan antarmuka interaktif berbasis komponen modern. |
+| **Fullstack Adapter** | Inertia.js | `^3.7` | Penghubung frontend React dengan backend Laravel tanpa perlunya REST API manual. |
+| **Styling & Desain** | Tailwind CSS | `^4.0` | Desain utilitas modern, responsif seluler, dan dukungan penuh mode gelap. |
+| **Bundler & Tooling** | Vite | `^6.0` | Kompilasi aset frontend super cepat dengan Hot Module Replacement (HMR). |
+| **Database** | MySQL / PostgreSQL | `8.0+` / `16+` | Penyimpanan relasional master data, transaksi jadwal, dan audit log. |
+| **Pengujian (Testing)** | PHPUnit | `^11.5` | Rangkaian automated unit testing dan feature testing logika bisnis. |
+| **PDF Generation** | DomPDF / Smalot | `^3.1` | Pembuatan dokumen presensi cetak dan parsing jadwal pelajaran PDF. |
+| **Komponen UI & Ikon** | Lucide React, Chart.js | `Latest` | Visualisasi grafik analitik presensi dan set ikon standar industri. |
 
 ---
 
-## 🔐 Struktur Portal & Hak Akses
+## 📂 Struktur Direktori Proyek
 
-| Portal | URL Prefix | Middleware Proteksi | Peran yang Diizinkan |
-| :--- | :--- | :--- | :--- |
-| **Landing & Profil** | `/` | Guest / Public | Publik |
-| **Autentikasi** | `/login`, `/register` | Guest | Pengguna belum masuk |
-| **Admin Control** | `/admin/*` | `auth`, `role:admin` | Administrator Kurikulum |
-| **Ruang Kerja Guru**| `/guru/*` | `auth`, `role:guru,admin` | Guru, Wali Kelas, Admin |
-| **Dashboard Siswa** | `/siswa/*` | `auth`, `role:siswa,admin`| Siswa, Ketua Kelas, Admin |
-
----
-
-## 🛡️ Integritas Data & Logika Bisnis
-
-Sistem telah diuji dan diamankan:
-1. **Schedule Overlap Prevention:** Mencegah bentrok jadwal pengajar, kelas, dan ruangan.
-2. **Inval Substitution Integrity:** Mencegah pertukaran jadwal yang tidak sah dan bentrok.
-3. **Cash & Penalty Atomicity:** Menggunakan `DB::transaction()` untuk integritas data keuangan (denda kelas).
-4. **Account Gatekeeping:** Akun baru (Siswa/Guru) bersifat *pending* dan wajib di-Approve oleh Admin Kurikulum.
-
----
-
-## 🔑 Akun Demo & Kredensial
-
-| Peran Akun | Email | Kata Sandi | Deskripsi |
-| :--- | :--- | :--- | :--- |
-| **Admin Kurikulum** | `admin@edusync.test` | `password` | Akses penuh master data & analitik |
-| **Guru Pengampu** | `guru1@edusync.test` | `password` | Pengajar produktif kejuruan |
-| **Wali Kelas** | `budi.santoso@edusync.test` | `password` | Guru dengan tugas tambahan wali kelas |
-| **Siswa / Rombel** | `ahmad.fadillah@edusync.test`| `password` | Siswa kelas XI PPLG 1 |
-
----
-
-## 💻 Panduan Instalasi & Menjalankan Aplikasi
-
-Aplikasi ini dapat dijalankan baik di sistem operasi Linux, MacOS, maupun Windows. Berikut adalah instruksi lengkap dan mendetail.
-
-### 1. Kebutuhan Sistem Minimum (Prasyarat)
-- **PHP:** >= 8.2
-- **Composer:** >= 2.5
-- **Node.js:** >= 20.x
-- **NPM:** >= 10.x
-- **Database:** MySQL >= 8.0 atau MariaDB >= 10.6
-- **Git**
-
----
-
-### 🐧 Panduan Instalasi di Linux (Ubuntu/Debian)
-
-Sistem operasi berbasis Linux sangat disarankan untuk development ekosistem PHP/Laravel.
-
-**Langkah 1: Persiapan Lingkungan**
-Pastikan dependensi sistem sudah terinstal:
-```bash
-sudo apt update
-sudo apt install php php-cli php-fpm php-mysql php-xml php-mbstring php-curl php-zip unzip curl git
+```text
+edusync/
+├── api/
+│   └── index.php                 # Serverless entry point untuk deployment Vercel
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/          # AdminController, AuthController, StudentController, dll.
+│   │   └── Middleware/           # CheckRole, HandleInertiaRequests, TrackUserActivity
+│   └── Models/                   # 21 Eloquent Models (AuditLog, Schedule, User, dll.)
+├── bootstrap/
+│   └── app.php                   # Konfigurasi middleware, exception handler, & storage path
+├── config/                       # Konfigurasi app, database, session, & cache
+├── database/
+│   ├── migrations/               # Skema tabel database relasional
+│   └── seeders/                  # Seeder data master, user demo, dan jadwal contoh
+├── public/                       # Berkas statis publik & output build Vite
+├── resources/
+│   ├── css/
+│   │   └── app.css               # Entri Tailwind CSS v4 & kustom utilitas
+│   ├── js/
+│   │   ├── Components/           # Komponen UI (Modal, Pagination, SincBot, ConflictBanner)
+│   │   ├── Layouts/              # AdminLayout, TeacherLayout, StudentLayout
+│   │   ├── Pages/
+│   │   │   ├── Admin/            # Dashboard, AuditLogs, RecapExport, ScheduleBuilder, dll.
+│   │   │   ├── Auth/             # Form Login & Registrasi
+│   │   │   ├── Student/          # Portal Belajar & Presensi Siswa / Ketua Kelas
+│   │   │   └── Teacher/          # Ruang Kerja & Presensi Harian Guru
+│   │   └── utils/                # Helper pemformatan tanggal, waktu, dan penomoran
+│   └── views/                    # Root Blade template (app.blade.php) & template cetak PDF
+├── routes/
+│   ├── console.php               # Perintah terjadwal Artisan (cron midnight reset)
+│   └── web.php                   # Definisi rute aplikasi terproteksi middleware
+├── tests/
+│   ├── Feature/                  # Pengujian integrasi alur bisnis, izin, dan jadwal
+│   └── Unit/                     # Pengujian unit fungsi dasar
+├── phpunit.xml                   # Konfigurasi automated testing
+├── render.yaml                   # Blueprint deployment ke Render.com
+├── tailwind.config.js            # Konfigurasi tema dan ekstensi Tailwind
+└── vercel.json                   # Konfigurasi serverless runtime Vercel & rewrite rules
 ```
 
-**Langkah 2: Clone Repository**
-```bash
-git clone https://github.com/itsvin-debug/jadwalsekolah.git
-cd jadwalsekolah
-```
+---
 
-**Langkah 3: Instalasi Dependensi (Backend & Frontend)**
+## 🔑 Akun Bawaan & Kredensial Demo
+
+Setelah menjalankan seeder database, sistem menyediakan akun demo siap pakai untuk setiap peran:
+
+| Peran (Role) | Email | Kata Sandi Bawaan | Deskripsi Akses |
+|---|---|---|---|
+| **Admin Kurikulum** | `admin@edusync.sch.id` | `password` | Akses penuh master data, jadwal, audit trail, dan rekapitulasi. |
+| **Guru Pengampu** | `guru@edusync.sch.id` | `password` | Presensi mandiri, tukar jam mengajar (inval), dan penugasan KBM. |
+| **Guru Wali Kelas** | `wali@edusync.sch.id` | `password` | Persetujuan izin siswa kelas bimbingan dan pantauan piket. |
+| **Ketua Kelas (Siswa)** | `siswa@edusync.sch.id` | `password` | Input presensi harian rombel, unduh rekap kelas, dan lapor kebersihan. |
+| **Siswa Reguler** | `siswabiasa@edusync.sch.id` | `password` | Cek jadwal pelajaran, pengajuan izin pribadi, dan unggah bukti piket. |
+
+> 💡 **Fitur Quick Login:** Pada halaman login pengujian, tersedia tombol **1-Klik Demo Login** untuk beralih peran secara instan tanpa mengetik manual.
+
+---
+
+## 🚀 Panduan Instalasi Lokal
+
+Ikuti langkah-langkah berikut untuk menjalankan EduSync di komputer lokal:
+
+### 1. Prasyarat Sistem
+* **PHP:** Versi `>= 8.2` (ekstensi `pdo`, `pdo_mysql` atau `pdo_pgsql`, `mbstring`, `zip`, `gd`, `bcmath` harus aktif).
+* **Composer:** Versi `2.x`.
+* **Node.js & NPM:** Versi `18.x` atau `20.x` LTS.
+* **Database:** MySQL `8.0+` atau MariaDB / PostgreSQL.
+
+### 2. Langkah Pemasangan
+
 ```bash
-# Backend
+# 1. Klon repositori dari GitHub
+git clone https://github.com/itsvin-debug/EduSync.git
+cd EduSync
+
+# 2. Pasang dependensi PHP (Composer)
 composer install
 
-# Frontend
+# 3. Pasang dependensi JavaScript (NPM)
 npm install
-```
 
-**Langkah 4: Konfigurasi Environment & Database**
-```bash
+# 4. Buat salinan konfigurasi environment
 cp .env.example .env
+
+# 5. Generate application key
 php artisan key:generate
 ```
-Buat database di MySQL Anda (contoh nama: `edusync_db`). Kemudian buka file `.env` dan atur konfigurasi database:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=edusync_db
-DB_USERNAME=root
-DB_PASSWORD=password_anda
-```
 
-**Langkah 5: Migrasi Database & Seeding**
-```bash
-php artisan migrate --seed
-```
+### 3. Konfigurasi Database
+Buka file `.env` menggunakan teks editor Anda, lalu sesuaikan koneksi database lokal:
 
-**Langkah 6: Menjalankan Aplikasi (Running)**
-Anda membutuhkan dua terminal yang berjalan bersamaan.
-**Terminal 1 (Backend):**
-```bash
-php artisan serve
-```
-**Terminal 2 (Frontend/Vite):**
-```bash
-npm run dev
-```
-Akses aplikasi di: **http://127.0.0.1:8000**
-
----
-
-### 🐧 Panduan Instalasi di Linux (Menggunakan Lerd)
-
-Jika Anda menggunakan sistem operasi berbasis Linux seperti Fedora atau Ubuntu dan memanfaatkan utilitas **Lerd** untuk manajemen environment lokal, setup dapat dilakukan dengan sangat mudah karena Lerd menggunakan Podman untuk isolasi service.
-
-**Langkah 1: Clone Repository & Setup Lerd**
-```bash
-git clone https://github.com/itsvin-debug/jadwalsekolah.git
-cd jadwalsekolah
-lerd link
-lerd setup
-```
-
-**Langkah 2: Konfigurasi Database (.env)**
-Sesuaikan kredensial database di file `.env`. Lerd menjalankan MySQL di dalam container dengan *hostname* `lerd-mysql` dan password default `lerd`.
-```env
-DB_CONNECTION=mysql
-DB_HOST=lerd-mysql
-DB_PORT=3306
-DB_DATABASE=edusync_db
-DB_USERNAME=root
-DB_PASSWORD=lerd
-```
-
-**Langkah 3: Pembuatan Database & Migrasi**
-Buat database secara langsung ke dalam container MySQL Lerd, lalu jalankan migrasi database:
-```bash
-# Membuat database di dalam container lerd-mysql
-podman exec -i lerd-mysql mysql -u root -plerd -e "CREATE DATABASE IF NOT EXISTS edusync_db;"
-
-# Menjalankan migrasi
-lerd php artisan migrate --seed
-```
-
-**Langkah 4: Menjalankan Aplikasi**
-Lerd secara otomatis akan menyajikan backend di domain `.test` (contoh: `http://jadwalsekolah.test`). Anda cukup menyalakan compiler frontend di terminal terpisah:
-```bash
-npm run dev
-```
-Akses aplikasi di browser menggunakan domain lokal Anda (misalnya: **http://jadwalsekolah.test**).
-
----
-
-### 🪟 Panduan Instalasi di Windows
-
-Untuk pengguna Windows, disarankan menggunakan **Laragon** atau **XAMPP**. Panduan ini menggunakan contoh XAMPP.
-
-**Langkah 1: Persiapan Lingkungan**
-1. Instal [XAMPP](https://www.apachefriends.org/index.html) (Pastikan versi PHP minimal 8.2).
-2. Instal [Composer](https://getcomposer.org/download/) untuk Windows.
-3. Instal [Node.js](https://nodejs.org/en/) (Versi LTS).
-4. Instal [Git Bash](https://git-scm.com/downloads) untuk terminal.
-
-**Langkah 2: Clone Repository**
-Buka **Git Bash** dan arahkan ke folder `htdocs` milik XAMPP:
-```bash
-cd /c/xampp/htdocs
-git clone https://github.com/itsvin-debug/jadwalsekolah.git
-cd jadwalsekolah
-```
-
-**Langkah 3: Instalasi Dependensi**
-Masih di Git Bash, jalankan:
-```bash
-composer install
-npm install
-```
-
-**Langkah 4: Konfigurasi Environment**
-Jalankan perintah berikut:
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-Buka **XAMPP Control Panel**, pastikan modul **Apache** dan **MySQL** berstatus `Running`. Buka `http://localhost/phpmyadmin` dan buat database baru bernama `edusync_db`.
-Edit file `.env` di folder project Anda:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -302,150 +222,115 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-**Langkah 5: Migrasi Database & Seeding**
+### 4. Migrasi & Seeding Data
+Jalankan migrasi skema tabel beserta data awal bawaan:
+
 ```bash
 php artisan migrate --seed
 ```
 
-**Langkah 6: Menjalankan Aplikasi (Running)**
-Anda membutuhkan dua terminal (Git Bash/Command Prompt) yang berjalan bersamaan di folder project.
-**Terminal 1 (Backend):**
+### 5. Menjalankan Server Pengembangan
+Anda dapat menjalankan server menggunakan perintah bawaan:
+
 ```bash
+# Terminal 1: Jalankan backend Laravel
 php artisan serve
-```
-**Terminal 2 (Frontend/Vite):**
-```bash
+
+# Terminal 2: Jalankan Vite HMR
 npm run dev
 ```
-Akses aplikasi di browser Anda pada URL: **http://127.0.0.1:8000**
+
+*Aplikasi kini dapat diakses melalui peramban di:* **`http://localhost:8000`**
+
+<details>
+<summary>⚡ <strong>Opsi Cepat: Menjalankan Sekaligus dengan <code>composer run dev</code></strong></summary>
+
+Proyek ini telah dikonfigurasi dengan `concurrently`. Anda cukup menjalankan satu perintah berikut di terminal:
+
+```bash
+composer run dev
+```
+
+Perintah ini akan menyalakan server Laravel, antrean queue, log pail, dan Vite development server secara simultan dalam satu jendela terminal.
+</details>
 
 ---
 
-## 🧪 Rangkaian Pengujian Otomatis (Testing)
+## 🧪 Pengujian Otomatis (Testing)
 
-EDUSYNC dilengkapi dengan serangkaian Unit dan Feature Test yang menggunakan **PHPUnit** untuk memastikan logika bisnis dan hak akses tetap aman.
+EduSync dilengkapi rangkaian automated test yang mencakup pengujian izin akses antar peran, integritas matriks jadwal, pencegahan bentrok, dan validasi rekonsiliasi presensi:
 
-Untuk menjalankan seluruh *test suite*, jalankan perintah berikut di terminal:
 ```bash
+# Menjalankan seluruh pengujian (29 tests)
 php artisan test
 ```
 
-**Hasil Ekspektasi:**
+Contoh keluaran pengujian yang valid:
 ```text
    PASS  Tests\Unit\ExampleTest
-  ✓ that true is true
-
    PASS  Tests\Feature\BusinessLogicAuditTest
-  ✓ guests are redirected to login                                       0.21s  
-  ✓ student cannot access admin portal                                   0.08s  
-  ✓ pending user is blocked by middleware                                0.04s  
-  ✓ schedule conflict validation on store                                0.06s  
-  ✓ teacher cannot swap with themselves                                  0.03s  
-  ✓ student cannot resubmit settled fine                                 0.05s  
-  ...
+   PASS  Tests\Feature\CrossRoleSyncTest
+   PASS  Tests\Feature\SincBotTest
 
-  Tests:    12 passed (25 assertions)
-  Duration: 1.29s
+  Tests:    29 passed (103 assertions)
+  Duration: 10.50s
 ```
 
-*Catatan untuk Windows:* Pastikan ekstensi `sqlite3` dan `pdo_sqlite` aktif di file `php.ini` XAMPP Anda karena testing biasanya dijalankan di *in-memory sqlite database*.
+---
+
+## ☁️ Panduan Deployment Cloud
+
+<details>
+<summary>🌐 <strong>A. Panduan Deployment ke Vercel & Neon PostgreSQL (Serverless)</strong></summary>
+
+Repositori ini sudah dioptimalkan untuk berjalan di Vercel menggunakan `vercel-php` runtime:
+
+1. **Buat Database Gratis di [Neon.tech](https://neon.tech):**
+   * Buat project baru dan pilih region terdekat (misal: Singapore).
+   * Catat *Connection String* atau kredensial host PostgreSQL Anda.
+2. **Jalankan Migrasi ke Cloud Neon (dari komputer lokal):**
+   * Sesuaikan sementara `.env` lokal ke koneksi Neon, lalu jalankan:
+     ```bash
+     php artisan migrate --force
+     php artisan db:seed --force
+     ```
+3. **Import Repositori di Vercel:**
+   * Di dashboard Vercel, pilih **Add New... -> Project**, lalu import repo `itsvin-debug/EduSync`.
+   * Pada bagian **Environment Variables**, tambahkan:
+     * `APP_NAME` = `EDUSYNC`
+     * `APP_KEY` = `(Salin dari .env lokal Anda)`
+     * `DB_CONNECTION` = `pgsql`
+     * `DB_HOST` = `(Host Neon Anda, contoh: ep-xxx-pooler.c-8.us-east-2.aws.neon.tech)`
+     * `DB_PORT` = `5432`
+     * `DB_DATABASE` = `neondb`
+     * `DB_USERNAME` = `neondb_owner`
+     * `DB_PASSWORD` = `(Password database Neon Anda)`
+     * `DB_SSLMODE` = `require`
+4. **Deploy:**
+   * Klik tombol **Deploy**. Vercel akan mengompilasi aset frontend secara otomatis dan menyajikan aplikasi via serverless function.
+</details>
+
+<details>
+<summary>🐳 <strong>B. Panduan Deployment ke Render.com (Docker Web Service)</strong></summary>
+
+Berkas blueprint [`render.yaml`](render.yaml) telah disediakan di root proyek:
+1. Hubungkan akun GitHub Anda ke [Render.com](https://render.com).
+2. Buat **New Blueprint Instance** dan arahkan ke repositori ini.
+3. Render akan membaca `render.yaml` dan membangun container Docker secara otomatis dengan variabel lingkungan yang telah disesuaikan.
+</details>
 
 ---
 
-## 🚀 Panduan Deployment Lengkap
+## 🤝 Kontribusi & Lisensi
 
-EDUSYNC siap untuk dideploy ke lingkungan produksi (Production Ready). Berikut adalah beberapa metode deployment:
+Kontribusi dan masukan untuk pengembangan EduSync sangat kami hargai. Silakan ikuti panduan berikut:
 
-### A. Deployment ke Vercel & Neon PostgreSQL (Gratis Permanen & No Credit Card) ⭐ Direkomendasikan
+1. **Fork** repositori ini ke akun GitHub Anda.
+2. Buat branch fitur baru (`git checkout -b feature/NamaFiturKeren`).
+3. Lakukan commit perubahan Anda (`git commit -m "feat: tambahkan fitur X"`).
+4. Pastikan semua automated test tetap lolos (`php artisan test`).
+5. **Push** branch Anda (`git push origin feature/NamaFiturKeren`).
+6. Buka **Pull Request** ke branch `main`.
 
-Opsi termudah dan **100% gratis tanpa kartu kredit**. Panduan super lengkap dan langkah detail dapat dibaca langsung di:  
-👉 **[DEPLOY_VERCEL.md](DEPLOY_VERCEL.md)**
-
-**Ringkasan Cepat:**
-1. Buat database gratis di [Neon.tech](https://neon.tech) (Pilih Region Singapore).
-2. Isi kredensial database Neon di `.env` lokal, lalu jalankan `php artisan migrate --force && php artisan db:seed --force`.
-3. Buka [Vercel.com](https://vercel.com) dengan akun GitHub pemilik repo (`itsvin-debug`), klik **Add New Project** -> **Import EduSync**.
-4. Masukkan *Environment Variables* di Vercel (`DB_CONNECTION=pgsql`, `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `APP_KEY`, dll).
-5. Klik **Deploy**! Selesai dalam 1–2 menit.
-
-### B. Deployment Menggunakan Docker
-
-Proyek ini telah dilengkapi dengan `Dockerfile` dan konfigurasi `docker/` (Nginx + PHP-FPM + Supervisor).
-1. Pastikan **Docker** dan **Docker Compose** terinstal.
-2. Build image Docker:
-   ```bash
-   docker build -t edusync-app .
-   ```
-3. Konfigurasi `docker-compose.yml` (Opsional, jika ingin digabungkan dengan MySQL/PostgreSQL image).
-4. Jalankan container:
-   ```bash
-   docker run -d -p 80:80 --env-file .env edusync-app
-   ```
-
-### C. Deployment ke Render.com & Supabase
-
-Metode paling mudah (1-Click Deployment) tanpa harus mengelola server (PaaS).
-
-**1. Persiapan Database (Supabase):**
-- Buat project di [Supabase Dashboard](https://supabase.com/).
-- Salin kredensial koneksi Database PostgreSQL (Host, Port, User, Password).
-
-**2. Deployment Frontend + Backend (Render.com):**
-- Buka [Render Dashboard](https://dashboard.render.com/) -> **New** -> **Blueprint**.
-- Hubungkan repository GitHub ini. Sistem Render akan membaca `render.yaml`.
-- Masukkan *Environment Variables* di Render:
-   - `DB_CONNECTION`: `pgsql`
-   - `DB_HOST`: `[host-supabase]`
-   - `DB_PORT`: `5432`
-   - `DB_DATABASE`: `postgres`
-   - `DB_USERNAME`: `postgres.[ref]`
-   - `DB_PASSWORD`: `[password-supabase]`
-   - `APP_KEY`: *(Generate dari lokal, lalu salin)*
-   - `RUN_MIGRATIONS`: `true`
-   - `RUN_SEEDER`: `true` (Hanya untuk instalasi pertama)
-- Klik **Apply**. Render akan melakukan build image dan menjalankan server secara otomatis.
-
-### D. Deployment ke Shared Hosting (cPanel)
-
-Jika menggunakan layanan shared hosting konvensional (Niagahoster, Hostinger, dll):
-
-1. **Build Frontend Lokal Dulu:**
-   Jalankan `npm run build` di komputer Anda lokal. Vite akan membuat folder `public/build/`.
-2. **Zip File Proyek:**
-   Zip seluruh folder proyek Anda, KECUALI folder `node_modules` (folder `vendor` boleh diikutsertakan jika di hosting tidak ada composer).
-3. **Upload ke File Manager cPanel:**
-   Upload file zip ke folder `public_html` atau *subdomain folder* Anda, kemudian ekstrak.
-4. **Setup Database:**
-   Buat database MySQL baru via **MySQL Databases** di cPanel, buat User, dan hubungkan User ke Database tersebut.
-5. **Konfigurasi .env:**
-   Ubah file `.env` di cPanel, sesuaikan nama database, user, dan password dari langkah ke-4. Ubah `APP_ENV=production` dan `APP_DEBUG=false`.
-6. **Migrasi:**
-   Jika ada akses terminal SSH di cPanel, jalankan `php artisan migrate --seed`. Jika tidak ada, Anda bisa melakukan dump (export) database lokal Anda lalu import via phpMyAdmin di cPanel.
-7. **Symlink Storage:**
-   Jalankan `php artisan storage:link` (via SSH Terminal / Cronjob) agar gambar bisa diakses publik.
-
----
-
-## 📊 Struktur Database & Hubungan Model
-
-- `users`: Data pengguna (Admin, Guru, Siswa).
-- `teachers`: Data pengajar (NIP, gelar, beban kerja).
-- `departments`: Kompetensi keahlian/jurusan.
-- `classrooms`: Rombongan belajar (Rombel).
-- `rooms`: Ruang kelas, lab, dan bengkel.
-- `subjects`: Mata pelajaran umum & kejuruan.
-- `schedules`: Alokasi jadwal matriks KBM mingguan.
-- `inval_requests`: Pengajuan substitusi/tukar jam mengajar.
-- `teacher_attendances`: Presensi guru harian.
-- `learning_tasks`: Tugas mandiri dari guru (Jam Kosong Terarah).
-- `official_duty_leaves`: Surat izin keluar kedinasan.
-- `trash_reports` & `class_fines`: Modul denda pelanggaran kebersihan (5R).
-- `audit_logs`: Log jejak aktivitas.
-
----
-
-## 📄 Lisensi & Kontribusi
-
-Proyek ini dikembangkan di bawah lisensi open-source **[MIT License](LICENSE)**.
-
-Kontribusi, *Issue Report*, maupun *Pull Request* sangat terbuka! Silakan fork repository ini, buat branch fitur baru Anda, dan ajukan Pull Request.
+### Lisensi
+Aplikasi ini dilisensikan di bawah lisensi terbuka [MIT License](LICENSE). Hak Cipta &copy; 2026 **EDUSYNC Development Team**.
